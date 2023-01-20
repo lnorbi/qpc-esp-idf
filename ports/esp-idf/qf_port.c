@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-20
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-18
+* @version Last updated for: @ref qpc_7_2_2
 *
 * @file
 * @brief "Experimental" QF/C port to Espressif ESP-IDF (version 4.x)
@@ -84,7 +84,13 @@ void QF_init(void) {
 }
 /*..........................................................................*/
 int_t QF_run(void) {
+    QS_CRIT_STAT_
+
     QF_onStartup(); /* the startup callback (configure/enable interrupts) */
+
+    /* produce the QS_QF_RUN trace record */
+    QS_BEGIN_PRE_(QS_QF_RUN, 0U)
+    QS_END_PRE_()
 
     return 0; /* dummy return to make the compiler happy */
 }
@@ -137,7 +143,7 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
                              : (char const *)"AO";
 
     /* statically create the FreeRTOS task for the AO */
-     Q_ALLEGE_ID(220,
+    Q_ALLEGE_ID(220,
          (TaskHandle_t)0 != xTaskCreateStaticPinnedToCore(
               &task_function,           /* the task function */
               taskName ,                /* the name of the task */
@@ -210,7 +216,7 @@ bool IRAM_ATTR QActive_post_(QActive * const me, QEvt const * const e,
 
         /* posting to the FreeRTOS message queue must succeed, see NOTE3 */
         Q_ALLEGE_ID(520,
-            xQueueSend(me->eQueue, (void const *)&e, portMAX_DELAY)
+            xQueueSendToFront(me->eQueue, (void const *)&e, (TickType_t)0)
             == pdPASS);
     }
     else {
@@ -252,7 +258,7 @@ void IRAM_ATTR QActive_postLIFO_(QActive * const me, QEvt const * const e) {
 
     /* LIFO posting to the FreeRTOS queue must succeed */
     Q_ALLEGE_ID(610,
-        xQueueSendToBack(me->eQueue, (void const *)&e, portMAX_DELAY)
+        xQueueSendToBack(me->eQueue, (void const *)&e, (TickType_t)0)
             == pdPASS);
 }
 /*..........................................................................*/
@@ -323,7 +329,7 @@ bool IRAM_ATTR QActive_postFromISR_(QActive * const me, QEvt const * const e,
         Q_ALLEGE_ID(820,
             xQueueSendFromISR(me->eQueue, (void const *)&e,
                               pxHigherPriorityTaskWoken)
-            == pdTRUE);
+            == pdPASS);
     }
     else {
 
@@ -366,9 +372,9 @@ void IRAM_ATTR QActive_publishFromISR_(QEvt const * const e,
         /* NOTE: The reference counter of a dynamic event is incremented to
         * prevent premature recycling of the event while the multicasting
         * is still in progress. At the end of the function, the garbage
-        * collector step (QF_gcFromISR()) decrements the reference counter and
-        * recycles the event if the counter drops to zero. This covers the
-        * case when the event was published without any subscribers.
+        * collector step (QF_gcFromISR()) decrements the reference counter
+        * and recycles the event if the counter drops to zero. This covers
+        * the case when the event was published without any subscribers.
         */
         QEvt_refCtr_inc_(e);
     }

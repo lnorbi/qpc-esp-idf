@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>__FPU_PRESENT</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS\Source\include;..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM4F;..\..\..\..\..\3rd_party\ek-tm4c123gxl;..\..\..\..\..\3rd_party\CMSIS\Include</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM4F;..\..\..\..\..\3rd_party\ek-tm4c123gxl;..\..\..\..\..\3rd_party\CMSIS\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -391,7 +391,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -472,11 +472,6 @@
               <FileName>qep_msm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
             </File>
             <File>
               <FileName>qf_defer.c</FileName>
@@ -640,17 +635,17 @@
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\list.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</FilePath>
             </File>
             <File>
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\queue.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\queue.c</FilePath>
             </File>
             <File>
               <FileName>tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\tasks.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\tasks.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -660,7 +655,7 @@
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\port.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -999,7 +994,7 @@
               <MiscControls></MiscControls>
               <Define>NDEBUG __FPU_PRESENT</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS\Source\include;..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM4F;..\..\..\..\..\3rd_party\ek-tm4c123gxl;..\..\..\..\..\3rd_party\CMSIS\Include</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM4F;..\..\..\..\..\3rd_party\ek-tm4c123gxl;..\..\..\..\..\3rd_party\CMSIS\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1051,7 +1046,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -1132,11 +1127,6 @@
               <FileName>qep_msm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
             </File>
             <File>
               <FileName>qf_defer.c</FileName>
@@ -1300,17 +1290,17 @@
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\list.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</FilePath>
             </File>
             <File>
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\queue.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\queue.c</FilePath>
             </File>
             <File>
               <FileName>tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\tasks.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\tasks.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1320,7 +1310,7 @@
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\port.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1659,7 +1649,7 @@
               <MiscControls></MiscControls>
               <Define>Q_SPY __FPU_PRESENT</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS\Source\include;..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM4F;..\..\..\..\..\3rd_party\ek-tm4c123gxl;..\..\..\..\..\3rd_party\CMSIS\Include</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM4F;..\..\..\..\..\3rd_party\ek-tm4c123gxl;..\..\..\..\..\3rd_party\CMSIS\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1711,7 +1701,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -1792,11 +1782,6 @@
               <FileName>qep_msm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
             </File>
             <File>
               <FileName>qf_defer.c</FileName>
@@ -1891,17 +1876,17 @@
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\list.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</FilePath>
             </File>
             <File>
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\queue.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\queue.c</FilePath>
             </File>
             <File>
               <FileName>tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\tasks.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\tasks.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1911,7 +1896,7 @@
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\port.c</FilePath>
             </File>
           </Files>
         </Group>

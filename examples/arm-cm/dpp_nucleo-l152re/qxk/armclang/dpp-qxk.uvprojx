@@ -404,11 +404,6 @@
               <FilePath>..\..\philo.c</FilePath>
             </File>
             <File>
-              <FileName>README.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\README.txt</FilePath>
-            </File>
-            <File>
               <FileName>table.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\table.c</FilePath>
@@ -416,7 +411,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -474,11 +469,6 @@
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
             </File>
             <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
-            </File>
-            <File>
               <FileName>qf_actq.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_actq.c</FilePath>
@@ -497,11 +487,6 @@
               <FileName>qf_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qf_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qf_ps.c</FileName>
@@ -681,7 +666,7 @@
         <TargetCommonOption>
           <Device>STM32L152RE</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32L1xx_DFP.1.0.2</PackID>
+          <PackID>Keil.STM32L1xx_DFP.1.4.1</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x08000000,0x80000) IRAM(0x20000000,0x14000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -1069,11 +1054,6 @@
               <FilePath>..\..\philo.c</FilePath>
             </File>
             <File>
-              <FileName>README.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\README.txt</FilePath>
-            </File>
-            <File>
               <FileName>table.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\table.c</FilePath>
@@ -1081,7 +1061,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -1139,11 +1119,6 @@
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
             </File>
             <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
-            </File>
-            <File>
               <FileName>qf_actq.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_actq.c</FilePath>
@@ -1162,11 +1137,6 @@
               <FileName>qf_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qf_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qf_ps.c</FileName>
@@ -1346,7 +1316,7 @@
         <TargetCommonOption>
           <Device>STM32L152RE</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32L1xx_DFP.1.0.2</PackID>
+          <PackID>Keil.STM32L1xx_DFP.1.4.1</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x08000000,0x80000) IRAM(0x20000000,0x14000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -1734,11 +1704,6 @@
               <FilePath>..\..\philo.c</FilePath>
             </File>
             <File>
-              <FileName>README.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\README.txt</FilePath>
-            </File>
-            <File>
               <FileName>table.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\table.c</FilePath>
@@ -1746,7 +1711,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -1804,11 +1769,6 @@
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
             </File>
             <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
-            </File>
-            <File>
               <FileName>qf_actq.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_actq.c</FilePath>
@@ -1827,11 +1787,6 @@
               <FileName>qf_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qf_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qf_ps.c</FileName>

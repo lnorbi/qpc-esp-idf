@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-27
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-18
+* @version Last updated for: @ref qpc_7_2_2
 *
 * @file
 * @brief QF/C port to FreeRTOS 10.x
@@ -182,24 +182,9 @@ enum FreeRTOS_TaskAttrs {
         ((UBaseType_t)((qp_prio_) + tskIDLE_PRIORITY))
 
     /* FreeRTOS scheduler locking for QF_publish_() (task context only) */
-    #define QF_SCHED_STAT_      \
-        UBaseType_t curr_prio;  \
-        TaskHandle_t curr_task;
-    #define QF_SCHED_LOCK_(prio_) do {                              \
-         curr_task = xTaskGetCurrentTaskHandle();                   \
-         curr_prio = uxTaskPriorityGet(curr_task);                  \
-         if (FREERTOS_TASK_PRIO(prio_) > curr_prio) {               \
-             vTaskPrioritySet(curr_task, FREERTOS_TASK_PRIO(prio_));\
-         }                                                          \
-         else {                                                     \
-             curr_prio = tskIDLE_PRIORITY;                          \
-         }                                                          \
-    } while (0)
-
-    #define QF_SCHED_UNLOCK_()                                      \
-         if (curr_prio != tskIDLE_PRIORITY) {                       \
-             vTaskPrioritySet(curr_task, curr_prio);                \
-         } else ((void)0)
+    #define QF_SCHED_STAT_
+    #define QF_SCHED_LOCK_(prio_) (vTaskSuspendAll())
+    #define QF_SCHED_UNLOCK_()    ((void)xTaskResumeAll())
 
     /* native QF event pool operations */
     #define QF_EPOOL_TYPE_            QMPool
@@ -233,4 +218,3 @@ enum FreeRTOS_TaskAttrs {
 */
 
 #endif /* QF_PORT_H */
-

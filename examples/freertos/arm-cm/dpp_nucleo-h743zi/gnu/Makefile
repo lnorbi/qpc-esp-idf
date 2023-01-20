@@ -1,13 +1,13 @@
 ##############################################################################
-# Product: Makefile for QP/C on NUCLEO-H743ZI, FreeRTOS, GNU-ARM
-# Last Updated for Version: 7.0.1
-# Date of the Last Update:  2022-06-13
+# Product: Makefile for QP/C on NUCLEO-H743ZI, FreeRTOS-Kernel, GNU-ARM
+# Last Updated for Version: 7.2.2
+# Date of the Last Update:  2023-03-04
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005-2021 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005 Quantum Leaps, LLC. <www.state-machine.com>.
 #
 # This program is open source software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -64,7 +64,7 @@ endif
 
 # location of the FREERTOS (if not provided in an environemnt var.)
 ifeq ($(FREERTOS),)
-FREERTOS := $(QPC)/3rd_party/FreeRTOS
+FREERTOS := $(QPC)/3rd_party/FreeRTOS-Kernel
 endif
 
 # QP port used in this project
@@ -76,8 +76,8 @@ VPATH = \
 	$(QPC)/src/qf \
 	$(QPC)/src/qs \
 	$(QP_PORT_DIR) \
-	$(FREERTOS)/Source \
-	$(FREERTOS)/Source/portable/GCC/ARM_CM7/r0p1 \
+	$(FREERTOS) \
+	$(FREERTOS)/portable/GCC/ARM_CM7/r0p1 \
 	$(QPC)/3rd_party/STM32CubeH7/nucleo-h743zi/gnu \
 	$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP\STM32H7xx_Nucleo_144 \
 	$(QPC)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src \
@@ -88,8 +88,8 @@ INCLUDES  = \
 	-I.. \
 	-I$(QPC)/include \
 	-I$(QP_PORT_DIR) \
-	-I$(FREERTOS)/Source/include \
-	-I$(FREERTOS)/Source/portable/GCC/ARM_CM4F \
+	-I$(FREERTOS)/include \
+	-I$(FREERTOS)/portable/GCC/ARM_CM4F \
 	-I$(QPC)/3rd_party/CMSIS/Include \
 	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
 	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
@@ -129,7 +129,6 @@ LD_SCRIPT := $(PROJECT).ld
 QP_SRCS := \
 	qep_hsm.c \
 	qep_msm.c \
-	qf_act.c \
 	qf_defer.c \
 	qf_dyn.c \
 	qf_mem.c \
@@ -283,7 +282,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/include/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32H743xx,USE_HAL_DRIVER,USE_STM32H7XX_NUCLEO_144</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS\Source\include;..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\CMSIS\Device\ST/STM32H7xx\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\BSP\STM32H7xx_Nucleo_144;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\STM32H7xx_HAL_Driver\Inc</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\CMSIS\Device\ST/STM32H7xx\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\BSP\STM32H7xx_Nucleo_144;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\STM32H7xx_HAL_Driver\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -406,7 +406,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -680,17 +680,17 @@
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\list.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</FilePath>
             </File>
             <File>
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\queue.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\queue.c</FilePath>
             </File>
             <File>
               <FileName>tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\tasks.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\tasks.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -700,12 +700,12 @@
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\port.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\port.c</FilePath>
             </File>
             <File>
               <FileName>portmacro.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\portmacro.h</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\portmacro.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1044,7 +1044,7 @@
               <MiscControls></MiscControls>
               <Define>NDEBUG,STM32H743xx,USE_HAL_DRIVER,USE_STM32H7XX_NUCLEO_144</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS\Source\include;..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\CMSIS\Device\ST/STM32H7xx\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\BSP\STM32H7xx_Nucleo_144;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\STM32H7xx_HAL_Driver\Inc</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\CMSIS\Device\ST/STM32H7xx\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\BSP\STM32H7xx_Nucleo_144;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\STM32H7xx_HAL_Driver\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1111,7 +1111,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -1385,17 +1385,17 @@
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\list.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</FilePath>
             </File>
             <File>
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\queue.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\queue.c</FilePath>
             </File>
             <File>
               <FileName>tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\tasks.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\tasks.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1405,12 +1405,12 @@
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\port.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\port.c</FilePath>
             </File>
             <File>
               <FileName>portmacro.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\portmacro.h</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\portmacro.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1749,7 +1749,7 @@
               <MiscControls>-Wno-padded</MiscControls>
               <Define>Q_SPY,QF_ON_CONTEXT_SW,STM32H743xx,USE_HAL_DRIVER,USE_STM32H7XX_NUCLEO_144</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS\Source\include;..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\CMSIS\Device\ST/STM32H7xx\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\BSP\STM32H7xx_Nucleo_144;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\STM32H7xx_HAL_Driver\Inc</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\freertos;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include;..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\CMSIS\Device\ST/STM32H7xx\Include;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\BSP\STM32H7xx_Nucleo_144;..\..\..\..\..\3rd_party\STM32CubeH7\Drivers\STM32H7xx_HAL_Driver\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1816,7 +1816,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -2090,17 +2090,17 @@
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\list.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</FilePath>
             </File>
             <File>
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\queue.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\queue.c</FilePath>
             </File>
             <File>
               <FileName>tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\tasks.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\tasks.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2110,12 +2110,12 @@
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\port.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\port.c</FilePath>
             </File>
             <File>
               <FileName>portmacro.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\portmacro.h</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\portmacro.h</FilePath>
             </File>
           </Files>
         </Group>

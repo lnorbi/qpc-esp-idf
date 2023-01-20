@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-10-18
-* @version Last updated for: @ref qpc_7_1_3
+* @date Last updated on: 2023-05-18
+* @version Last updated for: @ref qpc_7_2_2
 *
 * @file
 * @brief QF/C port to FreeRTOS 10.x
@@ -122,10 +122,10 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
 
     /* create FreeRTOS message queue */
     me->eQueue = xQueueCreateStatic(
-            (UBaseType_t)qLen,           /* length of the queue */
+            (UBaseType_t)qLen,     /* length of the queue */
             (UBaseType_t)sizeof(QEvt *), /* element size */
-            (uint8_t *)qSto,             /* storage buffer */
-            &me->osObject);              /* static queue buffer */
+            (uint8_t *)qSto,       /* storage buffer */
+            &me->osObject);        /* static queue buffer */
     Q_ASSERT_ID(210, me->eQueue != (QueueHandle_t)0);
 
     me->prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority of the AO */
@@ -213,7 +213,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
 
         /* posting to the FreeRTOS message queue must succeed, see NOTE3 */
         Q_ALLEGE_ID(520,
-            xQueueSend(me->eQueue, (void const *)&e, portMAX_DELAY)
+            xQueueSendToFront(me->eQueue, (void const *)&e, (TickType_t)0)
             == pdPASS);
     }
     else {
@@ -253,9 +253,9 @@ void QActive_postLIFO_(QActive * const me, QEvt const * const e) {
 
     QF_CRIT_X_();
 
-    /* LIFO posting to the FreeRTOS queue must succeed */
+    /* LIFO posting to the FreeRTOS queue must succeed, see NOTE3 */
     Q_ALLEGE_ID(610,
-        xQueueSendToBack(me->eQueue, (void const *)&e, portMAX_DELAY)
+        xQueueSendToBack(me->eQueue, (void const *)&e, (TickType_t)0)
             == pdPASS);
 }
 /*..........................................................................*/
@@ -326,7 +326,7 @@ bool QActive_postFromISR_(QActive * const me, QEvt const * const e,
         Q_ALLEGE_ID(820,
             xQueueSendFromISR(me->eQueue, (void const *)&e,
                               pxHigherPriorityTaskWoken)
-            == pdTRUE);
+            == pdPASS);
     }
     else {
 
@@ -369,9 +369,9 @@ void QActive_publishFromISR_(QEvt const * const e,
         /* NOTE: The reference counter of a dynamic event is incremented to
         * prevent premature recycling of the event while the multicasting
         * is still in progress. At the end of the function, the garbage
-        * collector step (QF_gcFromISR()) decrements the reference counter and
-        * recycles the event if the counter drops to zero. This covers the
-        * case when the event was published without any subscribers.
+        * collector step (QF_gcFromISR()) decrements the reference counter
+        * and recycles the event if the counter drops to zero. This covers
+        * the case when the event was published without any subscribers.
         */
         QEvt_refCtr_inc_(e);
     }
@@ -704,4 +704,13 @@ void *QMPool_getFromISR(QMPool * const me, uint_fast16_t const margin,
 
     return fb; /* return the pointer to memory block or NULL to the caller */
 }
+
+/*============================================================================
+* NOTE3:
+* The event posting to FreeRTOS message queue occurs OUTSIDE critical section,
+* which means that the remaining margin of available slots in the queue
+* cannot be guaranteed. The problem is that interrupts and other tasks can
+* preempt the event posting after checking the margin, but before actually
+* posting the event to the queue.
+*/
 

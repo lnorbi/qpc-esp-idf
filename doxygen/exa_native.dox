@@ -292,10 +292,6 @@ The DPP example is located in the directory <span class="img folder">qpc/example
   | | | | | +-Makefile     // Makefile for building the project
   | | | | +-iar/           // IAR-ARM toolchain
   | | | | | +-dpp-qk.eww   // IAR EW-ARM workspace
-  | | | | +-ti/      // TI-ARM toolchain (CCS)
-  | | | | | +-.ccsproject  // CCS project
-  | | | | | +-.cproject    // C Eclipse project
-  | | | | | +-.project     // Eclipse project
   | | | | +-bsp.c          // BSP for the QK kernel
   | | | | +-main.c         // main() for the QK kernel
   | | | +-qv/              // QV version
@@ -314,10 +310,6 @@ The DPP example is located in the directory <span class="img folder">qpc/example
   | | | | | +-Makefile     // Makefile for building the project
   | | | | +-iar/           // IAR-ARM toolchain
   | | | | | +-dpp-qk.eww   // IAR EW-ARM workspace
-  | | | | +-ti/            // TI-ARM toolchain (CCS)
-  | | | | | +-.ccsproject  // CCS project
-  | | | | | +-.cproject    // C Eclipse project
-  | | | | | +-.project     // Eclipse project
   | | | | +-bsp.c          // BSP for the QXK kernel
   | | | | +-main.c         // main() for the QXK kernel
   | | | | +-test.c         // extended (blocking) test threads

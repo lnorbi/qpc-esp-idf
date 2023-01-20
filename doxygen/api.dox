@@ -1,24 +1,29 @@
 /*! @page api API Reference
 @ifnot LATEX
-@nav_next{deprecated}
+@nav{tut_low,deprecated}
 @endif
 
 @section api_qep QEP (Hierarchical State Machines)
 QEP is a universal, UML-compliant event processor that enables developers to code UML state machines in highly readable ANSI-C, in which every state machine element is mapped to code precisely, unambiguously, and exactly once (traceability). QEP fully supports hierarchical state nesting, which is the fundamental mechanism for reusing behavior across many states instead of repeating the same actions and transitions over and over again.
 
 
-@subsection api_qep_hsm Hierarchical State Machines
-- ::QHsm class
-- QHsm_ctor()
+@subsection api_qep_qhsm Hierarchical State Machines
+<b>::QHsm class</b>
+- @ref QHsm::QHsm_ctor()  "QHsm_ctor()"
 - QHSM_INIT()
 - QHSM_DISPATCH()
-- QHsm_isIn()
-- QHsm_state()
-- QHsm_top()
-- ::QMsm class
-- QMsm_ctor()
-- QMsm_isInState()
-- QMsm_stateObj()
+- @ref QHsm::QHsm_isIn()  "QHsm_isIn()"
+- @ref QHsm::QHsm_state() "QHsm_state()"
+- @ref QHsm::QHsm_top()   "QHsm_top()"
+
+
+<b>::QMsm class derived from ::QHsm</b>
+- ::QMsm class    (derived from ::QHsm)
+- QHSM_INIT()     (inherited from ::QHsm)
+- QHSM_DISPATCH() (inherited from ::QHsm)
+- @ref QMsm::QMsm_ctor()      "QMsm_ctor()"
+- @ref QMsm::QMsm_isInState() "QMsm_isInState()"
+- @ref QMsm::QMsm_stateObj()  "QMsm_stateObj()"
 - Q_STATE_CAST()
 
 
@@ -26,100 +31,97 @@ QEP is a universal, UML-compliant event processor that enables developers to cod
 QF is a portable, event-driven, real-time framework for execution of active objects (concurrent state machines) specifically designed for real-time embedded (RTE) systems.
 
 
-@subsection api_qf_act Active Objects
-- ::QActive class
-- QActive_ctor()
+@subsection api_qf_qact Active Objects (QActive)
+<b>::QActive class</b>
+- @ref QActive::QActive_ctor()   "QActive_ctor()"
 - QACTIVE_START()
 - QACTIVE_POST()
 - QACTIVE_POST_X()
 - QACTIVE_POST_LIFO()
-- QActive_defer()
-- QActive_recall()
-- QActive_flushDeferred()
-- QActive_stop()
-- ::QMActive class
-- QMActive_ctor()
+- @ref QActive::QActive_defer()   "QActive_defer()"
+- @ref QActive::QActive_recall()  "QActive_recall()"
+- @ref QActive::QActive_flushDeferred() "QActive_flushDeferred()"
+- @ref QActive::QActive_stop()    "QActive_stop()"
+
+<b>Publish-Subscribe</b>
+- @ref QActive::QActive_psInit()         "QActive_psInit()"
+- @ref QActive::QActive_subscribe()      "QActive_subscribe()"
+- @ref QActive::QActive_unsubscribe()    "QActive_unsubscribe()"
+- @ref QActive::QActive_unsubscribeAll() "QActive_unsubscribeAll()"
+- QACTIVE_PUBLISH()
 
 
-@subsection api_qf_ps Publish-Subscribe
-- ::QSubscrList (Subscriber List struct)
-- QF_psInit()
-- QF_PUBLISH()
-- QActive_subscribe()
-- QActive_unsubscribe()
-- QActive_unsubscribeAll()
+@subsection api_qf_qmact Active Objects (QMActive)
+<b>::QMActive class (derived from ::QActive)</b>
+- @ref QMActive::QMActive_ctor() "QMActive_ctor()"
+- QACTIVE_START()     (inherited from ::QActive)
+- QACTIVE_POST()      (inherited from ::QActive)
+- QACTIVE_POST_X()    (inherited from ::QActive)
+- QACTIVE_POST_LIFO() (inherited from ::QActive)
+- QACTIVE_PUBLISH()   (inherited from ::QActive)
 
 
 @subsection api_qf_evt Event Management
-- ::QEvt class
-- QF_poolInit()
+<b>::QEvt class</b>
+- Q_EVT_CAST()
+- @ref QF::QF_poolInit() "QF_poolInit()"
 - Q_NEW()
 - Q_NEW_X()
 - Q_NEW_REF()
 - Q_DELETE_REF()
-- QF_gc()
-- Q_EVT_CAST()
+- @ref QF::QF_gc() "QF_gc()"
 
 
-@subsection api_qf_time Time Events
-- ::QTimeEvt class
-- QF_TICK_X()
-- QTimeEvt_ctorX()
-- QTimeEvt_armX()
-- QTimeEvt_disarm()
-- QTimeEvt_rearm()
-- QTimeEvt_currCtr()
-- ::QTicker active object
+@subsection api_qf_time Time Management
+<b>::QTimeEvt class</b>
+- QTIMEEVT_TICK()
+- @ref QTimeEvt::QTimeEvt_ctorX()   "QTimeEvt_ctorX()"
+- @ref QTimeEvt::QTimeEvt_armX()    "QTimeEvt_armX()"
+- @ref QTimeEvt::QTimeEvt_disarm()  "QTimeEvt_disarm()"
+- @ref QTimeEvt::QTimeEvt_rearm()   "QTimeEvt_rearm()"
+- @ref QTimeEvt::QTimeEvt_currCtr() "QTimeEvt_currCtr()"
+
+<b>::QTicker active object (derived from ::QTimeEvt)</b>
 
 
 @subsection api_qf_queue Event Queues (raw thread-safe)
-- ::QEQueue class
-- QEQueue_init()
-- QEQueue_post()
-- QEQueue_postLIFO()
-- QEQueue_get()
-- QEQueue_getNFree()
-- QEQueue_getNMin()
-- QEQueue_isEmpty()
-- QEQueueCtr()
+<b>::QEQueue class</b>
+- @ref QEQueue::QEQueue_init()     "QEQueue_init()"
+- @ref QEQueue::QEQueue_post()     "QEQueue_post()"
+- @ref QEQueue::QEQueue_postLIFO() "QEQueue_postLIFO()"
+- @ref QEQueue::QEQueue_get()      "QEQueue_get()"
+- @ref QEQueue::QEQueue_getNFree() "QEQueue_getNFree()"
+- @ref QEQueue::QEQueue_getNMin()  "QEQueue_getNMin()"
+- @ref QEQueue::QEQueue_isEmpty()  "QEQueue_isEmpty()"
 
 
 @subsection api_qf_mem Memory Pools
-- ::QMPool class
-- QMPool_init()
-- QMPool_get()
-- QMPool_put()
+<b>::QMPool class</b>
+- @ref QMPool::QMPool_init()  "QMPool_init()"
+- @ref QMPool::QMPool_get()   "QMPool_get()"
+- @ref QMPool::QMPool_put()   "QMPool_put()"
 
 
 @section api_qs QS (Software Tracing)
 QS is a software tracing system that enables developers to monitor live event-driven QP applications with minimal target system resources and without stopping or significantly slowing down the code. QS is an ideal tool for testing, troubleshooting, and optimizing QP applications. QS can even be used to support acceptance testing in product manufacturing.
 
 
-@subsection api_qs_ini QS Initialization and Control
+@subsection api_qs_tx QS-Transmit (QS-TX)
 - QS_INIT()
-- QS_initBuf()
-- QS_getByte()
-- QS_getBlock()
-- QS_onStartup()
-- QS_onCleanup()
-- QS_onFlush()
-- QS_onGetTime()
+- @ref QS_tx::QS_initBuf()   "QS_initBuf()"
+- @ref QS_tx::QS_getByte()   "QS_getByte()"
+- @ref QS_tx::QS_getBlock()  "QS_getBlock()"
+- @ref QS_tx::QS_onStartup() "QS_onStartup()"
+- @ref QS_tx::QS_onCleanup() "QS_onCleanup()"
+- @ref QS_tx::QS_onFlush()   "QS_onFlush()"
+- @ref QS_tx::QS_onGetTime() "QS_onGetTime()"
 
-
-@subsection api_qs_rx QS Receive-Channel (QS-RX)
-- QS_rxInitBuf()
-- QS_RX_PUT()
-- QS_rxParse()
-- QS_onCommand()
-
-
-@subsection api_qs_filter QS Filters
+<b>QS Filters</b>
 - QS_GLB_FILTER()
 - QS_LOC_FILTER()
 - QS_FILTER_AP_OBJ()
 
-
-@subsection api_qs_dict QS Dictionaries
+<b>QS Dictionaries</b>
 - QS_SIG_DICTIONARY()
 - QS_OBJ_DICTIONARY()
 - QS_OBJ_ARR_DICTIONARY()
@@ -127,17 +129,23 @@ QS is a software tracing system that enables developers to monitor live event-dr
 - QS_USR_DICTIONARY()
 - QS_ENUM_DICTIONARY()
 
-
-@subsection api_qs_user QS Application-Specific Records
-- ::QS_USER enumeration
+<b>QS Application-Specific Records</b>
 - QS_BEGIN_ID()
 - QS_END()
 - QS_U8() / QS_I8()
 - QS_U16() / QS_I16()
 - QS_U32() / QS_I32()
+- QS_ENUM()
 - QS_STR()
 - QS_MEM()
-- QS_ENUM()
+- ::QS_USER enumeration
+
+
+@subsection api_qs_rx QS Receive-Channel (QS-RX)
+- @ref QS_rx::QS_rxInitBuf() "QS_rxInitBuf()"
+- @ref QS_rx::QS_rxParse()   "QS_rxParse()"
+- @ref QS_rx::QS_onCommand() "QS_onCommand()"
+- @ref QS_rx::QS_RX_PUT()    "QS_RX_PUT()"
 
 
 @section api_qv QV (Cooperative Kernel)
@@ -154,8 +162,8 @@ Given the simplicity, portability, and low-resource consumption, the QV schedule
 
 @subsection api_qv_init Kernel Initialization and Control
 - QV_INIT()
-- <a href="qv_8c.html#a779a1bc9482e2d489dc87751cd100fdb"><b>QF_run()</b></a>
-- QV_onIdle()
+- <a href="qv_8c.html#a779a1bc9482e2d489dc87751cd100fdb">QF_run()</a>
+- @ref QV::QV_onIdle() "QV_onIdle()"
 - QV_CPU_SLEEP()
 
 
@@ -165,13 +173,12 @@ QK is a tiny **preemptive**, run-to-completion (RTC) kernel designed specificall
 
 @subsection api_qk_ctrl Kernel Initialization and Control
 - QK_INIT()
-- <a href="qk_8c.html#a779a1bc9482e2d489dc87751cd100fdb"><b>QF_run()</b></a>
-- QK_onIdle()
-- QK_schedLock()
-- QK_schedUnlock()
+- <a href="qk_8c.html#a779a1bc9482e2d489dc87751cd100fdb">QF_run()</a>
+- @ref QK::QK_onIdle()      "QK_onIdle()"
+- @ref QK::QK_schedLock()   "QK_schedLock()"
+- @ref QK::QK_schedUnlock() "QK_schedUnlock()"
 
-
-@subsection api_qk_isr Interrupt Management
+<b>QK Interrupt Management</b>
 - QK_ISR_ENTRY()
 - QK_ISR_EXIT()
 
@@ -182,64 +189,53 @@ QXK is a small, preemptive, priority-based, dual-mode (run-to-completion/<b>bloc
 
 @subsection api_qxk_ctrl Kernel Initialization and Control
 - QXK_INIT()
-- <a href="qxk_8c.html#a779a1bc9482e2d489dc87751cd100fdb"><b>QF_run()</b></a>
-- QXK_onIdle()
-- QXK_schedLock()
-- QXK_schedUnlock()
+- <a href="qxk_8c.html#a779a1bc9482e2d489dc87751cd100fdb">QF_run()</a>
+- @ref QXK::QXK_onIdle()      "QXK_onIdle()"
+- @ref QXK::QXK_schedLock()   "QXK_schedLock("
+- @ref QXK::QXK_schedUnlock() "QXK_schedUnlock()"
 
-
-@subsection api_qxk_isr Interrupt Management
+<b>QXK Interrupt Management</b>
 - QXK_ISR_ENTRY()
 - QXK_ISR_EXIT()
 
-
-@subsection api_qxk_xthr Extended Thread Management
-- ::QXThread class
-- QXThread_ctor()
+<b>::QXThread class</b>
+- @ref QXThread::QXThread_ctor()     "QXThread_ctor()"
 - QXTHREAD_START()
 - QXTHREAD_POST_X()
 - Q_XTHREAD_CAST()
-- QXThread_delay()
-- QXThread_delayCancel()
-- QXThread_queueGet()
-- QXK_current()
+- @ref QXThread::QXThread_delay()    "QXThread_delay()"
+- @ref QXThread::QXThread_delayCancel() "QXThread_delayCancel()"
+- @ref QXThread::QXThread_queueGet() "QXThread_queueGet("
+- @ref QXThread::QXK_current()       "QXK_current()"
 - QXK_TLS()
 
-@subsection api_qxk_sema Semaphores
-- ::QXSemaphore class (Semaphore Control Block)
-- QXSemaphore_init()
-- QXSemaphore_wait()
-- QXSemaphore_tryWait()
-- QXSemaphore_signal()
-
-
-@subsection api_qxk_mutex Mutexes
-- ::QXMutex class (Mutex Control Block)
-- QXMutex_init()
-- QXMutex_lock()
-- QXMutex_tryLock()
-- QXMutex_unlock()
-
-
-@subsection api_qxk_queue Message Queues
+<b>QXThread Message Queues</a>
 - QXTHREAD_POST_X() - posting messages to blocking threads
 - QACTIVE_POST_X()  - posting events to Active Objects
-- QXThread_queueGet() - waiting (blocking) on message queue
+- @ref QXThread::QXThread_queueGet() "QXThread_queueGet()"
 
 
-@subsection api_qxk_mem Memory Pools
-- ::QMPool class
-- QMPool_init()
-- QMPool_get()
-- QMPool_put()
+<b>::QXSemaphore class</b>
+- @ref QXSemaphore::QXSemaphore_init()    "QXSemaphore_init()"
+- @ref QXSemaphore::QXSemaphore_wait()    "QXSemaphore_wait()"
+- @ref QXSemaphore::QXSemaphore_tryWait() "QXSemaphore_tryWait()"
+- @ref QXSemaphore::QXSemaphore_signal()  "QXSemaphore_signal()"
+
+
+<b>::QXMutex class</b>
+- @ref QXMutex::QXMutex_init()    "QXMutex_init()"
+- @ref QXMutex::QXMutex_lock()    "QXMutex_lock()"
+- @ref QXMutex::QXMutex_tryLock() "QXMutex_tryLock()"
+- @ref QXMutex::QXMutex_unlock()  "QXMutex_unlock()"
+
 
 @ifnot LATEX
-@nav_next{deprecated}
+@nav{tut_low,deprecated}
 @endif
 */
 ##############################################################################
 /*! @page deprecated Deprecated APIs
 
-**The following QP/C APIs are now deprecated:**
+<b>The following QP/C APIs are now deprecated:</b>
 
 */

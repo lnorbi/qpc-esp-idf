@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-04-12
+* @version Last updated for: @ref qpc_7_2_2
 *
 * @file
 * @brief QF/C, port to ThreadX
@@ -167,7 +167,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
 
         QF_CRIT_X_();
 
-        /* posting to the ThreadX message queue must succeed, see NOTE1 */
+        /* posting to the ThreadX message queue must succeed, see NOTE3 */
         Q_ALLEGE_ID(520,
             tx_queue_send(&me->eQueue, (VOID *)&e, TX_NO_WAIT)
             == TX_SUCCESS);
@@ -209,7 +209,7 @@ void QActive_postLIFO_(QActive * const me, QEvt const * const e) {
 
     QF_CRIT_X_();
 
-    /* LIFO posting must succeed, see NOTE1 */
+    /* LIFO posting must succeed, see NOTE3 */
     Q_ALLEGE_ID(610,
         tx_queue_front_send(&me->eQueue, (VOID *)&e, TX_NO_WAIT)
         == TX_SUCCESS);
@@ -291,3 +291,11 @@ void QFSchedUnlock_(QFSchedLock const * const lockStat) {
                      &old_thre) == TX_SUCCESS);
 }
 
+/*============================================================================
+* NOTE3:
+* The event posting to ThreadX message queue occurs OUTSIDE critical section,
+* which means that the remaining margin of available slots in the queue
+* cannot be guaranteed. The problem is that interrupts and other tasks can
+* preempt the event posting after checking the margin, but before actually
+* posting the event to the queue.
+*/

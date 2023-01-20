@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: QMsmTst Example
-* Last updated for: @ref qpc_7_0_0
-* Last updated on: 2021-12-18
+* Last updated for: @ref qpc_7_2_2
+* Last updated on: 2023-02-13
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -31,11 +31,17 @@
 * <www.state-machine.com/licensing>
 * <info@state-machine.com>
 *****************************************************************************/
-#include "qpc.h"
+#include "qep_port.h"     /* QEP event processor */
+#include "qassert.h"      /* embedded systems assertions */
+#ifdef Q_SPY
+    #include "qs_port.h"  /* QS software tracing */
+#else
+    #include "qs_dummy.h" /* QS software tracing dummy */
+#endif
 #include "qmsmtst.h"
 
 #include "safe_std.h" /* portable "safe" <stdio.h>/<string.h> facilities */
-#include <stdlib.h>
+#include <stdlib.h>   /* for exit() */
 
 Q_DEFINE_THIS_FILE
 
@@ -46,55 +52,34 @@ static void dispatch(QSignal sig);
 /*..........................................................................*/
 int main(int argc, char *argv[]) {
 
-    QF_init();
-    QF_onStartup();
-
     QMsmTst_ctor(); /* instantiate the QMsmTst object */
 
-    Q_ALLEGE(QS_INIT((void *)0));
-    QS_OBJ_DICTIONARY(the_sm);
-    QS_SIG_DICTIONARY(A_SIG, (void *)0);
-    QS_SIG_DICTIONARY(B_SIG, (void *)0);
-    QS_SIG_DICTIONARY(C_SIG, (void *)0);
-    QS_SIG_DICTIONARY(D_SIG, (void *)0);
-    QS_SIG_DICTIONARY(E_SIG, (void *)0);
-    QS_SIG_DICTIONARY(F_SIG, (void *)0);
-    QS_SIG_DICTIONARY(G_SIG, (void *)0);
-    QS_SIG_DICTIONARY(H_SIG, (void *)0);
-    QS_SIG_DICTIONARY(I_SIG, (void *)0);
-    QS_GLB_FILTER(QS_ALL_RECORDS);
-    QS_GLB_FILTER(-QS_QF_TICK);
-
     if (argc > 1) {   /* file name provided? */
-        l_outFile = fopen(argv[1], "w");
+        FOPEN_S(l_outFile, argv[1], "w");
     }
 
     if (l_outFile == (FILE *)0) { /* interactive version? */
         l_outFile = stdout; /* use the stdout as the output file */
 
         PRINTF_S("QMsmTst example, built on %s at %s,\n"
-               "QP: %s.\nPress ESC to quit...\n",
+               "QP: %s.\nEnter x or X to quit...\n",
                __DATE__, __TIME__, QP_VERSION_STR);
 
         QHSM_INIT(the_sm, (void *)0, 0U); /* the top-most initial tran. */
 
         for (;;) { /* event loop */
+            PRINTF_S("\n%s", ">>>");
+            char inp[4];
+            scanf("%1s", inp); /* input the event */
+
             QEvt e;
-            int c;
-
-            PRINTF_S("\n", "");
-            QS_OUTPUT(); /* handle the QS output */
-
-            c = (uint8_t)QF_consoleWaitForKey();
-            PRINTF_S("%c: ", (c >= ' ') ? c : 'X');
-
-            if ('a' <= c && c <= 'i') { /* in range? */
-                e.sig = (QSignal)(c - 'a' + A_SIG);
+            if ('a' <= inp[0] && inp[0] <= 'i') { /* in range? */
+                e.sig = (QSignal)(inp[0] - 'a' + A_SIG);
             }
-            else if ('A' <= c && c <= 'I') { /* in range? */
-                e.sig = (QSignal)(c - 'A' + A_SIG);
+            else if ('A' <= inp[0] && inp[0] <= 'I') { /* in range? */
+                e.sig = (QSignal)(inp[0] - 'A' + A_SIG);
             }
-            else if (c == '\33') { /* the ESC key? */
+            else if ((inp[0] == 'x') || (inp[0] == 'X')) { /* x or X? */
                 e.sig = TERMINATE_SIG; /* terminate the interactive test */
             }
             else {
@@ -141,13 +126,11 @@ int main(int argc, char *argv[]) {
         fclose(l_outFile);
     }
 
-    QF_onCleanup();
     return 0;
 }
 /*..........................................................................*/
 Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
     FPRINTF_S(stderr, "Assertion failed in %s:%d\n", module, loc);
-    QF_onCleanup();
     exit(-1);
 }
 /*..........................................................................*/
@@ -157,7 +140,6 @@ void BSP_display(char const *msg) {
 /*..........................................................................*/
 void BSP_exit(void) {
     PRINTF_S("\n%s\n", "Bye, Bye!");
-    QF_onCleanup();
     exit(0);
 }
 /*..........................................................................*/
@@ -167,35 +149,5 @@ static void dispatch(QSignal sig) {
     e.sig = sig;
     FPRINTF_S(l_outFile, "\n%c:", 'A' + sig - A_SIG);
     QHSM_DISPATCH(the_sm, &e, 0U); /* dispatch the event */
-    QS_OUTPUT(); /* handle the QS output */
 }
-
-/*--------------------------------------------------------------------------*/
-void QF_onStartup(void) {
-    QF_consoleSetup();
-}
-/*..........................................................................*/
-void QF_onCleanup(void) {
-    QF_consoleCleanup();
-}
-/*..........................................................................*/
-void QF_onClockTick(void) {
-}
-
-/*--------------------------------------------------------------------------*/
-#ifdef Q_SPY /* define QS callbacks */
-
-/*! callback function to execute user commands (dummy definition) */
-void QS_onCommand(uint8_t cmdId,
-                  uint32_t param1, uint32_t param2, uint32_t param3)
-{
-    /* unused parameters */
-    (void)cmdId;
-    (void)param1;
-    (void)param2;
-    (void)param3;
-}
-
-#endif /* Q_SPY */
-/*--------------------------------------------------------------------------*/
 

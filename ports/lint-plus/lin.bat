@@ -1,6 +1,6 @@
 @echo off
 :: ===========================================================================
-:: Batch script for linting QP/C with PC-Lint-Plus
+:: Batch script for linting QP/C with PC-Lint-Plus2
 :: Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 ::
 :: SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
@@ -26,14 +26,14 @@
 @setlocal
 
 :: usage of lin.bat
-@echo Usage: lin [16bit] [-d...]
+@echo Usage: lin [16bit] [-u...] files
 @echo examples:
 @echo lin -uQ_SPY -uQ_UTEST : use 32bit CPU (default) and undefine Q_SPY/Q_UTEST
 @echo lin 16bit -uQ_SPY : use 16bit CPU includes and undefine Q_SPY
 @echo.
 
 :: NOTE: adjust to for your installation directory of PC-Lint-Plus
-@set PCLP=C:\tools\lint-plus\windows\pclp64.exe
+@set PCLP=C:\tools\lint-plus2\windows\pclp64.exe
 
 if NOT exist "%PCLP%" (
     @echo The PC-Lint-Plus toolset not found. Please adjust lin.bat

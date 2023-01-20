@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for SYSTEM-Level tests of QP/C on EMF32, GNU-ARM
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
+# Last Updated for Version: 7.2.2
+# Date of the Last Update:  2023-02-02
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -33,12 +33,12 @@
 ##############################################################################
 #
 # examples of invoking this Makefile:
-# make -f make_efm32  # make and run the tests in the current directory
-# make -f make_efm32 TESTS=thr*.py  # make and run the selected tests
-# make -f make_efm32 HOST=localhost:7705 # connect to host:port
-# make -f make_efm32 norun   # only make but not run the tests
-# make -f make_efm32 clean   # cleanup the build
-# make -f make_efm32 debug   # only run tests in DEBUG mode
+# make -f efm32pg1b.mak  # make and run the tests in the current directory
+# make -f efm32pg1b.mak TESTS=thr*.py  # make and run the selected tests
+# make -f efm32pg1b.mak HOST=localhost:7705 # connect to host:port
+# make -f efm32pg1b.mak norun   # only make but not run the tests
+# make -f efm32pg1b.mak clean   # cleanup the build
+# make -f efm32pg1b.mak debug   # only run tests in DEBUG mode
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
@@ -99,7 +99,7 @@ ASM_SRCS :=
 # C source files
 C_SRCS := \
 	test_sched.c \
-	bsp_efm32.c \
+	bsp_efm32pg1b.c \
 	startup_efm32pg1b.c \
 	system_efm32pg1b.c \
 	em_cmu.c \
@@ -116,7 +116,6 @@ LD_SCRIPT := $(TARGET_DIR)/qutest.ld
 QP_SRCS := \
 	qep_hsm.c \
 	qep_msm.c \
-	qf_act.c \
 	qf_actq.c \
 	qf_defer.c \
 	qf_dyn.c \
@@ -262,7 +261,7 @@ $(TARGET_BIN) : $(TARGET_ELF)
 	$(FLASH) $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/include/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 flash :
@@ -299,7 +298,7 @@ endif
 endif
 
 debug :
-	$(QUTEST) $(TESTS) DEBUG $(HOST)
+	$(QUTEST) -edebug -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
 
 .PHONY : clean show
 

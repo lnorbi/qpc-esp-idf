@@ -1,7 +1,7 @@
 /*============================================================================
 * Product: DPP example, NUCLEO-L053R8 board, cooperative QV kernel
-* Last updated for version 7.2.0
-* Last updated on  2022-12-13
+* Last updated for version 7.2.1
+* Last updated on  2023-01-26
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -42,10 +42,10 @@ Q_DEFINE_THIS_FILE
 
 /* Local-scope defines -----------------------------------------------------*/
 /* LED pins available on the board (just one user LED LD2--Green on PA.5) */
-#define LED_LD2  (1U << 5)
+#define LD2_PIN  5U
 
 /* Button pins available on the board (just one user Button B1 on PC.13) */
-#define BTN_B1   (1U << 13)
+#define B1_PIN   13U
 
 static uint32_t l_rnd;  /* random seed */
 
@@ -99,12 +99,12 @@ void SysTick_Handler(void) {   /* system clock tick ISR */
     buttons.depressed &= (buttons.previous | current); /* clear released */
     buttons.previous   = current; /* update the history */
     tmp ^= buttons.depressed;     /* changed debounced depressed */
-    if ((tmp & BTN_B1) != 0U) {  /* debounced B1 state changed? */
-        if ((buttons.depressed & BTN_B1) != 0U) { /* is B1 depressed? */
+    if ((tmp & (1U << B1_PIN)) != 0U) { /* debounced B1 state changed? */
+        if ((buttons.depressed & (1U << B1_PIN)) != 0U) { /* B1 depressed? */
             static QEvt const pauseEvt = { PAUSE_SIG, 0U, 0U};
             QACTIVE_PUBLISH(&pauseEvt, &l_SysTick_Handler);
         }
-        else {            /* the button is released */
+        else { /* the button is released */
             static QEvt const serveEvt = { SERVE_SIG, 0U, 0U};
             QACTIVE_PUBLISH(&serveEvt, &l_SysTick_Handler);
         }
@@ -259,24 +259,24 @@ void BSP_init(void) {
     SystemCoreClockUpdate();
 
     /* enable GPIOA clock port for the LED LD2 */
-    RCC->IOPENR |= (1U << 0);
+    RCC->IOPENR |= (1U << 0U);
 
     /* configure LED (PA.5) pin as push-pull output, no pull-up, pull-down */
-    GPIOA->MODER   &= ~((3U << 2*5));
-    GPIOA->MODER   |=  ((1U << 2*5));
-    GPIOA->OTYPER  &= ~((1U <<   5));
-    GPIOA->OSPEEDR &= ~((3U << 2*5));
-    GPIOA->OSPEEDR |=  ((1U << 2*5));
-    GPIOA->PUPDR   &= ~((3U << 2*5));
+    GPIOA->MODER   &= ~((3U << 2U*LD2_PIN));
+    GPIOA->MODER   |=  ((1U << 2U*LD2_PIN));
+    GPIOA->OTYPER  &= ~((1U <<    LD2_PIN));
+    GPIOA->OSPEEDR &= ~((3U << 2U*LD2_PIN));
+    GPIOA->OSPEEDR |=  ((1U << 2U*LD2_PIN));
+    GPIOA->PUPDR   &= ~((3U << 2U*LD2_PIN));
 
     /* enable GPIOC clock port for the Button B1 */
-    RCC->IOPENR |=  (1U << 2);
+    RCC->IOPENR |=  (1U << 2U);
 
     /* configure Button (PC.13) pins as input, no pull-up, pull-down */
-    GPIOC->MODER   &= ~(3U << 2*13);
-    GPIOC->OSPEEDR &= ~(3U << 2*13);
-    GPIOC->OSPEEDR |=  (1U << 2*13);
-    GPIOC->PUPDR   &= ~(3U << 2*13);
+    GPIOC->MODER   &= ~(3U << 2U*B1_PIN);
+    GPIOC->OSPEEDR &= ~(3U << 2U*B1_PIN);
+    GPIOC->OSPEEDR |=  (1U << 2U*B1_PIN);
+    GPIOC->PUPDR   &= ~(3U << 2U*B1_PIN);
 
     BSP_randomSeed(1234U); /* seed the random number generator */
 
@@ -295,10 +295,10 @@ void BSP_init(void) {
 /*..........................................................................*/
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
     if (stat[0] == 'h') {
-        GPIOA->BSRR |= LED_LD2;  /* turn LED on  */
+        GPIOA->BSRR = (1U << LD2_PIN);  /* turn LED on  */
     }
     else {
-        GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED off */
+        GPIOA->BSRR = (1U << (LD2_PIN + 16U));  /* turn LED off */
     }
 
     QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->prio) /* app-specific record */
@@ -310,10 +310,10 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
 void BSP_displayPaused(uint8_t paused) {
     /* not enough LEDs to implement this feature */
     if (paused != 0U) {
-        //GPIOA->BSRR |= (LED_LD2);  /* turn LED[n] on  */
+        //GPIOA->BSRR = (1U << LD2_PIN);  /* turn LED[n] on  */
     }
     else {
-        //GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED[n] off */
+        //GPIOA->BSRR = (1U << (LD2_PIN + 16U));  /* turn LED[n] off */
     }
 }
 /*..........................................................................*/
@@ -334,18 +334,18 @@ void BSP_terminate(int16_t result) {
 }
 /*..........................................................................*/
 void BSP_wait4SW1(void) {
-    while ((GPIOC->IDR  & BTN_B1) != 0U) {
-        GPIOA->BSRR |= (LED_LD2);        /* turn LED2 on  */
-        GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED2 off */
+    while ((GPIOC->IDR  & (1U << B1_PIN)) != 0U) {
+        GPIOA->BSRR = (1U << LD2_PIN);         /* turn LED2 on  */
+        GPIOA->BSRR = (1U << (LD2_PIN + 16U)); /* turn LED2 off */
     }
 }
 /*..........................................................................*/
 void BSP_ledOn(void) {
-    //GPIOA->BSRR |= (LED_LD2);        /* turn LED2 on  */
+    //GPIOA->BSRR = (1U << LD2_PIN);        /* turn LED2 on  */
 }
 /*..........................................................................*/
 void BSP_ledOff(void) {
-    //GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED2 off */
+    //GPIOA->BSRR = (1U << (LD2_PIN + 16U));  /* turn LED2 off */
 }
 
 /* QF callbacks ============================================================*/
@@ -382,18 +382,16 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 void QV_onIdle(void) {  /* called with interrupts disabled, see NOTE01 */
 
     /* toggle an LED on and then off (not enough LEDs, see NOTE02) */
-    //GPIOA->BSRR |= (LED_LD2);        /* turn LED[n] on  */
-    //GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED[n] off */
+    //GPIOA->BSRR = (1U << LD2_PIN);         /* turn LED[n] on  */
+    //GPIOA->BSRR = (1U << (LD2_PIN + 16U)); /* turn LED[n] off */
 
 #ifdef Q_SPY
     QF_INT_ENABLE();
     QS_rxParse();  /* parse all the received bytes */
 
-    if ((USART2->ISR & (1U << 7)) != 0) {  /* is TXE empty? */
-        uint16_t b;
-
+    if ((USART2->ISR & (1U << 7U)) != 0U) {  /* is TXE empty? */
         QF_INT_DISABLE();
-        b = QS_getByte();
+        uint16_t b = QS_getByte();
         QF_INT_ENABLE();
 
         if (b != QS_EOD) {  /* not End-Of-Data? */
@@ -449,6 +447,10 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
 #define __USART_BRR(__PCLK, __BAUD) \
     ((__DIVMANT(__PCLK, __BAUD) << 4)|(__DIVFRAQ(__PCLK, __BAUD) & 0x0F))
 
+/* USART2 pins PA.2 and PA.3 */
+#define USART2_TX_PIN 2U
+#define USART2_RX_PIN 3U
+
 /*..........................................................................*/
 uint8_t QS_onStartup(void const *arg) {
     static uint8_t qsBuf[2*1024]; /* buffer for Quantum Spy */
@@ -460,25 +462,25 @@ uint8_t QS_onStartup(void const *arg) {
     QS_rxInitBuf(qsRxBuf, sizeof(qsRxBuf));
 
     /* enable peripheral clock for USART2 */
-    RCC->IOPENR  |= ( 1U <<  0);   /* Enable GPIOA clock   */
-    RCC->APB1ENR |= ( 1U << 17);   /* Enable USART#2 clock */
+    RCC->IOPENR  |= ( 1U <<  0U);  /* Enable GPIOA clock   */
+    RCC->APB1ENR |= ( 1U << 17U);  /* Enable USART#2 clock */
 
     /* Configure PA3 to USART2_RX, PA2 to USART2_TX */
-    GPIOA->AFR[0] &= ~((15U << 4* 3) | (15U << 4* 2) );
-    GPIOA->AFR[0] |=  (( 4U << 4* 3) | ( 4U << 4* 2) );
-    GPIOA->MODER  &= ~(( 3U << 2* 3) | ( 3U << 2* 2) );
-    GPIOA->MODER  |=  (( 2U << 2* 3) | ( 2U << 2* 2) );
+    GPIOA->AFR[0] &= ~((15U << 4U*USART2_RX_PIN) | (15U << 4U*USART2_TX_PIN) );
+    GPIOA->AFR[0] |=  (( 4U << 4U*USART2_RX_PIN) | ( 4U << 4U*USART2_TX_PIN) );
+    GPIOA->MODER  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN) );
+    GPIOA->MODER  |=  (( 2U << 2U*USART2_RX_PIN) | ( 2U << 2U*USART2_TX_PIN) );
 
     USART2->BRR  = __USART_BRR(SystemCoreClock, 115200U);  /* baud rate */
-    USART2->CR3  = 0x0000 |       /* no flow control */
-                   (1U << 12);    /* disable overrun detection (OVRDIS) */
-    USART2->CR2  = 0x0000;        /* 1 stop bit      */
-    USART2->CR1  = ((1U <<  2) |  /* enable RX       */
-                    (1U <<  3) |  /* enable TX       */
-                    (1U <<  5) |  /* enable RX interrupt */
-                    (0U << 12) |  /* 8 data bits     */
-                    (0U << 28) |  /* 8 data bits     */
-                    (1U <<  0) ); /* enable USART    */
+    USART2->CR3  = 0x0000U |      /* no flow control */
+                   (1U << 12U);   /* disable overrun detection (OVRDIS) */
+    USART2->CR2  = 0x0000U;       /* 1 stop bit      */
+    USART2->CR1  = ((1U <<  2U) | /* enable RX       */
+                    (1U <<  3U) | /* enable TX       */
+                    (1U <<  5U) | /* enable RX interrupt */
+                    (0U << 12U) | /* 8 data bits     */
+                    (0U << 28U) | /* 8 data bits     */
+                    (1U <<  0U) );/* enable USART    */
 
     QS_tickPeriod_ = SystemCoreClock / BSP_TICKS_PER_SEC;
     QS_tickTime_ = QS_tickPeriod_; /* to start the timestamp at zero */

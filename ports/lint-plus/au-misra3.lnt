@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
-// Copyright Gimpel Software LLC 2020. All rights reserved.
+// Copyright Vector Informatik GmbH 2020. All rights reserved.
 //
-// This file is provided by Gimpel Software LLC (https://www.gimpel.com) for
+// This file is provided by Vector Informatik GmbH (https://www.vector.com) for
 // use with PC-lint Plus. Redistribution is permitted but any redistribution
 // must preserve this notice and, if the redistributed file has been modified,
 // provide notice that the file has been modified from the original.
@@ -18,10 +18,10 @@
 
     lint au-misra3.lnt hello.c
 
-    Gimpel Software relies on the document, "MISRA-C:2012
+    Vector Informatik GmbH relies on the document, "MISRA-C:2012
     Guidelines for the use of the C language in critical systems",
     copyright 2012 by MISRA Limited, as the primary source for this
-    file. Gimpel Software makes no warranty as to the completeness
+    file. Vector Informatik GmbH makes no warranty as to the completeness
     or applicability of this options file and reserves the right to
     amend or alter the official contents of such at any time.
 
@@ -30,8 +30,8 @@
 
  */
 
-/* version check */ -cond('%PCLP_NO_LNT_VERSION_CHECK%' != '1' && (%LINT_MAJOR_VERSION% != 1 || %LINT_MINOR_VERSION% != 4),
-    +fatal_error(This configuration file is intended for PC-lint Plus 1.4.
+/* version check */ -cond('%PCLP_NO_LNT_VERSION_CHECK%' != '1' && (%LINT_MAJOR_VERSION% != 2 || %LINT_MINOR_VERSION% != 0),
+    +fatal_error(This configuration file is intended for PC-lint Plus 2.0.
                  You are attempting to use it with PC-lint Plus %LINT_MAJOR_VERSION%.%LINT_MINOR_VERSION%.
                  It is recommended that you use configuration files intended
                  for PC-lint Plus %LINT_MAJOR_VERSION%.%LINT_MINOR_VERSION%.)
@@ -146,20 +146,24 @@
 
 /**** Rule 1.1 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
-     */
     -std(c99)                /* strict ISO C99 */
     /* Note: if you code to the C90 standard instead, you may
        want to comment out the above option and uncomment the
        following option. You will also want to do likewise for
        other uses of the '-std(c99)' option throughout this file. */
     // -std(c90)
+    /* Note: appended citation text is not applied to errors
+       reporting violations of the C language. */
+
+    /* See the -lang_limit option. */
+    +e793     /* language limit exceeded */
+    +elib(793)
+    -append(793,[MISRA 2012 Rule 1.1, required])
 
 /**** Rule 1.2 (Adv) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     -std(c99)                /* strict ISO C99 */
     /* Note: if you code to the C90 standard instead, you may
@@ -170,8 +174,8 @@
 
 /**** Rule 1.3 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
 
     /* Avoid the use of undefined or unspecified behavior as described
@@ -338,9 +342,6 @@
        (ISO C, Appendix A.6.2, point 39).
        Also, see Rule 9.2
      */
-    +e64    /* type mismatch */
-    +elib(64)
-    -append(64,[MISRA 2012 Rule 1.3, required])
 
     /* The value of a function is used, but no value was returned
        (ISO C, Appendix A.6.2, point 40).
@@ -452,8 +453,8 @@
 
 /**** Rule 2.1 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e527       /* unreachable */
     +elib(527)
@@ -467,8 +468,8 @@
 
 /**** Rule 2.2 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e438       /* value not used */
     +elib(438)
@@ -834,8 +835,8 @@
 
 /**** Rule 8.13 (Adv) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e818    /* pointer could be declared pointing to const */
     +elib(818)
@@ -857,8 +858,8 @@
 
 /**** Rule 9.1 (Mand) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e644                   /* Symbol may not have been initialized */
     +elib(644)
@@ -916,7 +917,6 @@
 
     +e9034                              /* expression assigned to narrower or different essential type */
     +elib(9034)
-    -estring(9052, true, false)
     -append(9034,[MISRA 2012 Rule 10.3, required])
 
 /**** Rule 10.4 (Req) ************/
@@ -1033,8 +1033,8 @@
 
 /**** Rule 12.2 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e598           /* excessive left shift */
     +elib(598)
@@ -1055,8 +1055,8 @@
 
 /**** Rule 13.1 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e446                              /* side effect in initializer */
     +elib(446)
@@ -1064,8 +1064,8 @@
 
 /**** Rule 13.2 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e564            /* variable depends on order of evaluation */
     +elib(564)
@@ -1092,8 +1092,8 @@
 
 /**** Rule 13.5 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e9007                              /* side effects on right hand side of logical operator */
     +elib(9007)
@@ -1107,8 +1107,8 @@
 
 /**** Rule 14.1 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e9009                              /* floating point variable used as loop counter */
     +elib(9009)
@@ -1120,8 +1120,8 @@
 
 /**** Rule 14.3 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e685            /* relational always evaluates to true/false */
     +elib(685)
@@ -1288,8 +1288,8 @@
 
 /**** Rule 17.2 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e9070
     -append(9070,[MISRA 2012 Rule 17.2, required])
@@ -1328,8 +1328,8 @@
 
 /**** Rule 17.8 (Adv) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e9044               /* function parameter modified */
     +elib(9044)
@@ -1337,8 +1337,8 @@
 
 /**** Rule 18.1 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e415          /* out-of-bounds pointer */
     +elib(415)
@@ -1361,8 +1361,8 @@
 
 /**** Rule 18.2 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e947          /* pointer subtraction */
     +elib(947)
@@ -1370,8 +1370,8 @@
 
 /**** Rule 18.3 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e946          /* relational operator applied to pointers */
     +elib(946)
@@ -1391,8 +1391,8 @@
 
 /**** Rule 18.6 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e733               /* assigning address of auto to outer scope symbol */
     +elib(733)
@@ -2026,8 +2026,8 @@
 
 /**** Rule 22.1 (Req) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e429       /* custodial pointer neither free'd nor returned */
     +elib(429)
@@ -2040,8 +2040,8 @@
 
 /**** Rule 22.2 (Mand) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e424       /* inappropriate deallocation */
     +elib(424)
@@ -2057,8 +2057,8 @@
 
 /**** Rule 22.4 (Mand) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
 
     +e2477   /* attempt to perform write operation on stream not opened for writing */
@@ -2067,8 +2067,8 @@
 
 /**** Rule 22.5 (Mand) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-       Software provides the following message to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
     +e9047   /* FILE pointer dereferenced */
     +elib(9047)
@@ -2077,8 +2077,8 @@
 
 /**** Rule 22.6 (Mand) ************/
 
-    /* While MISRA has declared this rule to be "undecidable", Gimpel
-     * Software provides the following options to assist:
+    /* While MISRA has declared this rule to be "undecidable", the
+     * following options are provided to assist:
      */
 
     +e2471   /* operation on stream that has been closed */

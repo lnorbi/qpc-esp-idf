@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-10-18
-* @version Last updated for: Zephyr 3.1.99 and @ref qpc_7_1_3
+* @date Last updated on: 2023-05-18
+* @version Last updated for: Zephyr 3.1.99 and @ref qpc_7_2_2
 *
 * @file
 * @brief QF/C port to Zephyr RTOS (v 3.1.99)
@@ -52,13 +52,19 @@ void QF_init(void) {
 /*..........................................................................*/
 int_t QF_run(void) {
     QF_onStartup();
+
 #ifdef Q_SPY
 
-#if CONFIG_NUM_PREEMPT_PRIORITIES > 0
+#if (CONFIG_NUM_PREEMPT_PRIORITIES > 0)
     /* lower the priority of the main thread to the level of idle thread */
     k_thread_priority_set(k_current_get(),
                           CONFIG_NUM_PREEMPT_PRIORITIES - 1);
 #endif
+
+    /* produce the QS_QF_RUN trace record */
+    QS_CRIT_STAT_
+    QS_BEGIN_PRE_(QS_QF_RUN, 0U)
+    QS_END_PRE_()
 
     /* perform QS work... */
     while (true) {
@@ -77,8 +83,8 @@ void QF_stop(void) {
 /*..........................................................................*/
 static void thread_entry(void *p1, void *p2, void *p3) {
     QActive *act = (QActive *)p1;
-    (void)p2; /* unused parameter */
-    (void)p3; /* unused parameter */
+    Q_UNUSED_PAR(p2);
+    Q_UNUSED_PAR(p3);
 
     /* event-loop */
     for (;;) {  /* for-ever */
@@ -154,6 +160,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
 {
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    /* NOTE: k_msgq_num_free_get() can be safely called from crit-section */
     uint_fast16_t nFree = (uint_fast16_t)k_msgq_num_free_get(&me->eQueue);
 
     bool status;

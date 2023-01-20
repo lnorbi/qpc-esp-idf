@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-11-22
-* @version Last updated for: @ref qpc_7_1_3
+* @date Last updated on: 2023-04-12
+* @version Last updated for: @ref qpc_7_2_2
 *
 * @file
 * @brief QF/C port to embOS
@@ -258,19 +258,21 @@ QEvt const *QActive_get_(QActive * const me) {
     return e;
 }
 
-/*****************************************************************************
+/*============================================================================
 * NOTE1:
 * In case of hardware-supported floating point unit (FPU), a task must
-* preserve the FPU registers accross the context switch. However, this
+* preserve the FPU registers across the context switch. However, this
 * additional overhead is necessary only for tasks that actually use the
 * FPU. In this QP-embOS port, an active object task that uses the FPU is
-* designated by the QF_TASK_USES_FPU attribute, which can be set wiht the
+* designated by the QF_TASK_USES_FPU attribute, which can be set with the
 * QF_setEmbOsTaskAttr() function. The task attributes must be set *before*
 * calling QACTIVE_START(). The task attributes are saved in QActive.osObject
 * member.
 *
 * NOTE3:
-* The event posting to embOS mailbox occurs inside a critical section,
-* but this is OK, because the QF/embOS critical sections are designed
-* to nest.
+* The event posting to embOS mailbox occurs OUTSIDE critical section,
+* which means that the remaining margin of available slots in the queue
+* cannot be guaranteed. The problem is that interrupts and other tasks can
+* preempt the event posting after checking the margin, but before actually
+* posting the event to the queue.
 */

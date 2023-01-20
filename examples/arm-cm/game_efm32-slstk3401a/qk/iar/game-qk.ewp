@@ -3183,7 +3183,7 @@
             <name>$PROJ_DIR$\..\..\missile.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\..\include\qstamp.c</name>
+            <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\ship.c</name>
@@ -3247,9 +3247,6 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qf\qep_msm.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\..\src\qf\qf_act.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qf\qf_actq.c</name>

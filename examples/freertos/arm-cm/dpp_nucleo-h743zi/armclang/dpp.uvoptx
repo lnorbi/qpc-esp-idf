@@ -703,7 +703,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\include\qstamp.c</PathWithFileName>
+      <PathWithFileName>..\..\..\..\..\src\qs\qstamp.c</PathWithFileName>
       <FilenameWithoutPath>qstamp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1171,7 +1171,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS\Source\list.c</PathWithFileName>
+      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</PathWithFileName>
       <FilenameWithoutPath>list.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1183,7 +1183,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS\Source\queue.c</PathWithFileName>
+      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\queue.c</PathWithFileName>
       <FilenameWithoutPath>queue.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1195,7 +1195,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS\Source\tasks.c</PathWithFileName>
+      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\tasks.c</PathWithFileName>
       <FilenameWithoutPath>tasks.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1215,7 +1215,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\port.c</PathWithFileName>
+      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\port.c</PathWithFileName>
       <FilenameWithoutPath>port.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1227,7 +1227,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS\Source\portable\GCC\ARM_CM7\r0p1\portmacro.h</PathWithFileName>
+      <PathWithFileName>..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM7\r0p1\portmacro.h</PathWithFileName>
       <FilenameWithoutPath>portmacro.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>

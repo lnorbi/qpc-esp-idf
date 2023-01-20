@@ -1,7 +1,7 @@
 ##############################################################################
-# Product: Makefile for QP/C for Windows and POSIX *HOSTS*
-# Last updated for version 7.2.0
-# Last updated on  2022-11-13
+# Product: Makefile for QEP/C for Windows and POSIX *HOSTS*
+# Last updated for version 7.2.2
+# Last updated on  2023-02-13
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -36,14 +36,13 @@
 # building configurations: Debug (default), Release, and Spy
 # make
 # make CONF=rel
-# make CONF=spy
 # make clean   # cleanup the build
-# make CONF=spy clean   # cleanup the build
+# make CONF=rel clean   # cleanup the build
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
 # is included in the QTools collection for Windows, see:
-#    http://sourceforge.net/projects/qpc/files/QTools/
+#    https://github.com/QuantumLeaps/qtools
 #
 
 #-----------------------------------------------------------------------------
@@ -56,10 +55,10 @@ PROJECT := qhsmtst
 #
 
 # list of all source directories used by this project
-VPATH := . \
+VPATH := .
 
 # list of all include directories needed by this project
-INCLUDES := -I. \
+INCLUDES := -I.
 
 # location of the QP/C framework (if not provided in an env. variable)
 ifeq ($(QPC),)
@@ -93,65 +92,21 @@ endif
 # add QP/C framework:
 #
 C_SRCS += \
-	qep_hsm.c \
-	qep_msm.c \
-	qf_act.c \
-	qf_actq.c \
-	qf_defer.c \
-	qf_dyn.c \
-	qf_mem.c \
-	qf_ps.c \
-	qf_qact.c \
-	qf_qeq.c \
-	qf_qmact.c \
-	qf_time.c \
-	qf_port.c
-
-QS_SRCS := \
-	qs.c \
-	qs_64bit.c \
-	qs_rx.c \
-	qs_fp.c \
-	qs_port.c
-
-ifeq ($(OS),Windows_NT)
-
-# NOTE:
-# For Windows hosts, you can choose:
-# - the single-threaded QP/C port (win32-qv) or
-# - the multithreaded QP/C port (win32).
-#
-QP_PORT_DIR := $(QPC)/ports/win32-qv
-#QP_PORT_DIR := $(QPC)/ports/win32
-LIBS += -lws2_32
-
-else
-
-# NOTE:
-# For POSIX hosts (Linux, MacOS), you can choose:
-# - the single-threaded QP/C port (win32-qv) or
-# - the multithreaded QP/C port (win32).
-#
-QP_PORT_DIR := $(QPC)/ports/posix-qv
-#QP_PORT_DIR := $(QPC)/ports/posix
-
-LIBS += -lpthread
-
-endif
+	qep_hsm.c
 
 #============================================================================
 # Typically you should not need to change anything below this line
 
 VPATH    += $(QPC)/src/qf $(QP_PORT_DIR)
-INCLUDES += -I$(QPC)/include -I$(QP_PORT_DIR)
+INCLUDES += -I$(QPC)/include
 
 #-----------------------------------------------------------------------------
 # GNU toolset:
 #
 # NOTE:
 # GNU toolset (MinGW) is included in the QTools collection for Windows, see:
-#     https://www.state-machine.com/qtools
-# It is assumed that %QTOOLS%\bin directory is added to the PATH
+#     https://github.com/QuantumLeaps/qtools
+# It is assumed that $(QTOOLS)/bin directory is added to the PATH
 #
 CC    := gcc
 CPP   := g++
@@ -191,19 +146,6 @@ CPPFLAGS = -c -O3 -fno-pie -std=c++11 -pedantic -Wall -Wextra \
 
 else ifeq (spy, $(CONF))  # Spy configuration ................................
 
-BIN_DIR := build_spy
-
-C_SRCS   += $(QS_SRCS)
-VPATH    += $(QPC)/src/qs
-
-# gcc options:
-CFLAGS  = -c -g -O -fno-pie -std=c11 -pedantic -Wall -Wextra -W \
-	$(INCLUDES) $(DEFINES) -DQ_SPY
-
-CPPFLAGS = -c -g -O -fno-pie -std=c++11 -pedantic -Wall -Wextra \
-	-fno-rtti -fno-exceptions \
-	$(INCLUDES) $(DEFINES) -DQ_SPY
-
 else # default Debug configuration .........................................
 
 BIN_DIR := build
@@ -232,6 +174,11 @@ C_DEPS_EXT   := $(patsubst %.o,%.d, $(C_OBJS_EXT))
 CPP_OBJS_EXT := $(addprefix $(BIN_DIR)/, $(CPP_OBJS))
 CPP_DEPS_EXT := $(patsubst %.o,%.d, $(CPP_OBJS_EXT))
 
+# create $(BIN_DIR) if it does not exist
+ifeq ("$(wildcard $(BIN_DIR))","")
+$(shell $(MKDIR) $(BIN_DIR))
+endif
+
 #-----------------------------------------------------------------------------
 # rules
 #
@@ -241,8 +188,7 @@ CPP_DEPS_EXT := $(patsubst %.o,%.d, $(CPP_OBJS_EXT))
 all: $(TARGET_EXE)
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/include/qstamp.c -o $(BIN_DIR)/qstamp.o
-	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
+	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(LIBS)
 
 $(BIN_DIR)/%.d : %.c
 	$(CC) -MM -MT $(@:.d=.o) $(CFLAGS) $< > $@

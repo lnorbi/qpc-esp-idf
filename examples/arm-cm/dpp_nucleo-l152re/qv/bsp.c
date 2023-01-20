@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: DPP example, STM32 NUCLEO-L152RE board, cooperative QV kernel
-* Last updated for version 6.9.3
-* Last updated on  2021-03-03
+* Last updated for version 7.2.1
+* Last updated on  2023-01-26
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -163,10 +163,10 @@ void BSP_init(void) {
 /*..........................................................................*/
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
     if (stat[0] == 'h') {
-        GPIOA->BSRRL |= LED_LD2;  /* turn LED on  */
+        GPIOA->BSRRL = LED_LD2;  /* turn LED on  */
     }
     else {
-        GPIOA->BSRRH |= LED_LD2;  /* turn LED off */
+        GPIOA->BSRRH = LED_LD2;  /* turn LED off */
     }
 
     QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->prio) /* app-specific record */
@@ -178,10 +178,10 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
 void BSP_displayPaused(uint8_t paused) {
     // not enough LEDs to show the "Paused" status
     if (paused != 0U) {
-        //GPIOA->BSRRL |= LED_LD2;  /* turn LED on  */
+        //GPIOA->BSRRL = LED_LD2;  /* turn LED on  */
     }
     else {
-        //GPIOA->BSRRH |= LED_LD2;  /* turn LED off */
+        //GPIOA->BSRRH = LED_LD2;  /* turn LED off */
     }
 }
 /*..........................................................................*/
@@ -228,8 +228,8 @@ void QF_onCleanup(void) {
 void QV_onIdle(void) {  /* called with interrupts disabled, see NOTE01 */
 
     /* toggle an LED on and then off (not enough LEDs, see NOTE02) */
-    //GPIOA->BSRRL |= LED_LD2;  /* turn LED[n] on  */
-    //GPIOA->BSRRH |= LED_LD2;  /* turn LED[n] off */
+    //GPIOA->BSRRL = LED_LD2;  /* turn LED[n] on  */
+    //GPIOA->BSRRH = LED_LD2;  /* turn LED[n] off */
 
 #ifdef Q_SPY
     QF_INT_ENABLE();

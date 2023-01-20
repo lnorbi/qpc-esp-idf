@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: DPP example, NUCLEO-L053R8 board, uC/OS-II RTOS
-* Last updated for version 6.9.3
-* Last updated on  2021-03-03
+* Last updated for version 7.2.1
+* Last updated on  2023-01-26
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -75,8 +75,8 @@ void App_TaskIdleHook(void) {
 
     /* toggle LED2 on and then off, see NOTE01 */
     OS_ENTER_CRITICAL();
-    //GPIOA->BSRR |= (LED_LD2);        /* turn LED[n] on  */
-    //GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED[n] off */
+    //GPIOA->BSRR = (LED_LD2);        /* turn LED[n] on  */
+    //GPIOA->BSRR = (LED_LD2 << 16);  /* turn LED[n] off */
     OS_EXIT_CRITICAL();
 
 #ifdef Q_SPY
@@ -189,10 +189,10 @@ void BSP_init(void) {
 /*..........................................................................*/
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
     if (stat[0] == 'h') {
-        GPIOA->BSRR |= LED_LD2;  /* turn LED on  */
+        GPIOA->BSRR = LED_LD2;  /* turn LED on  */
     }
     else {
-        GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED off */
+        GPIOA->BSRR = (LED_LD2 << 16);  /* turn LED off */
     }
 
     QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->prio) /* app-specific record */
@@ -204,10 +204,10 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
 void BSP_displayPaused(uint8_t paused) {
     /* not enough LEDs to implement this feature */
     if (paused != 0U) {
-        //GPIOA->BSRR |= (LED_LD2);  /* turn LED[n] on  */
+        //GPIOA->BSRR = (LED_LD2);  /* turn LED[n] on  */
     }
     else {
-        //GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED[n] off */
+        //GPIOA->BSRR = (LED_LD2 << 16);  /* turn LED[n] off */
     }
 }
 /*..........................................................................*/
@@ -256,8 +256,8 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
 #ifndef NDEBUG
     /* wait until button B1 is pressed... */
     while ((GPIOC->IDR  & BTN_B1) != 0U) {
-        GPIOA->BSRR |= (LED_LD2);        /* turn LED2 on  */
-        GPIOA->BSRR |= (LED_LD2 << 16);  /* turn LED2 off */
+        GPIOA->BSRR = (LED_LD2);        /* turn LED2 on  */
+        GPIOA->BSRR = (LED_LD2 << 16);  /* turn LED2 off */
     }
 #endif
 

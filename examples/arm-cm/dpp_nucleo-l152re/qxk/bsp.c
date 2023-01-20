@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: DPP example, STM32 NUCLEO-L152RE board, preemptive QXK kernel
-* Last updated for version 6.9.3
-* Last updated on  2021-03-03
+* Last updated for version 7.2.1
+* Last updated on  2023-01-26
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -166,10 +166,10 @@ void BSP_init(void) {
 /*..........................................................................*/
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
     if (stat[0] == 'h') {
-        GPIOA->BSRRL |= LED_LD2;  /* turn LED on  */
+        GPIOA->BSRRL = LED_LD2;  /* turn LED on  */
     }
     else {
-        GPIOA->BSRRH |= LED_LD2;  /* turn LED off */
+        GPIOA->BSRRH = LED_LD2;  /* turn LED off */
     }
 
     QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->prio) /* app-specific record */
@@ -181,10 +181,10 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
 void BSP_displayPaused(uint8_t paused) {
     // not enough LEDs to show the "Paused" status
     if (paused != 0U) {
-        //GPIOA->BSRRL |= LED_LD2;  /* turn LED on  */
+        //GPIOA->BSRRL = LED_LD2;  /* turn LED on  */
     }
     else {
-        //GPIOA->BSRRH |= LED_LD2;  /* turn LED off */
+        //GPIOA->BSRRH = LED_LD2;  /* turn LED off */
     }
 }
 /*..........................................................................*/
@@ -206,17 +206,17 @@ void BSP_terminate(int16_t result) {
 /*..........................................................................*/
 void BSP_wait4SW1(void) {
     while ((GPIOC->IDR  & BTN_B1) != 0U) {
-        GPIOA->BSRRL |= LED_LD2;  /* turn LED[n] on  */
-        GPIOA->BSRRH |= LED_LD2;  /* turn LED[n] off */
+        GPIOA->BSRRL = LED_LD2;  /* turn LED[n] on  */
+        GPIOA->BSRRH = LED_LD2;  /* turn LED[n] off */
     }
 }
 /*..........................................................................*/
 void BSP_ledOn(void) {
-    //GPIOA->BSRL |= (LED_LD2); /* turn LED2 on  */
+    //GPIOA->BSRL = (LED_LD2); /* turn LED2 on  */
 }
 /*..........................................................................*/
 void BSP_ledOff(void) {
-    //GPIOA->BSRRH |= LED_LD2;  /* turn LED2 off */
+    //GPIOA->BSRRH = LED_LD2;  /* turn LED2 off */
 }
 
 /* QF callbacks ============================================================*/
@@ -247,8 +247,8 @@ void QXK_onIdle(void) { /* called with interrupts enabled */
 
     /* toggle an LED on and then off (not enough LEDs, see NOTE01) */
     QF_INT_DISABLE();
-    //GPIOA->BSRRL |= LED_LD2;  /* turn LED[n] on  */
-    //GPIOA->BSRRH |= LED_LD2;  /* turn LED[n] off */
+    //GPIOA->BSRRL = LED_LD2;  /* turn LED[n] on  */
+    //GPIOA->BSRRH = LED_LD2;  /* turn LED[n] off */
     QF_INT_ENABLE();
 
 #ifdef Q_SPY

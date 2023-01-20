@@ -3214,7 +3214,7 @@
             <name>$PROJ_DIR$\..\..\philo.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\..\include\qstamp.c</name>
+            <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\table.c</name>
@@ -3242,9 +3242,6 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qf\qep_msm.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\..\src\qf\qf_act.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qf\qf_actq.c</name>

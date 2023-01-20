@@ -1,6 +1,9 @@
 ![QP Framework](doxygen/images/qp_banner.jpg)
 
 # What's New?
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/QuantumLeaps/qpc)](https://github.com/QuantumLeaps/qpc/releases/latest)
+
 View QP/C Revision History at: https://www.state-machine.com/qpc/history.html
 
 > **NOTE:** If you're interested in the latest QP/C version from GitHub,

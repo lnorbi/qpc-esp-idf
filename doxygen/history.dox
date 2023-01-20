@@ -15,7 +15,7 @@ __Ports:__
 - Fixed problems in QXK ports for ARM Cortex-M: in case a regular IRQ is used for returning to the thread context. The port didn't handle correctly #QK_USE_IRQ_NUM above 32.
 
 __Bug Fixes:__
-- [bug#328    Assertion qxk:720 in QP/​C/​C++ 7.2.0](https://sourceforge.net/p/qpc/bugs/328)
+- [bug#328 Assertion qxk:720 in QP/C/C++ 7.2.0](https://sourceforge.net/p/qpc/bugs/328)
 
 @attention
 This bug in QXK affects releases QP/C @ref qpc_7_1_0 "7.1.0" through @ref qpc_7_2_0 "7.2.0"

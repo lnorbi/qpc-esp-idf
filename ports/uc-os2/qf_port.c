@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-04-12
+* @version Last updated for: @ref qpc_7_2_2
 *
 * @file
 * @brief QF/C port to uC-OS2, generic C99 compiler
@@ -190,7 +190,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
 
         QF_CRIT_X_();
 
-        /* posting the event to uC-OS2 message queue must succeed */
+        /* posting to uC-OS2 message queue must succeed, see NOTE3 */
         Q_ALLEGE_ID(720,
             OSQPost(me->eQueue, (void *)e) == OS_ERR_NONE);
     }
@@ -232,7 +232,7 @@ void QActive_postLIFO_(QActive * const me, QEvt const * const e) {
 
     QF_CRIT_X_();
 
-    /* posting the event to uC/OS message queue must succeed */
+        /* posting to uC-OS2 message queue must succeed, see NOTE3 */
     Q_ALLEGE_ID(810,
         OSQPostFront((OS_EVENT *)me->eQueue, (void *)e) == OS_ERR_NONE);
 }
@@ -256,7 +256,7 @@ QEvt const *QActive_get_(QActive * const me) {
     return e;
 }
 
-/*****************************************************************************
+/*============================================================================
 * NOTE0:
 * The QF_onStartup() should enter the critical section before configuring
 * and starting interrupts and it should NOT exit the critical section.
@@ -269,4 +269,11 @@ QEvt const *QActive_get_(QActive * const me) {
 * The member QActive.thread is set to the uC-OS2 task options in the
 * function QF_setUCosTaskAttr(), which must be called **before**
 * QACTIVE_START().
+*
+* NOTE3:
+* The event posting to uC-OS2 message queue occurs OUTSIDE critical section,
+* which means that the remaining margin of available slots in the queue
+* cannot be guaranteed. The problem is that interrupts and other tasks can
+* preempt the event posting after checking the margin, but before actually
+* posting the event to the queue.
 */

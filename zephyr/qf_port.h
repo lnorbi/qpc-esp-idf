@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-04
-* @version Last updated for: Zephyr 3.2.0 and @ref qpc_7_2_0
+* @date Last updated on: 2023-05-19
+* @version Last updated for: Zephyr 3.2.0 and @ref qpc_7_2_2
 *
 * @file
 * @brief QF/C port to Zephyr RTOS
@@ -71,8 +71,16 @@ extern struct k_spinlock QF_spinlock;
 
     /* QF-specific scheduler locking (global lock in Zephyr, NOTE2) */
     #define QF_SCHED_STAT_
-    #define QF_SCHED_LOCK_(dummy) (k_sched_lock())
-    #define QF_SCHED_UNLOCK_()    (k_sched_unlock())
+    #define QF_SCHED_LOCK_(dummy) do { \
+        if (!k_is_in_isr()) { \
+            k_sched_lock(); \
+        } \
+    } while (false)
+    #define QF_SCHED_UNLOCK_() do { \
+        if (!k_is_in_isr()) { \
+            k_sched_unlock(); \
+        } \
+    } while (false)
 
     /* native QF event-pool customization... */
     #define QF_EPOOL_TYPE_            QMPool
@@ -100,4 +108,3 @@ extern struct k_spinlock QF_spinlock;
 */
 
 #endif /* QF_PORT_H */
-

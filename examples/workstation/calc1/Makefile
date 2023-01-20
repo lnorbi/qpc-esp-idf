@@ -96,7 +96,6 @@ endif
 C_SRCS += \
 	qep_hsm.c \
 	qep_msm.c \
-	qf_act.c \
 	qf_actq.c \
 	qf_defer.c \
 	qf_dyn.c \
@@ -242,7 +241,7 @@ CPP_DEPS_EXT := $(patsubst %.o,%.d, $(CPP_OBJS_EXT))
 all: $(TARGET_EXE)
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/include/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

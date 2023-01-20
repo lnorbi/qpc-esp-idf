@@ -7,6 +7,7 @@
 #---------------------------------------------------------------------------
 INPUT                  = main.dox \
                          gs.dox \
+                         api.dox \
                          ../../cert-pack/cert-pack.dox \
                          ../../cert-pack/srs.dox \
                          ../../cert-pack/sas.dox \
@@ -26,11 +27,11 @@ INPUT                  = main.dox \
                          ports_arm-cm.dox \
                          ports_rtos.dox \
                          ports_os.dox \
-                         api.dox \
                          dir.dox \
                          config.h \
                          ../include \
                          ../src \
+                         ../ports/sample \
                          ../ports/lint-plus/std.lnt \
                          ../ports/lint-plus/qpc.lnt \
                          ../ports/lint-plus/options.lnt

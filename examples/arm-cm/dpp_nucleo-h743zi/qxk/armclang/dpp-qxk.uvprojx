@@ -426,7 +426,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>test.c</FileName>
@@ -512,11 +512,6 @@
               <FileName>qep_msm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
             </File>
             <File>
               <FileName>qf_actq.c</FileName>
@@ -1131,7 +1126,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>test.c</FileName>
@@ -1217,11 +1212,6 @@
               <FileName>qep_msm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
             </File>
             <File>
               <FileName>qf_actq.c</FileName>
@@ -1836,7 +1826,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>test.c</FileName>
@@ -1922,11 +1912,6 @@
               <FileName>qep_msm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
             </File>
             <File>
               <FileName>qf_actq.c</FileName>

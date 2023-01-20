@@ -1,7 +1,5 @@
 ##############################################################################
-# Product: Makefile for QP/C on NUCLEO-H743ZI board, QUTEST, GNU-ARM
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
+# Product: Makefile for SYSTEM-Level tests of QP/C on NUCLEO-L053R8, GNU-ARM
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -33,11 +31,12 @@
 ##############################################################################
 #
 # examples of invoking this Makefile:
-# make -f make_nucleo-h743zi USB=g: # make, uplaod to USB drive, run the tests
-# make -f make_nucleo-h743zi USB=g: TESTS=philo*.py  # make and run the selected tests
-# make -f make_nucleo-h743zi HOST=localhost:7705 # connect to host:port
-# make -f make_nucleo-h743zi norun   # only make but not run the tests
-# make -f make_nucleo-h743zi clean   # cleanup the build
+# make -f nucleo-l053r8.mak USB=g: # make, uplaod to USB drive, run the tests
+# make -f nucleo-l053r8.mak USB=g: TESTS=philo*.py  # make and run the selected tests
+# make -f nucleo-l053r8.mak HOST=localhost:7705 # connect to host:port
+# make -f nucleo-l053r8.mak norun   # only make but not run the tests
+# make -f nucleo-l053r8.mak clean   # cleanup the build
+# make -f nucleo-l053r8.mak debug   # only run tests in DEBUG mode
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
@@ -54,8 +53,8 @@ endif
 # project name, target name, target directory:
 #
 PROJECT := test_sched
-TARGET  := nucleo-h743zi
-TARGET_DIR := $(QPC)/3rd_party/STM32CubeH7/qutest
+TARGET  := nucleo-l053r8
+TARGET_DIR := $(QPC)/3rd_party/nucleo-l053r8/qutest
 
 #-----------------------------------------------------------------------------
 # project directories:
@@ -77,10 +76,8 @@ VPATH := . \
 	$(QPC)/src/qs \
 	$(QP_PORT_DIR) \
 	$(TARGET_DIR) \
-	$(QPC)/3rd_party/STM32CubeH7/nucleo-h743zi/gnu \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP\STM32H7xx_Nucleo_144 \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates
+	$(QPC)/3rd_party/nucleo-l053r8 \
+	$(QPC)/3rd_party/nucleo-l053r8/gnu
 
 # list of all include directories needed by this project
 INCLUDES  = -I. \
@@ -88,9 +85,7 @@ INCLUDES  = -I. \
 	-I$(QP_PORT_DIR) \
 	-I$(TARGET_DIR) \
 	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Inc
+	-I$(QPC)/3rd_party/nucleo-l053r8
 
 #-----------------------------------------------------------------------------
 # project files:
@@ -102,18 +97,9 @@ ASM_SRCS :=
 # C source files
 C_SRCS := \
 	test_sched.c \
-	bsp_h743zi.c \
-	startup_stm32h743xx.c \
-	system_stm32h7xx.c \
-	stm32h7xx_nucleo_144.c \
-	stm32h7xx_hal.c \
-	stm32h7xx_hal_cortex.c \
-	stm32h7xx_hal_gpio.c \
-	stm32h7xx_hal_pwr_ex.c \
-	stm32h7xx_hal_rcc.c \
-	stm32h7xx_hal_rcc_ex.c \
-	stm32h7xx_hal_msp.c \
-	stm32h7xx_hal_uart.c
+	bsp_nucleo-l053r8.c \
+	system_stm32l0xx.c \
+	startup_stm32l053xx.c
 
 # C++ source files
 CPP_SRCS :=
@@ -124,7 +110,6 @@ LD_SCRIPT := $(TARGET_DIR)/qutest.ld
 QP_SRCS := \
 	qep_hsm.c \
 	qep_msm.c \
-	qf_act.c \
 	qf_actq.c \
 	qf_defer.c \
 	qf_dyn.c \
@@ -152,8 +137,7 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines
-DEFINES   := -DQP_API_VERSION=9999 \
-	-DSTM32H743xx -DUSE_HAL_DRIVER -DUSE_STM32H7XX_NUCLEO_144 \
+DEFINES   := \
 	-DQF_ON_CONTEXT_SW
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
@@ -161,9 +145,9 @@ DEFINES   := -DQP_API_VERSION=9999 \
 # ARM_FPU:   [ | vfp]
 # FLOAT_ABI: [ | soft | softfp | hard]
 #
-ARM_CPU   := -mcpu=cortex-m7
-ARM_FPU   := -mfpu=fpv5-d16
-FLOAT_ABI := -mfloat-abi=softfp
+ARM_CPU   := -mcpu=cortex-m0plus
+ARM_FPU   :=
+FLOAT_ABI :=
 
 #-----------------------------------------------------------------------------
 # GNU-ARM toolset (NOTE: You need to adjust to your machine)
@@ -276,7 +260,7 @@ $(TARGET_BIN) : $(TARGET_ELF)
 	$(SLEEP) 2
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/include/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 flash :
@@ -313,7 +297,7 @@ endif
 endif
 
 debug :
-	$(QUTEST) $(TESTS) DEBUG $(HOST)
+	$(QUTEST) -edebug -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
 
 .PHONY : clean show
 

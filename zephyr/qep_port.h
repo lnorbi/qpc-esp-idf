@@ -23,14 +23,17 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-06-03
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-04-06
+* @version Last updated for: @ref qpc_7_2_2
 *
 * @file
 * @brief QEP/C port, generic C99 compiler
 */
 #ifndef QEP_PORT_H
 #define QEP_PORT_H
+
+/*! no-return function specifier (C11 Standard) */
+#define Q_NORETURN   _Noreturn void
 
 #include <stdint.h>  /* Exact-width types. WG14/N843 C99 Standard */
 #include <stdbool.h> /* Boolean type.      WG14/N843 C99 Standard */

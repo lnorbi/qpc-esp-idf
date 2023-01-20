@@ -1,7 +1,5 @@
 ##############################################################################
 # Product: Makefile for SYSTEM-Level tests of QP/C on NUCLEO-L053R8, GNU-ARM
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -33,12 +31,12 @@
 ##############################################################################
 #
 # examples of invoking this Makefile:
-# make -f make_nucleo-l053r8 USB=g: # make, uplaod to USB drive, run the tests
-# make -f make_nucleo-l053r8 USB=g: TESTS=philo*.py  # make and run the selected tests
-# make -f make_nucleo-l053r8 HOST=localhost:7705 # connect to host:port
-# make -f make_nucleo-l053r8 norun   # only make but not run the tests
-# make -f make_nucleo-l053r8 clean   # cleanup the build
-# make -f make_nucleo-l053r8 debug   # only run tests in DEBUG mode
+# make -f nucleo-l053r8.mak USB=g: # make, uplaod to USB drive, run the tests
+# make -f nucleo-l053r8.mak USB=g: TESTS=philo*.py  # make and run the selected tests
+# make -f nucleo-l053r8.mak HOST=localhost:7705 # connect to host:port
+# make -f nucleo-l053r8.mak norun   # only make but not run the tests
+# make -f nucleo-l053r8.mak clean   # cleanup the build
+# make -f nucleo-l053r8.mak debug   # only run tests in DEBUG mode
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
@@ -99,7 +97,7 @@ ASM_SRCS :=
 # C source files
 C_SRCS := \
 	test_sched.c \
-	bsp_l053r8.c \
+	bsp_nucleo-l053r8.c \
 	system_stm32l0xx.c \
 	startup_stm32l053xx.c
 
@@ -112,7 +110,6 @@ LD_SCRIPT := $(TARGET_DIR)/qutest.ld
 QP_SRCS := \
 	qep_hsm.c \
 	qep_msm.c \
-	qf_act.c \
 	qf_actq.c \
 	qf_defer.c \
 	qf_dyn.c \
@@ -260,7 +257,7 @@ $(TARGET_BIN) : $(TARGET_ELF)
 	$(SLEEP) 2
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/include/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 flash :
@@ -297,7 +294,7 @@ endif
 endif
 
 debug :
-	$(QUTEST) $(TESTS) DEBUG $(HOST)
+	$(QUTEST) -edebug -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
 
 .PHONY : clean show
 

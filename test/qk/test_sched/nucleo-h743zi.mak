@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QP/C on NUCLEO-H743ZI board, QUTEST, GNU-ARM
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
+# Last Updated for Version: 7.2.2
+# Date of the Last Update:  2023-02-02
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -33,11 +33,12 @@
 ##############################################################################
 #
 # examples of invoking this Makefile:
-# make -f make_nucleo-h743zi USB=g: # make, uplaod to USB drive, run the tests
-# make -f make_nucleo-h743zi USB=g: TESTS=philo*.py  # make and run the selected tests
-# make -f make_nucleo-h743zi USB=g: HOST=localhost:7705 # connect to host:port
-# make -f make_nucleo-h743zi USB=g: norun   # only make but not run the tests
-# make -f make_nucleo-h743zi USB=g: clean   # cleanup the build
+# make -f nucleo-h743zi.mak USB=g: # make, uplaod to USB drive, run the tests
+# make -f nucleo-h743zi.mak USB=g: TESTS=philo*.py  # make and run the selected tests
+# make -f nucleo-h743zi.mak USB=g: HOST=localhost:7705 # connect to host:port
+# make -f nucleo-h743zi.mak USB=g: norun   # only make but not run the tests
+# make -f nucleo-h743zi.mak USB=g: clean   # cleanup the build
+# make -f nucleo-h743zi.mak USB=g: debug   # only run tests in DEBUG mode
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
@@ -102,7 +103,7 @@ ASM_SRCS :=
 # C source files
 C_SRCS := \
 	test_sched.c \
-	bsp_h743zi.c \
+	bsp_nucleo-h743zi.c \
 	startup_stm32h743xx.c \
 	system_stm32h7xx.c \
 	stm32h7xx_nucleo_144.c \
@@ -124,7 +125,6 @@ LD_SCRIPT := $(TARGET_DIR)/qutest.ld
 QP_SRCS := \
 	qep_hsm.c \
 	qep_msm.c \
-	qf_act.c \
 	qf_actq.c \
 	qf_defer.c \
 	qf_dyn.c \
@@ -273,7 +273,7 @@ $(TARGET_BIN) : $(TARGET_ELF)
 	$(SLEEP) 2
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/include/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 flash :
@@ -310,7 +310,7 @@ endif
 endif
 
 debug :
-	$(QUTEST) $(TESTS) DEBUG $(HOST)
+	$(QUTEST) -edebug -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
 
 .PHONY : clean show
 

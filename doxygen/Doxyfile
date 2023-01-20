@@ -7,7 +7,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = QP/C
-PROJECT_NUMBER         = 7.2.1
+PROJECT_NUMBER         = 7.2.2
 PROJECT_BRIEF          = "Real-Time Embedded Framework"
 PROJECT_LOGO           = ../../ql-doxygen/images/logo_ql.png
 OUTPUT_DIRECTORY       =
@@ -68,11 +68,11 @@ NUM_PROC_THREADS       = 1
 #---------------------------------------------------------------------------
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
-EXTRACT_PRIV_VIRTUAL   = NO
+EXTRACT_PRIV_VIRTUAL   = YES
 EXTRACT_PACKAGE        = YES
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
-EXTRACT_LOCAL_METHODS  = NO
+EXTRACT_LOCAL_METHODS  = YES
 EXTRACT_ANON_NSPACES   = NO
 RESOLVE_UNNAMED_PARAMS = YES
 HIDE_UNDOC_MEMBERS     = NO
@@ -81,12 +81,12 @@ HIDE_FRIEND_COMPOUNDS  = NO
 HIDE_IN_BODY_DOCS      = NO
 INTERNAL_DOCS          = NO
 CASE_SENSE_NAMES       = NO
-HIDE_SCOPE_NAMES       = YES
+HIDE_SCOPE_NAMES       = NO
 HIDE_COMPOUND_REFERENCE= NO
 SHOW_HEADERFILE        = YES
 SHOW_INCLUDE_FILES     = YES
 SHOW_GROUPED_MEMB_INC  = NO
-FORCE_LOCAL_INCLUDES   = NO
+FORCE_LOCAL_INCLUDES   = YES
 INLINE_INFO            = YES
 SORT_MEMBER_DOCS       = NO
 SORT_BRIEF_DOCS        = NO
@@ -124,6 +124,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = main.dox \
                          gs.dox \
+                         api.dox \
                          ../../cert-pack/cert-pack.dox \
                          ../../cert-pack/srs.dox \
                          ../../cert-pack/sas.dox \
@@ -143,7 +144,6 @@ INPUT                  = main.dox \
                          ports_arm-cm.dox \
                          ports_rtos.dox \
                          ports_os.dox \
-                         api.dox \
                          ../../ql-doxygen/help.dox \
                          dir.dox \
                          config.h \
@@ -167,7 +167,9 @@ RECURSIVE              = YES
 EXCLUDE                = ../include/qs_dummy.h
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
-EXCLUDE_SYMBOLS        = QP_IMPL
+EXCLUDE_SYMBOLS        = QP_IMPL \
+                         Q_DEFINE_THIS_FILE \
+                         Q_DEFINE_THIS_MODULE
 EXAMPLE_PATH           = gen \
                          snippets \
                          ../include \
@@ -285,8 +287,8 @@ ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = NO
 EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
-INCLUDE_PATH           = .
-INCLUDE_FILE_PATTERNS  = *.h
+INCLUDE_PATH           =
+INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = Q_SPY \
                          Q_UTEST \
                          QP_IMPL \

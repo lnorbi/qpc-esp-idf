@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>QF_ON_CONTEXT_SW</Define>
+              <Define>QF_ON_CONTEXT_SW QXK_USE_IRQ_HANDLER=WWDG_IRQHandler QXK_USE_IRQ_NUM=0</Define>
               <Undefine></Undefine>
               <IncludePath>..\..;..\..\..\..\..\include;..\..\..\..\..\ports\arm-cm\qxk\armclang;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-l053r8</IncludePath>
             </VariousControls>
@@ -411,7 +411,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -469,11 +469,6 @@
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
             </File>
             <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
-            </File>
-            <File>
               <FileName>qf_actq.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_actq.c</FilePath>
@@ -492,11 +487,6 @@
               <FileName>qf_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qf_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qf_ps.c</FileName>
@@ -534,11 +524,6 @@
               <FilePath>..\..\..\..\..\src\qxk\qxk_mutex.c</FilePath>
             </File>
             <File>
-              <FileName>qxk_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qxk_pkg.h</FilePath>
-            </File>
-            <File>
               <FileName>qxk_sema.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qxk\qxk_sema.c</FilePath>
@@ -572,57 +557,6 @@
               <FileName>qxk_port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\ports\arm-cm\qxk\armclang\qxk_port.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>2</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <uGnu>2</uGnu>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define>QXK_USE_IRQ_NUM=30 QXK_USE_IRQ_HANDLER=LCD_IRQHandler</Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
             </File>
             <File>
               <FileName>qxk_port.h</FileName>
@@ -717,11 +651,6 @@
               <FileName>qs_fp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_fp.c</FilePath>
-            </File>
-            <File>
-              <FileName>qs_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qs_rx.c</FileName>
@@ -1137,7 +1066,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -1195,11 +1124,6 @@
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
             </File>
             <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
-            </File>
-            <File>
               <FileName>qf_actq.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_actq.c</FilePath>
@@ -1218,11 +1142,6 @@
               <FileName>qf_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qf_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qf_ps.c</FileName>
@@ -1258,11 +1177,6 @@
               <FileName>qxk_mutex.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qxk\qxk_mutex.c</FilePath>
-            </File>
-            <File>
-              <FileName>qxk_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qxk_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qxk_sema.c</FileName>
@@ -1392,11 +1306,6 @@
               <FileName>qs_fp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_fp.c</FilePath>
-            </File>
-            <File>
-              <FileName>qs_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qs_rx.c</FileName>
@@ -1812,7 +1721,7 @@
             <File>
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -1870,11 +1779,6 @@
               <FilePath>..\..\..\..\..\src\qf\qep_msm.c</FilePath>
             </File>
             <File>
-              <FileName>qf_act.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_act.c</FilePath>
-            </File>
-            <File>
               <FileName>qf_actq.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_actq.c</FilePath>
@@ -1893,11 +1797,6 @@
               <FileName>qf_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>qf_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qf_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qf_ps.c</FileName>
@@ -1933,11 +1832,6 @@
               <FileName>qxk_mutex.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qxk\qxk_mutex.c</FilePath>
-            </File>
-            <File>
-              <FileName>qxk_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qxk_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qxk_sema.c</FileName>
@@ -1998,11 +1892,6 @@
               <FileName>qs_fp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_fp.c</FilePath>
-            </File>
-            <File>
-              <FileName>qs_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qs_rx.c</FileName>
