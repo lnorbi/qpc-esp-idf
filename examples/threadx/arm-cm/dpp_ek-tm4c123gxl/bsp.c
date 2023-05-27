@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: DPP example, EK-TM4C123GXL board, ThreadX kernel
-* Last updated for version 7.2.0
-* Last updated on  2022-12-17
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -326,20 +326,23 @@ void QF_onStartup(void) {
     * might choose to call QTIMEEVT_TICK_X() directly from timer interrupts
     * or from active object(s).
     */
-    Q_ALLEGE(tx_timer_create(&l_tick_timer, /* ThreadX timer object */
+    if (tx_timer_create(&l_tick_timer, /* ThreadX timer object */
         (CHAR *)"QP-tick", /* name of the timer */
         &timer_expiration, /* expiration function */
         0U,       /* expiration function input (tick rate) */
         1U,       /* initial ticks */
         1U,       /* reschedule ticks */
         TX_AUTO_ACTIVATE) /* automatically activate timer */
-             == TX_SUCCESS);
+             != TX_SUCCESS)
+     {
+         Q_ERROR();
+     }
 
 #ifdef Q_SPY
     NVIC_EnableIRQ(UART0_IRQn);  /* UART0 interrupt used for QS-RX */
 
     /* start a ThreadX "idle" thread. See NOTE1... */
-    Q_ALLEGE(tx_thread_create(&idle_thread, /* thread control block */
+    if (tx_thread_create(&idle_thread, /* thread control block */
         (CHAR *)("idle"), /* thread name */
         &idle_thread_fun,       /* thread function */
         0LU,                    /* thread input (unsued) */
@@ -349,7 +352,10 @@ void QF_onStartup(void) {
         TX_MAX_PRIORITIES - 1U, /* preemption threshold disabled */
         TX_NO_TIME_SLICE,
         TX_AUTO_START)
-             == TX_SUCCESS);
+             != TX_SUCCESS)
+     {
+         Q_ERROR();
+     }
 #endif /* Q_SPY */
 }
 /*..........................................................................*/
@@ -357,13 +363,14 @@ void QF_onCleanup(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
 
 #ifndef NDEBUG
     /* light up all LEDs */
@@ -374,6 +381,11 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
 #endif
 
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/
@@ -386,12 +398,11 @@ static void idle_thread_fun(ULONG thread_input) { /* see NOTE1 */
 
         if ((UART0->FR & UART_FR_TXFE) != 0U) {  /* TX done? */
             uint16_t fifo = UART_TXFIFO_DEPTH;   /* max bytes we can accept */
-            uint8_t const *block;
-            QF_CRIT_STAT_TYPE intStat;
 
-            QF_CRIT_ENTRY(intStat);
-            block = QS_getBlock(&fifo); /* try to get next block to transmit */
-            QF_CRIT_EXIT(intStat);
+            QF_CRIT_STAT_
+            QF_CRIT_E_();
+            uint8_t const *block = QS_getBlock(&fifo);
+            QF_CRIT_X_();
 
             while (fifo-- != 0U) {       /* any bytes in the block? */
                 UART0->DR = *block++;    /* put into the FIFO */
@@ -464,11 +475,10 @@ QSTimeCtr QS_onGetTime(void) {  /* NOTE: invoked with interrupts DISABLED */
 void QS_onFlush(void) {
     while (true) {
         /* try to get next byte to transmit */
-        QF_CRIT_STAT_TYPE intStat;
-
-        QF_CRIT_ENTRY(intStat);
+        QF_CRIT_STAT_
+        QF_CRIT_E_();
         uint16_t b = QS_getByte();
-        QF_CRIT_EXIT(intStat);
+        QF_CRIT_X_();
 
         if (b != QS_EOD) { /* NOT end-of-data */
             /* busy-wait as long as TX FIFO has data to transmit */

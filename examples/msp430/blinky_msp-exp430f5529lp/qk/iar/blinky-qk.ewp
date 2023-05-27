@@ -3473,9 +3473,6 @@
         <file>
             <name>$PROJ_DIR$\..\..\main.c</name>
         </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
-        </file>
     </group>
     <group>
         <name>QP</name>
@@ -3554,6 +3551,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qs_rx.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
         </file>
     </group>
 </project>

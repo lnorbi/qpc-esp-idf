@@ -52,10 +52,12 @@
 
 /*Q_DEFINE_THIS_MODULE("qf_qmact")*/
 
-/*
-* This internal macro encapsulates the violation of MISRA-C 2012
+/*! This internal macro encapsulates the violation of MISRA-C 2012
 * Rule 11.3(req) "A cast shall not be performed between a pointer to
 * object type and a poiner to a different object type".
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_03A}
 */
 #define QMSM_CAST_(ptr_) ((QMsm *)(ptr_))
 

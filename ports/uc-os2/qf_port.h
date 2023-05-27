@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to uC-OS2, generic C99 compiler
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* uC-OS2 event queue and thread types */
 #define QF_EQUEUE_TYPE       OS_EVENT *
@@ -41,15 +41,15 @@
 
 #include "ucos_ii.h"  /* uC-OS2 API, port and compile-time configuration */
 
-/* uC-OS2 crtitical section, NOTE1 */
+/* uC-OS2 critical section, NOTE1 */
 #if (OS_CRITICAL_METHOD == 1u)
-    /* QF_CRIT_STAT_TYPE  not defined */
-    #define QF_CRIT_ENTRY(dummy) OS_ENTER_CRITICAL()
-    #define QF_CRIT_EXIT(dummy)  OS_EXIT_CRITICAL()
+    #define QF_CRIT_STAT_
+    #define QF_CRIT_E_()     OS_ENTER_CRITICAL()
+    #define QF_CRIT_X_()     OS_EXIT_CRITICAL()
 #elif (OS_CRITICAL_METHOD == 3u)
-    #define QF_CRIT_STAT_TYPE    OS_CPU_SR
-    #define QF_CRIT_ENTRY(dummy) OS_ENTER_CRITICAL()
-    #define QF_CRIT_EXIT(dummy)  OS_EXIT_CRITICAL()
+    #define QF_CRIT_STAT_    OS_CPU_SR cpu_sr;
+    #define QF_CRIT_E_()     OS_ENTER_CRITICAL()
+    #define QF_CRIT_X_()     OS_EXIT_CRITICAL()
 #else
     #error Unsupported uC-OS2 critical section type
 #endif /* OS_CRITICAL_METHOD */
@@ -59,29 +59,20 @@ enum UCOS2_TaskAttrs {
 };
 
 #include "qep_port.h" /* QEP port */
-#include "qequeue.h"  /* native QF event queue for deferring events */
-#include "qmpool.h"   /* native QF event pool */
+#include "qequeue.h"  /* for event deferral */
+#include "qmpool.h"   /* native QF memory pool */
 #include "qf.h"       /* QF platform-independent public interface */
 
-/*****************************************************************************
-* interface used only inside QF, but not in applications
-*/
+/*==========================================================================*/
+/* interface used only inside QF implementation, but not in applications */
 #ifdef QP_IMPL
 
-    /* uC-OS2 crtitical section, NOTE1 */
-#if (OS_CRITICAL_METHOD == 3u)
-    /* internal uC-OS2 critical section operations, NOTE1 */
-    #define QF_CRIT_STAT_       OS_CPU_SR cpu_sr;
-    #define QF_CRIT_E_()    OS_ENTER_CRITICAL()
-    #define QF_CRIT_X_()     OS_EXIT_CRITICAL()
-#endif /* OS_CRITICAL_METHOD */
-
-    /* uC-OS2-specific scheduler locking, see NOTE2 */
+    /* scheduler locking, see NOTE2 */
     #define QF_SCHED_STAT_
     #define QF_SCHED_LOCK_(dummy) do { \
-        if (OSIntNesting == 0) {       \
-            OSSchedLock();             \
-        }                              \
+        if (OSIntNesting == 0) {    \
+            OSSchedLock();          \
+        }                           \
     } while (false)
 
     #define QF_SCHED_UNLOCK_() do { \
@@ -90,7 +81,7 @@ enum UCOS2_TaskAttrs {
         } \
     } while (false)
 
-    /* native QF event pool operations */
+    /* native QF event pool customization */
     #define QF_EPOOL_TYPE_            QMPool
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
         (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
@@ -100,11 +91,11 @@ enum UCOS2_TaskAttrs {
     #define QF_EPOOL_PUT_(p_, e_, qs_id_) \
         (QMPool_put(&(p_), (e_), (qs_id_)))
 
-#endif /* ifdef QP_IMPL */
+#endif /* QP_IMPL */
 
-/*****************************************************************************
-* NOTE1:
-* This QP port to uC-OS2 re-uses the exact same crtical section mechanism
+/*==========================================================================*/
+/* NOTE1:
+* This QP port to uC-OS2 re-uses the exact same critical section mechanism
 * as uC-OS2. The goal is to make this port independent on the CPU or the
 * toolchain by employing only the official uC-OS2 API. That way, all CPU
 * and toolchain dependencies are handled internally by uC-OS2.
@@ -115,5 +106,5 @@ enum UCOS2_TaskAttrs {
 * scheduler only up to the specified lock priority is not supported.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 

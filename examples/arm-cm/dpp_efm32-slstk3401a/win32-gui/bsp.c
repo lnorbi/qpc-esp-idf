@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: DPP example, Win32-GUI
-* Last updated for version: 6.9.3
-* Date of the Last Update:  2021-03-03
+* Last updated for version: 7.3.0
+* Date of the Last Update:  2023-05-24
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -144,9 +144,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg,
                  2U, LoadBitmap(l_hInst, MAKEINTRESOURCE(IDB_EATING)));
 
             /* --> QP: spawn the application thread to run main_gui() */
-            Q_ALLEGE(CreateThread(NULL, 0, &appThread, NULL, 0, NULL)
-                     != (HANDLE)0);
-
+            if (CreateThread(NULL, 0, &appThread, NULL, 0, NULL)
+                != (HANDLE)0)
+            {
+                Q_ERROR();
+            }
             SetDlgItemTextA(hWnd, IDC_EDIT1, "Edit1");
             SetDlgItemTextA(hWnd, IDC_EDIT2, "Edit2");
             return 0;
@@ -226,28 +228,33 @@ void QF_onCleanup(void) {
 }
 /*..........................................................................*/
 void QF_onClockTick(void) {
-    QTIMEEVT_TICK_X(0U, &l_clock_tick); /* perform the QF clock tick processing */
+    QTIMEEVT_TICK_X(0U, &l_clock_tick); /* QF clock tick processing */
 
     QS_RX_INPUT(); /* handle the QS-RX input */
     QS_OUTPUT();   /* handle the QS output */
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     char message[80];
     QF_stop(); /* stop ticking */
 
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
     SNPRINTF_S(message, Q_DIM(message) - 1U,
                "Assertion failed in module %s location %d", module, loc);
     MessageBox(l_hWnd, message, "!!! ASSERTION !!!",
                MB_OK | MB_ICONEXCLAMATION | MB_APPLMODAL);
     PostQuitMessage(-1);
 }
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
+}
 
 /*..........................................................................*/
 void BSP_init(void) {
-    if (QS_INIT(l_cmdLine) == 0U) { /* QS initialization failed? */
+    if (!QS_INIT(l_cmdLine)) { /* QS initialization failed? */
         MessageBox(l_hWnd,
                    "Cannot connect to QSPY via TCP/IP\n"
                    "Please make sure that 'qspy -t' is running",

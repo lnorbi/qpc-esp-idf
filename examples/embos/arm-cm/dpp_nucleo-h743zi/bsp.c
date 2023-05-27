@@ -317,14 +317,20 @@ void QF_onCleanup(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/

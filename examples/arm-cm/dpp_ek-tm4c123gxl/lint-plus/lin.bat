@@ -26,15 +26,15 @@
 @setlocal
 
 :: usage of lin.bat
-@echo Usage: lin [16bit] [-d...] [files...]
+@echo Usage: lin [16bit] [-u...] files
 @echo examples:
-@echo lin ..\table.c               : use 32bit CPU (default) for linting ..\table.c
-@echo lin 16bit -dQ_SPY ..\philo.c : use 16bit CPU and define Q_SPY for linting ..\philo.c
-@echo lin ..\philo.c ..\table.c    : use 32bit CPU for linting ..\philo.c and ..\table.c
+@echo lin files               : use 32bit CPU (default) for linting files
+@echo lin 16bit -uQ_SPY files : use 16bit CPU and undefine Q_SPY for linting files
 @echo.
 
 :: NOTE: adjust to for your installation directory of PC-Lint-Plus
-@set PCLP=C:\tools\lint-plus\windows\pclp64.exe
+@set PCLP=C:\tools\lint-plus2\windows\pclp64.exe
+@echo %PCLP%
 
 if NOT exist "%PCLP%" (
     @echo The PC-Lint-Plus toolset not found. Please adjust lin.bat
@@ -46,16 +46,15 @@ set QPC=..\..\..\..
 set QPC_LINT=%QPC%\ports\lint-plus
 
 if "%1"=="16bit" (
-    set LINTFLAGS=%QPC_LINT%\std.lnt -i%QPC_LINT%\16bit options.lnt %2 %3 %4 %5 %6 %7 %8
     @echo 16bit CPU
+    set LINTFLAGS=%QPC_LINT%\std.lnt -i%QPC_LINT%\16bit options.lnt %2 %3 %4 %5 %6 %7 %8
 ) else (
-    set LINTFLAGS=%QPC_LINT%\std.lnt -i%QPC_LINT%\32bit options.lnt %1 %2 %3 %4 %6 %7 %8
     @echo 32bit CPU (default)
+    set LINTFLAGS=%QPC_LINT%\std.lnt -i%QPC_LINT%\32bit options.lnt %1 %2 %3 %4 %5 %6 %7
 )
 
 :: cleanup
 @del *.log
-
 
 :: linting -------------------------------------------------------------------
 %PCLP% -os(lint_out.log) %LINTFLAGS%

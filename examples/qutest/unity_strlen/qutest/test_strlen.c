@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Purpose: example QUTEST fixture for the mock example from Unity
-* Last updated for: @ref qpc_7_0_0
-* Date of the Last Update:  2022-03-12
+* Last updated for: @ref qpc_7_3_0
+* Date of the Last Update:  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -45,7 +45,9 @@ int main(int argc, char *argv[]) {
     QF_init();  /* initialize the framework */
 
     /* initialize the QS software tracing */
-    Q_ALLEGE(QS_INIT(argc > 1 ? argv[1] : (void *)0));
+    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+        Q_ERROR();
+    }
 
     /* dictionaries... */
     QS_FUN_DICTIONARY(&my_strlen);

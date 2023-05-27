@@ -23,7 +23,9 @@ int main(int argc, char *argv[]) {
     QF_init();  /* initialize the framework */
 
     /* initialize the QS software tracing */
-    Q_ALLEGE(QS_INIT(argc > 1 ? argv[1] : (void *)0));
+    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+        Q_ERROR();
+    }
 
     /* produce dictionaries... */
     Led_DICTIONARY();
@@ -65,10 +67,15 @@ void QF_onClockTick(void) {
 /*..........................................................................*/
 #include <stdlib.h> /* for exit() */
 
-void Q_onAssert(char const * const module, int const loc) {
-    //printf("Assertion in %s:%d\n", module, loc);
-    QS_ASSERTION(module, loc, 1000U); /* report assertion to QS */
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    //printf("ERROR in %s:%d\n", module, id);
+    QS_ASSERTION(module, id, 1000U); /* report assertion to QS */
     QF_onCleanup();
     QS_EXIT();
     exit(-1);
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }

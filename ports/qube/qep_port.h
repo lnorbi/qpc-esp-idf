@@ -23,48 +23,22 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
-* @brief QEP/C port for the "Qube" execution harness (Windows, Linux, macOS)
+* @brief QEP/C port, generic C11 compiler
 */
 #ifndef QEP_PORT_H_
 #define QEP_PORT_H_
 
+/*! no-return function specifier (C11 Standard) */
+#define Q_NORETURN   _Noreturn void
+
 #include <stdint.h>  /* Exact-width types. WG14/N843 C99 Standard */
 #include <stdbool.h> /* Boolean type.      WG14/N843 C99 Standard */
 
-#ifdef __GNUC__
-/*! no-return function specifier (C11 Standard) */
-#define Q_NORETURN   _Noreturn void
-#elif (defined _MSC_VER) && (defined __cplusplus)
-
-    /* no-return function specifier (Microsoft Visual Studio C++ compiler) */
-    #define Q_NORETURN   [[ noreturn ]] void
-
-    /*
-    * This is the case where QP/C is compiled by the Microsoft Visual C++
-    * compiler in the C++ mode, which can happen when qep_port.h is included
-    * in a C++ module, or the compilation is forced to C++ by the option /TP.
-    *
-    * The following pragma suppresses the level-4 C++ warnings C4510, C4512,
-    * and C4610, which warn that default constructors and assignment operators
-    * could not be generated for structures QMState and QMTranActTable.
-    *
-    * The QP/C source code cannot be changed to avoid these C++ warnings
-    * because the structures QMState and QMTranActTable must remain PODs
-    * (Plain Old Datatypes) to be initializable statically with constant
-    * initializers.
-    */
-    #pragma warning (disable: 4510 4512 4610)
-
-#endif
-
 #include "qep.h"     /* QEP platform-independent public interface */
 
-#if (defined __cplusplus) && (defined _MSC_VER)
-    #pragma warning (default: 4510 4512 4610)
-#endif
-
 #endif /* QEP_PORT_H_ */
+

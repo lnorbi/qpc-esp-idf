@@ -246,12 +246,6 @@ static QState Table_serving(Table * const me, QEvt const * const e) {
             status_ = Q_HANDLED();
             break;
         }
-        /*${AOs::Table::SM::active::serving::EAT} */
-        case EAT_SIG: {
-            Q_ERROR();
-            status_ = Q_HANDLED();
-            break;
-        }
         /*${AOs::Table::SM::active::serving::PAUSE} */
         case PAUSE_SIG: {
             status_ = Q_TRAN(&Table_paused);

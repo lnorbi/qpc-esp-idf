@@ -103,7 +103,7 @@ version. */
 #ifndef __IAR_SYSTEMS_ASM__
     #define configASSERT( x ) if( ( x ) == 0 ) assert_failed( __FILE__, __LINE__ );
 
-    void assert_failed(char const * const module, int location);
+    void assert_failed(char const * const module, int const id);
     extern uint32_t SystemCoreClock;
 #endif
 

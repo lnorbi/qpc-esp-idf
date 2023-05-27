@@ -39,6 +39,9 @@
 /*! @file
 * @brief QV/C (cooperative "Vanilla" kernel) platform-independent
 * public interface
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QV_H_
 #define QV_H_
@@ -99,21 +102,40 @@ void QV_onIdle(void);
 #define QF_SCHED_STAT_
 
 /*${QV-impl::QF_SCHED_LOCK_} ...............................................*/
-/*! QV scheduler locking (not needed in QV) */
+/*! QV scheduler locking (not needed in QV)
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
+*/
 #define QF_SCHED_LOCK_(dummy) ((void)0)
 
 /*${QV-impl::QF_SCHED_UNLOCK_} .............................................*/
-/*! QV scheduler unlocking (not needed in QV) */
+/*! QV scheduler unlocking (not needed in QV)
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
+*/
 #define QF_SCHED_UNLOCK_() ((void)0)
 
 /*${QV-impl::QACTIVE_EQUEUE_WAIT_} .........................................*/
+/*! QV native event queue waiting implementation */
 #define QACTIVE_EQUEUE_WAIT_(me_) \
-    Q_ASSERT_ID(0, (me_)->eQueue.frontEvt != (QEvt *)0)
+    Q_ASSERT_NOCRIT_(302, (me_)->eQueue.frontEvt != (QEvt *)0)
 
 /*${QV-impl::QACTIVE_EQUEUE_SIGNAL_} .......................................*/
-/*! QV native event queue signaling */
+#ifdef Q_UNSAFE
+/*! QV event queue signaling (no QP Functional Safety System) */
 #define QACTIVE_EQUEUE_SIGNAL_(me_) \
     QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio)
+#endif /* def Q_UNSAFE */
+
+/*${QV-impl::QACTIVE_EQUEUE_SIGNAL_} .......................................*/
+#ifndef Q_UNSAFE
+/*! QV event queue signaling (with QP Functional Safety System) */
+#define QACTIVE_EQUEUE_SIGNAL_(me_) \
+    QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio); \
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_)
+#endif /* ndef Q_UNSAFE */
 /*$enddecl${QV-impl} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /* Native QF event pool operations... */
@@ -127,9 +149,19 @@ void QV_onIdle(void);
     (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
 
 /*${QF-QMPool-impl::QF_EPOOL_EVENT_SIZE_} ..................................*/
+/*! Native QF event pool event-size getter
+*
+* @trace
+* - @tr{DVR-QP-MC3-R18_01}
+*/
 #define QF_EPOOL_EVENT_SIZE_(p_) ((uint_fast16_t)(p_).blockSize)
 
 /*${QF-QMPool-impl::QF_EPOOL_GET_} .........................................*/
+/*! Native QF event pool get-event
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
+*/
 #define QF_EPOOL_GET_(p_, e_, m_, qs_id_) \
     ((e_) = (QEvt *)QMPool_get(&(p_), (m_), (qs_id_)))
 

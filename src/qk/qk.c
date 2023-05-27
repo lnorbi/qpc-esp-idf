@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope internal interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -73,7 +73,7 @@ QSchedStatus QK_schedLock(uint_fast8_t const ceiling) {
     QF_CRIT_STAT_
     QF_CRIT_E_();
 
-    Q_REQUIRE_ID(600, !QK_ISR_CONTEXT_());
+    Q_REQUIRE_NOCRIT_(100, !QK_ISR_CONTEXT_());
 
     /* first store the previous lock prio */
     QSchedStatus stat;
@@ -110,7 +110,7 @@ void QK_schedUnlock(QSchedStatus const stat) {
         QF_CRIT_STAT_
         QF_CRIT_E_();
 
-        Q_REQUIRE_ID(700, (!QK_ISR_CONTEXT_())
+        Q_REQUIRE_NOCRIT_(200, (!QK_ISR_CONTEXT_())
                           && (lockCeil > prevCeil));
 
         QS_BEGIN_NOCRIT_PRE_(QS_SCHED_UNLOCK, 0U)
@@ -143,8 +143,12 @@ void QF_init(void) {
 
     QF_bzero(&QTimeEvt_timeEvtHead_[0], sizeof(QTimeEvt_timeEvtHead_));
     QF_bzero(&QActive_registry_[0],     sizeof(QActive_registry_));
-    QF_bzero(&QF_readySet_,             sizeof(QF_readySet_));
     QF_bzero(&QK_attr_,                 sizeof(QK_attr_));
+
+    QPSet_setEmpty(&QF_readySet_);
+    #ifndef Q_UNSAFE
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
 
     /* setup the QK scheduler as initially locked and not running */
     QK_attr_.lockCeil = (QF_MAX_ACTIVE + 1U); /* scheduler locked */
@@ -220,8 +224,11 @@ void QActive_start_(QActive * const me,
     Q_UNUSED_PAR(stkSto);  /* not needed in QK */
     Q_UNUSED_PAR(stkSize); /* not needed in QK */
 
-    Q_REQUIRE_ID(300, (!QK_ISR_CONTEXT_())
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(300, (!QK_ISR_CONTEXT_())
                       && (stkSto == (void *)0));
+    QF_CRIT_X_();
 
     me->prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority of the AO */
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
@@ -229,11 +236,11 @@ void QActive_start_(QActive * const me,
 
     QEQueue_init(&me->eQueue, qSto, qLen); /* init the built-in queue */
 
-    QHSM_INIT(&me->super, par, me->prio); /* top-most initial tran. */
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 
     /* See if this AO needs to be scheduled if QK is already running */
-    QF_CRIT_STAT_
     QF_CRIT_E_();
     if (QK_sched_() != 0U) { /* activation needed? */
         QK_activate_();
@@ -250,8 +257,9 @@ QK QK_attr_;
 /*${QK::QK-extern-C::sched_} ...............................................*/
 /*! @static @private @memberof QK */
 uint_fast8_t QK_sched_(void) {
-    uint_fast8_t p;
+    Q_REQUIRE_NOCRIT_(400, QPSet_verify(&QF_readySet_, &QF_readySet_inv_));
 
+    uint_fast8_t p;
     if (QPSet_isEmpty(&QF_readySet_)) {
         p = 0U; /* no activation needed */
     }
@@ -281,7 +289,7 @@ void QK_activate_(void) {
     uint8_t p = QK_attr_.nextPrio; /* next prio to run */
     QK_attr_.nextPrio = 0U; /* clear for the next time */
 
-    Q_REQUIRE_ID(500, (prio_in <= QF_MAX_ACTIVE)
+    Q_REQUIRE_NOCRIT_(500, (prio_in <= QF_MAX_ACTIVE)
                       && (0U < p) && (p <= QF_MAX_ACTIVE));
 
     #if (defined QF_ON_CONTEXT_SW) || (defined Q_SPY)
@@ -292,7 +300,7 @@ void QK_activate_(void) {
     QActive *a;
     do  {
         a = QActive_registry_[p]; /* obtain the pointer to the AO */
-        Q_ASSERT_ID(505, a != (QActive *)0); /* the AO must be registered */
+        Q_ASSERT_NOCRIT_(505, a != (QActive *)0); /* the AO must be registered */
 
         /* set new active priority and preemption-threshold */
         QK_attr_.actPrio = p;
@@ -326,7 +334,8 @@ void QK_activate_(void) {
         * 3. determine if event is garbage and collect it if so
         */
         QEvt const * const e = QActive_get_(a);
-        QHSM_DISPATCH(&a->super, e, p);
+        /* dispatch event (virtual call) */
+        (*a->super.vptr->dispatch)(&a->super, e, p);
     #if (QF_MAX_EPOOL > 0U)
         QF_gc(e);
     #endif
@@ -334,8 +343,14 @@ void QK_activate_(void) {
         /* determine the next highest-priority AO ready to run... */
         QF_INT_DISABLE(); /* unconditionally disable interrupts */
 
+        /* internal integrity check (duplicate storage) */
+        Q_ASSERT_NOCRIT_(502, QPSet_verify(&QF_readySet_, &QF_readySet_inv_));
+
         if (a->eQueue.frontEvt == (QEvt *)0) { /* empty queue? */
             QPSet_remove(&QF_readySet_, p);
+    #ifndef Q_UNSAFE
+            QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
         }
 
         if (QPSet_isEmpty(&QF_readySet_)) {
@@ -354,7 +369,7 @@ void QK_activate_(void) {
                 p = 0U; /* no activation needed */
             }
             else {
-                Q_ASSERT_ID(510, p <= QF_MAX_ACTIVE);
+                Q_ASSERT_NOCRIT_(510, p <= QF_MAX_ACTIVE);
             }
         }
     } while (p != 0U);

@@ -39,6 +39,9 @@
 /*! @file
 * @brief QK/C (preemptive non-blocking kernel) platform-independent
 * public interface.
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QK_H_
 #define QK_H_
@@ -92,6 +95,9 @@ extern QK QK_attr_;
 * The QF-priority of the next active object to activate, or zero
 * if no activation of AO is needed.
 *
+* @precondition{qk,400}
+* - check the internal integrity (duplicate storage)
+*
 * @attention
 * QK_sched_() must be always called with interrupts **disabled** and
 * returns with interrupts **disabled**.
@@ -134,7 +140,7 @@ void QK_activate_(void);
 * the scheduler by restoring its previous lock status in
 * QK_schedUnlock().
 *
-* @precondition{qk,600}
+* @precondition{qk,100}
 * - The QK scheduler lock cannot be called from an ISR
 *
 * @note
@@ -159,7 +165,7 @@ QSchedStatus QK_schedLock(uint_fast8_t const ceiling);
 * @param[in]   stat       previous QK Scheduler lock status returned from
 *                         QK_schedLock()
 *
-* @precondition{qk,700}
+* @precondition{qk,200}
 * - the QK scheduler cannot be unlocked: from the ISR context
 * - the current lock ceiling must be greater than the previous
 *
@@ -203,6 +209,9 @@ void QK_onIdle(void);
 *
 * @returns true if the code executes in the ISR context and false
 * otherwise
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
 */
 #define QK_ISR_CONTEXT_() (QF_intNest_ != 0U)
 #endif /* ndef QK_ISR_CONTEXT_ */
@@ -212,7 +221,11 @@ void QK_onIdle(void);
 #define QF_SCHED_STAT_ QSchedStatus lockStat_;
 
 /*${QK-impl::QF_SCHED_LOCK_} ...............................................*/
-/*! QK selective scheduler locking */
+/*! QK selective scheduler locking
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
+*/
 #define QF_SCHED_LOCK_(ceil_) do { \
     if (QK_ISR_CONTEXT_()) { \
         lockStat_ = 0xFFU; \
@@ -222,7 +235,11 @@ void QK_onIdle(void);
 } while (false)
 
 /*${QK-impl::QF_SCHED_UNLOCK_} .............................................*/
-/*! QK selective scheduler unlocking */
+/*! QK selective scheduler unlocking
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
+*/
 #define QF_SCHED_UNLOCK_() do { \
     if (lockStat_ != 0xFFU) { \
         QK_schedUnlock(lockStat_); \
@@ -232,10 +249,11 @@ void QK_onIdle(void);
 /*${QK-impl::QACTIVE_EQUEUE_WAIT_} .........................................*/
 /*! QK native event queue waiting */
 #define QACTIVE_EQUEUE_WAIT_(me_) \
-    (Q_ASSERT_ID(110, (me_)->eQueue.frontEvt != (QEvt *)0))
+    Q_ASSERT_NOCRIT_(302, (me_)->eQueue.frontEvt != (QEvt *)0)
 
 /*${QK-impl::QACTIVE_EQUEUE_SIGNAL_} .......................................*/
-/*! QK native event queue signaling */
+#ifdef Q_UNSAFE
+/*! QK event queue signaling (no QP Functional Safety System) */
 #define QACTIVE_EQUEUE_SIGNAL_(me_) do { \
     QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio); \
     if (!QK_ISR_CONTEXT_()) { \
@@ -244,6 +262,21 @@ void QK_onIdle(void);
         } \
     } \
 } while (false)
+#endif /* def Q_UNSAFE */
+
+/*${QK-impl::QACTIVE_EQUEUE_SIGNAL_} .......................................*/
+#ifndef Q_UNSAFE
+/*! QK event queue signaling (with QP Functional Safety System) */
+#define QACTIVE_EQUEUE_SIGNAL_(me_) do { \
+    QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio); \
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_); \
+    if (!QK_ISR_CONTEXT_()) { \
+        if (QK_sched_() != 0U) { \
+            QK_activate_(); \
+        } \
+    } \
+} while (false)
+#endif /* ndef Q_UNSAFE */
 /*$enddecl${QK-impl} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /* Native QF event pool operations... */
@@ -257,9 +290,19 @@ void QK_onIdle(void);
     (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
 
 /*${QF-QMPool-impl::QF_EPOOL_EVENT_SIZE_} ..................................*/
+/*! Native QF event pool event-size getter
+*
+* @trace
+* - @tr{DVR-QP-MC3-R18_01}
+*/
 #define QF_EPOOL_EVENT_SIZE_(p_) ((uint_fast16_t)(p_).blockSize)
 
 /*${QF-QMPool-impl::QF_EPOOL_GET_} .........................................*/
+/*! Native QF event pool get-event
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
+*/
 #define QF_EPOOL_GET_(p_, e_, m_, qs_id_) \
     ((e_) = (QEvt *)QMPool_get(&(p_), (m_), (qs_id_)))
 

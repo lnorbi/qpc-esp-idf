@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-02-25
-* @version Last updated for: @ref qpc_7_0_0
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief DPP example, NUCLEO-L552ZE board, cooperative QV kernel
@@ -66,14 +66,8 @@ static uint32_t l_rnd; /* random seed */
 
 /* ISRs used in this project ===============================================*/
 void SysTick_Handler(void) {
-    /* state of the button debouncing, see below */
-    static struct ButtonsDebouncing {
-        uint32_t depressed;
-        uint32_t previous;
-    } buttons = { 0U, 0U };
-    uint32_t current;
-    uint32_t tmp;
 
+    uint32_t tmp;
 #ifdef Q_SPY
     {
         tmp = SysTick->CTRL; /* clear SysTick_CTRL_COUNTFLAG */
@@ -87,7 +81,12 @@ void SysTick_Handler(void) {
     * adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
     * and Michael Barr, page 71.
     */
-    current = BSP_PB_GetState(BUTTON_USER); /* read the User button */
+    /* state of the button debouncing, see below */
+    static struct ButtonsDebouncing {
+        uint32_t depressed;
+        uint32_t previous;
+    } buttons = { 0U, 0U };
+    uint32_t current = BSP_PB_GetState(BUTTON_USER); /* read User button */
     tmp = buttons.depressed; /* save the debounced depressed buttons */
     buttons.depressed |= (buttons.previous & current); /* set depressed */
     buttons.depressed &= (buttons.previous | current); /* clear released */
@@ -142,8 +141,11 @@ void BSP_init(void) {
     /* Configure the system clock */
     SystemClock_Config();
 
-    Q_ALLEGE(HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY) == HAL_OK);
-    Q_ALLEGE(HAL_ICACHE_Enable() == HAL_OK);
+    HAL_StatusTypeDef err = HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY);
+    Q_ASSERT(err == HAL_OK);
+
+    err = HAL_ICACHE_Enable();
+    Q_ASSERT(err == HAL_OK);
 
     /* Configure the LEDs */
     BSP_LED_Init(LED1);
@@ -157,7 +159,7 @@ void BSP_init(void) {
     BSP_randomSeed(1234U);
 
     /* initialize the QS software tracing... */
-    if (QS_INIT((void *)0) == 0) {
+    if (!QS_INIT((void *)0)) {
         Q_ERROR();
     }
 
@@ -183,8 +185,9 @@ static void SystemClock_Config(void) {
     RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
     /* Configure the main internal regulator output voltage */
-    Q_ALLEGE(HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE0)
-             == HAL_OK);
+    HAL_StatusTypeDef err =
+        HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE0);
+    Q_ASSERT(err == HAL_OK);
 
     /* Initializes the RCC Oscillators according to the specified parameters
     * in the RCC_OscInitTypeDef structure.
@@ -199,7 +202,8 @@ static void SystemClock_Config(void) {
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
     RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
     RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-    Q_ALLEGE(HAL_RCC_OscConfig(&RCC_OscInitStruct) == HAL_OK);
+    err = HAL_RCC_OscConfig(&RCC_OscInitStruct);
+    Q_ASSERT(err == HAL_OK);
 
     /* Initializes the CPU, AHB and APB buses clocks */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
@@ -208,8 +212,8 @@ static void SystemClock_Config(void) {
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-    Q_ALLEGE(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5)
-             == HAL_OK);
+    err = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+    Q_ASSERT(err == HAL_OK);
 }
 
 /*..........................................................................*/
@@ -278,12 +282,7 @@ void QF_onStartup(void) {
     /* set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate */
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
-    /* set priorities of ALL ISRs used in the system, see NOTE1
-    *
-    * !!!!!!!!!!!!!!!!!!!!!!!!!!!! CAUTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    * Assign a priority to EVERY ISR explicitly by calling NVIC_SetPriority().
-    * DO NOT LEAVE THE ISR PRIORITIES AT THE DEFAULT VALUE!
-    */
+    /* set priorities of ALL ISRs used in the system, see NOTE1 */
     NVIC_SetPriority(LPUART1_IRQn,  0U); /* kernel unaware interrupt */
     NVIC_SetPriority(SysTick_IRQn, QF_AWARE_ISR_CMSIS_PRI);
     /* ... */
@@ -341,13 +340,14 @@ void QV_onIdle(void) { /* CATION: called with interrupts DISABLED, NOTE01 */
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
 
 #ifndef NDEBUG
     /* light all LEDs */
@@ -360,6 +360,11 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
 #endif
 
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/
@@ -432,7 +437,6 @@ void QS_onReset(void) {
 void QS_onCommand(uint8_t cmdId,
                   uint32_t param1, uint32_t param2, uint32_t param3)
 {
-    void assert_failed(char const *module, int loc);
     (void)cmdId;
     (void)param1;
     (void)param2;
@@ -444,9 +448,6 @@ void QS_onCommand(uint8_t cmdId,
 
     if (cmdId == 10U) {
         Q_ERROR();
-    }
-    else if (cmdId == 11U) {
-        assert_failed("QS_onCommand", 123);
     }
 }
 

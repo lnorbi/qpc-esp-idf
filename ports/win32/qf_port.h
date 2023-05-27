@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Win32 API (multi-threaded)
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* Win32 event queue and thread types */
 #define QF_EQUEUE_TYPE       QEQueue
@@ -54,9 +54,9 @@
 #define QF_TIMEEVT_CTR_SIZE  4U
 
 /* Win32 critical section, see NOTE1 */
-/* QF_CRIT_STAT_TYPE not defined */
-#define QF_CRIT_ENTRY(dummy) QF_enterCriticalSection_()
-#define QF_CRIT_EXIT(dummy)  QF_leaveCriticalSection_()
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()         QF_enterCriticalSection_()
+#define QF_CRIT_X_()         QF_leaveCriticalSection_()
 
 /* QF_LOG2 not defined -- use the internal LOG2() implementation */
 
@@ -94,7 +94,7 @@ void QF_consoleCleanup(void);
 int QF_consoleGetKey(void);
 int QF_consoleWaitForKey(void);
 
-/****************************************************************************/
+/*==========================================================================*/
 /* interface used only inside QF implementation, but not in applications */
 #ifdef QP_IMPL
 
@@ -105,13 +105,12 @@ int QF_consoleWaitForKey(void);
 
     /* Win32 active object event queue customization... */
     #define QACTIVE_EQUEUE_WAIT_(me_) \
-        while ((me_)->eQueue.frontEvt == (QEvt *)0) { \
+        do { \
             QF_CRIT_X_(); \
             (void)WaitForSingleObject((me_)->osObject, (DWORD)INFINITE); \
             QF_CRIT_E_(); \
-        }
+        } while ((me_)->eQueue.frontEvt == (QEvt *)0)
     #define QACTIVE_EQUEUE_SIGNAL_(me_) \
-        Q_ASSERT_ID(410, QActive_registry_[(me_)->prio] != (QActive *)0); \
         (void)SetEvent((me_)->osObject)
 
     /* native QF event pool operations */
@@ -148,13 +147,13 @@ int QF_consoleWaitForKey(void);
 * the time. Such sections of code are called "critical sections"
 *
 * This port uses a pair of functions QF_enterCriticalSection_() /
-* QF_leaveCriticalSection_() to enter/leave the cirtical section,
+* QF_leaveCriticalSection_() to enter/leave the critical section,
 * respectively.
 *
 * These functions are implemented in the qf_port.c module, where they
 * manipulate the file-scope Win32 critical section object l_win32CritSect
 * to protect all critical sections. Using the single critical section
-* object for all crtical section guarantees that only one thread at a time
+* object for all critical section guarantees that only one thread at a time
 * can execute inside a critical section. This prevents race conditions and
 * data corruption.
 *
@@ -164,9 +163,9 @@ int QF_consoleWaitForKey(void);
 * section, but it does not guarantee that a context switch cannot occur
 * within the critical section. In fact, such context switches probably
 * will happen, but they should not cause concurrency hazards because the
-* critical section eliminates all race conditionis.
+* critical section eliminates all race conditions.
 *
-* Unlinke simply disabling and enabling interrupts, the critical section
+* Unlike simply disabling and enabling interrupts, the critical section
 * approach is also subject to priority inversions. Various versions of
 * Windows handle priority inversions differently, but it seems that most of
 * them recognize priority inversions and dynamically adjust the priorities of
@@ -180,4 +179,4 @@ int QF_consoleWaitForKey(void);
 * events during multicasting.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */

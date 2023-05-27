@@ -71,11 +71,6 @@
 			<locationURI>PARENT-2-PROJECT_LOC/philo.c</locationURI>
 		</link>
 		<link>
-			<name>qstamp.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/include/qstamp.c</locationURI>
-		</link>
-		<link>
 			<name>table.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/table.c</locationURI>

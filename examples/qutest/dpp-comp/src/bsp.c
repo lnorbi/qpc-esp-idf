@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: DPP example, BSP for QUTest
-* Last Updated for Version: 7.2.0
-* Date of the Last Update:  2022-12-22
+* Last Updated for Version: 7.3.0
+* Date of the Last Update:  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -45,7 +45,10 @@ enum {
 
 /*..........................................................................*/
 void BSP_init(int argc, char **argv) {
-    Q_ALLEGE(QS_INIT(argc <= 1 ? (void *)0 : argv[1]) != 0U);
+    /* initialize the QS software tracing */
+    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+        Q_ERROR();
+    }
 
     QS_FUN_DICTIONARY(&BSP_displayPaused);
     QS_FUN_DICTIONARY(&BSP_displayPhilStat);

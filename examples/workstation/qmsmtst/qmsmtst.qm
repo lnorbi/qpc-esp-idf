@@ -320,7 +320,7 @@ void BSP_exit(void);
   <!--${.::qmsmtst.c}-->
   <file name="qmsmtst.c">
    <text>#include &quot;qep_port.h&quot;     /* QEP event processor */
-#include &quot;qassert.h&quot;      /* embedded systems assertions */
+#include &quot;qsafety.h&quot;      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY
     #include &quot;qs_port.h&quot;  /* QS software tracing */
 #else
@@ -336,8 +336,7 @@ static QMsmTst l_sm; /* the only instance of the QMsmTst class */
 QHsm * const the_sm = &amp;l_sm.super.super; /* the opaque pointer */
 
 $define${SMs::QMsmTst_ctor}
-$define${SMs::QMsmTst}
-</text>
+$define${SMs::QMsmTst}</text>
   </file>
  </directory>
 </model>

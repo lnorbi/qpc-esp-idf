@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: QMsmTst Example
-* Last updated for: @ref qpc_7_2_2
-* Last updated on: 2023-02-13
+* Last updated for: @ref qpc_7_3_0
+* Last updated on: 2023-05-16
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -32,7 +32,7 @@
 * <info@state-machine.com>
 *****************************************************************************/
 #include "qep_port.h"     /* QEP event processor */
-#include "qassert.h"      /* embedded systems assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY
     #include "qs_port.h"  /* QS software tracing */
 #else
@@ -129,8 +129,8 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
-    FPRINTF_S(stderr, "Assertion failed in %s:%d\n", module, loc);
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
     exit(-1);
 }
 /*..........................................................................*/

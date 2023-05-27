@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -91,10 +91,10 @@ bool QEQueue_post(QEQueue * const me,
     Q_UNUSED_PAR(qs_id);
     #endif
 
-    Q_REQUIRE_ID(200, e != (QEvt *)0);
-
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(200, e != (QEvt *)0);
+
     QEQueueCtr nFree  = me->nFree; /* get volatile into temporary */
 
     /* required margin available? */
@@ -142,7 +142,7 @@ bool QEQueue_post(QEQueue * const me,
         /*! @note assert if event cannot be posted and dropping events is
         * not acceptable
         */
-        Q_ASSERT_CRIT_(210, margin != QF_NO_MARGIN);
+        Q_ASSERT_NOCRIT_(210, margin != QF_NO_MARGIN);
 
         QS_BEGIN_NOCRIT_PRE_(QS_QF_EQUEUE_POST_ATTEMPT, qs_id)
             QS_TIME_PRE_();          /* timestamp */
@@ -174,7 +174,7 @@ void QEQueue_postLIFO(QEQueue * const me,
     QF_CRIT_E_();
     QEQueueCtr nFree = me->nFree; /* get volatile into temporary */
 
-    Q_REQUIRE_CRIT_(300, nFree != 0U);
+    Q_REQUIRE_NOCRIT_(300, nFree != 0U);
 
     /* is it a dynamic event? */
     if (e->poolId_ != 0U) {
@@ -249,7 +249,7 @@ QEvt const * QEQueue_get(QEQueue * const me,
             me->frontEvt = (QEvt *)0; /* queue becomes empty */
 
             /* all entries in the queue must be free (+1 for fronEvt) */
-            Q_ASSERT_CRIT_(410, nFree == (me->end + 1U));
+            Q_ASSERT_NOCRIT_(410, nFree == (me->end + 1U));
 
             QS_BEGIN_NOCRIT_PRE_(QS_QF_EQUEUE_GET_LAST, qs_id)
                 QS_TIME_PRE_();      /* timestamp */

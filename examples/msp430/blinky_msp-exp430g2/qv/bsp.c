@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: Blinky on MSP-EXP430G2, cooperative QV kernel
-* Last updated for version 7.1.1
-* Last updated on  2022-09-09
+* Last updated for version 7.3.0
+* Last updated on  2023-05-23
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -110,14 +110,20 @@ void QV_onIdle(void) { /* NOTE: called with interrutps DISABLED, see NOTE1 */
 #endif
 }
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /* implement the error-handling policy for your application!!! */
-    QF_INT_DISABLE(); /* disable all interrupts */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
 
     /* cause the reset of the CPU... */
     WDTCTL = WDTPW | WDTHOLD;
     __asm("    push &0xFFFE");
-    /* return from function does the reset */
+    for (;;) {} /* explicitly no-return */
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /*****************************************************************************

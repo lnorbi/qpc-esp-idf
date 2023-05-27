@@ -130,7 +130,7 @@ standard names. */
     extern uint32_t SystemCoreClock;
 
     /* Normal assert() semantics without relying on the provision of an assert.h header file. */
-    void assert_failed(char const * const module, int location);
+    void assert_failed(char const * const module, int const id);
     #define configASSERT( x ) if( ( x ) == 0 ) assert_failed( __FILE__, __LINE__ );
 #endif /* __IAR_SYSTEMS_ASM__ */
 

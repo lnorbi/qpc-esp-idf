@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-04
-* @version Last updated for: @ref qpc_7_2.0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QS/C port for the "Qube" execution harness (Windows, Linux, macOS)
@@ -48,17 +48,16 @@
 #define QS_REC_DONE()  QS_onFlush()
 
 /*============================================================================
-* NOTE: QS might be used with or without other QP components, in which
-* case the separate definitions of the macros QF_CRIT_STAT_TYPE,
-* QF_CRIT_ENTRY, and QF_CRIT_EXIT are needed. In this port QS is configured
-* to be used with the other QP component, by simply including "qf_port.h"
+/* NOTE: QS might be used with or without other QP components, in which
+* case the separate definitions of the macros QF_CRIT_STAT_, QF_CRIT_E_(),
+* and QF_CRIT_X_() are needed. In this port QS is configured to be used
+* with the other QP component, by simply including "qf_port.h"
 * *before* "qs.h".
 */
-#ifndef QF_PORT_H
+#ifndef QF_PORT_H_
 #include "qf_port.h" /* use QS with QF */
 #endif
 
 #include "qs.h"      /* QS platform-independent public interface */
 
 #endif /* QS_PORT_H_ */
-

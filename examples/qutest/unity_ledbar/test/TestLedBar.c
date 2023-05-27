@@ -79,10 +79,17 @@ void test_LedBar_99_percent_four_on(void) {
     TEST_ASSERT_EQUAL(60U, LedBar_setPercent(99U));
 }
 
-/* assertion handler... */
-void Q_onAssert(char const * const module, int const loc) {
-    (void)module;
-    UNITY_TEST_FAIL(loc, "ASSERTION");
+/* error handler... */
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    UNITY_TEST_FAIL(loc, "ERROR");
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* NOTE:

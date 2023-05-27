@@ -31,6 +31,7 @@
       <itemPath>../../../../../src/qs/qs_64bit.c</itemPath>
       <itemPath>../../../../../src/qs/qs_fp.c</itemPath>
       <itemPath>../../../../../src/qs/qs_rx.c</itemPath>
+      <itemPath>../../../../../src/qs/qstamp.c</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -40,7 +41,6 @@
       <itemPath>../../blinky.h</itemPath>
       <itemPath>../../bsp.h</itemPath>
       <itemPath>../../main.c</itemPath>
-      <itemPath>../../../../../include/qstamp.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

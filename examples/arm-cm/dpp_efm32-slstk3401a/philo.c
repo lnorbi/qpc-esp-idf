@@ -62,8 +62,10 @@ static QState Philo_eating(Philo * const me, QEvt const * const e);
 #define EAT_TIME    \
     (QTimeEvtCtr)((BSP_random() % BSP_TICKS_PER_SEC) + BSP_TICKS_PER_SEC)
 
-/* helper macro to provide the ID of Philo "me_" */
-#define PHILO_ID(me_)    ((uint8_t)((me_) - &Philo_inst[0]))
+/* helper function to provide the ID of Philo me */
+static inline uint8_t PHILO_ID(Philo * const me) {
+    return (uint8_t)(me - &Philo_inst[0]);
+}
 
 /* Global objects ----------------------------------------------------------*/
 /*$skip${QP_VERSION} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/

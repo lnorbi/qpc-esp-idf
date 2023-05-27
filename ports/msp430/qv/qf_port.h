@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-07-30
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to MSP430, cooperative QV kernel
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* The maximum number of active objects in the application, see NOTE01 */
 #define QF_MAX_ACTIVE        8U
@@ -46,12 +46,13 @@
 #define QF_INT_ENABLE()      __enable_interrupt()
 
 /* QF critical section entry/exit... */
-#define QF_CRIT_STAT_TYPE    unsigned short
-#define QF_CRIT_ENTRY(stat_) do { \
-    (stat_) =  __get_interrupt_state(); \
-    __disable_interrupt(); \
+#define QF_CRIT_STAT_        unsigned short int_state_;
+#define QF_CRIT_E_() do {                  \
+    int_state_ =  __get_interrupt_state(); \
+    __disable_interrupt();                 \
 } while (false)
-#define QF_CRIT_EXIT(stat_)  __set_interrupt_state(stat_)
+
+#define QF_CRIT_X_()         __set_interrupt_state(int_state_)
 
 
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
@@ -65,10 +66,11 @@
 #include "qv_port.h"    /* QV cooperative kernel port */
 #include "qf.h"         /* QF platform-independent public interface */
 
-/*****************************************************************************
-* NOTE01:
+/*==========================================================================*/
+/* NOTE01:
 * The maximum number of active objects QF_MAX_ACTIVE can be increased
 * up to 64, if necessary. Here it is set to a lower level to save some RAM.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
+

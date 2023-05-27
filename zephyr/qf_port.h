@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-05-19
-* @version Last updated for: Zephyr 3.2.0 and @ref qpc_7_2_2
+* @date Last updated on: 2023-05-23
+* @version Last updated for: Zephyr 3.2.0 and @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Zephyr RTOS
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* event queue and thread types */
 #define QF_EQUEUE_TYPE       struct k_msgq
@@ -43,9 +43,9 @@
 #define QF_MAX_TICK_RATE     2U
 
 /* QF critical section entry/exit for Zephyr, see NOTE1 */
-#define QF_CRIT_STAT_TYPE    k_spinlock_key_t
-#define QF_CRIT_ENTRY(key_)  ((key_) = k_spin_lock(&QF_spinlock))
-#define QF_CRIT_EXIT(key_)   (k_spin_unlock(&QF_spinlock, (key_)))
+#define QF_CRIT_STAT_        k_spinlock_key_t key_;
+#define QF_CRIT_E_()         ((key_) = k_spin_lock(&QF_spinlock))
+#define QF_CRIT_X_()         k_spin_unlock(&QF_spinlock, key_)
 
 #include <zephyr/kernel.h>   /* Zephyr kernel API */
 #include "qep_port.h"        /* QEP port */
@@ -69,20 +69,20 @@ extern struct k_spinlock QF_spinlock;
 /* interface used only inside QF implementation, but not in applications */
 #ifdef QP_IMPL
 
-    /* QF-specific scheduler locking (global lock in Zephyr, NOTE2) */
+    /* scheduler locking, see NOTE2 */
     #define QF_SCHED_STAT_
     #define QF_SCHED_LOCK_(dummy) do { \
-        if (!k_is_in_isr()) { \
-            k_sched_lock(); \
+        if (!k_is_in_isr()) {       \
+            k_sched_lock();         \
         } \
     } while (false)
     #define QF_SCHED_UNLOCK_() do { \
-        if (!k_is_in_isr()) { \
-            k_sched_unlock(); \
+        if (!k_is_in_isr()) {       \
+            k_sched_unlock();       \
         } \
     } while (false)
 
-    /* native QF event-pool customization... */
+    /* native QF event pool customization */
     #define QF_EPOOL_TYPE_            QMPool
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
         (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
@@ -107,4 +107,5 @@ extern struct k_spinlock QF_spinlock;
 * priority ceiling. Therefore, this port uses global Zephyr scheduler lock.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
+

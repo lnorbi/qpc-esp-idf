@@ -23,38 +23,39 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-05
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
-* @brief QS/C sample port with all configurable options
+* @brief QS/C port to a 32-bit CPU and a generic C99 compiler.
+* @description
+* This is an example of a QP/C port with the documentation for the
+* configuration macros and includes.
 */
 #ifndef QS_PORT_H_
 #define QS_PORT_H_
 
-/*! QS buffer counter size in bytes */
-#define QS_CTR_SIZE      2U
-
-/*! QS time-stamp size in bytes */
+/* QS time-stamp size in bytes */
 #define QS_TIME_SIZE     4U
 
-/*! object pointer size in bytes */
+/* object pointer size in bytes */
 #define QS_OBJ_PTR_SIZE  4U
 
-/*! function pointer size in bytes */
+/* function pointer size in bytes */
 #define QS_FUN_PTR_SIZE  4U
 
 /*==========================================================================*/
 /* NOTE: QS might be used with or without other QP components, in which
-* case the separate definitions of the macros QF_CRIT_STAT_TYPE,
-* QF_CRIT_ENTRY, and QF_CRIT_EXIT are needed. In this port QS is configured
-* to be used with the other QP component, by simply including "qf_port.h"
+* case the separate definitions of the macros QF_CRIT_STAT_, QF_CRIT_E_(),
+* and QF_CRIT_X_() are needed. In this port QS is configured to be used
+* with the other QP component, by simply including "qf_port.h"
 * *before* "qs.h".
 */
-#ifndef QF_PORT_H
+#ifndef QF_PORT_H_
 #include "qf_port.h" /* use QS with QF */
 #endif
 
 #include "qs.h"      /* QS platform-independent public interface */
 
 #endif /* QS_PORT_H_ */
+

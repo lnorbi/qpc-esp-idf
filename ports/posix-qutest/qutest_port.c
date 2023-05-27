@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-16
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QS/C QUTest port to POSIX
@@ -38,7 +38,7 @@
 
 #define QP_IMPL       /* this is QP implementation */
 #include "qf_port.h"  /* QF port */
-#include "qassert.h"  /* QP embedded systems-friendly assertions */
+#include "qsafety.h"  /* QP Functional Safety (FuSa) System */
 #include "qs_port.h"  /* QS port */
 #include "qs_pkg.h"   /* QS package-scope interface */
 

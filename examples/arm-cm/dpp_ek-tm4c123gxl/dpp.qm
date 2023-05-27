@@ -296,16 +296,9 @@ if ((me-&gt;isHungry[m] != 0U) &amp;&amp; (me-&gt;fork[n] == FREE)) {
         <action box="0,-2,6,2"/>
        </tran_glyph>
       </tran>
-      <!--${AOs::Table::SM::active::serving::EAT}-->
-      <tran trig="EAT">
-       <action>Q_ERROR();</action>
-       <tran_glyph conn="4,37,3,-1,15">
-        <action box="0,-2,12,4"/>
-       </tran_glyph>
-      </tran>
       <!--${AOs::Table::SM::active::serving::PAUSE}-->
       <tran trig="PAUSE" target="../../3">
-       <tran_glyph conn="4,41,3,1,37,6,-3">
+       <tran_glyph conn="4,39,3,1,37,8,-3">
         <action box="0,-2,7,2"/>
        </tran_glyph>
       </tran>
@@ -319,7 +312,7 @@ if ((me-&gt;isHungry[m] != 0U) &amp;&amp; (me-&gt;fork[n] == FREE)) {
       <exit>BSP_displayPaused(0U);</exit>
       <!--${AOs::Table::SM::active::paused::SERVE}-->
       <tran trig="SERVE" target="../../2">
-       <tran_glyph conn="4,57,3,1,39,-20,-5">
+       <tran_glyph conn="4,57,3,1,39,-23,-5">
         <action box="0,-2,7,2"/>
        </tran_glyph>
       </tran>

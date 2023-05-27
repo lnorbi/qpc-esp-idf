@@ -119,6 +119,9 @@
     #define QS_TEC_PRE_(ctr_)           ((void)0)
 
     #define QS_CRIT_STAT_
+    #define QS_CRIT_E_()                ((void)0)
+    #define QS_CRIT_X_()                ((void)0)
+
     #define QF_QS_CRIT_ENTRY()          ((void)0)
     #define QF_QS_CRIT_EXIT()           ((void)0)
     #define QF_QS_ISR_ENTRY(isrnest_, prio_) ((void)0)

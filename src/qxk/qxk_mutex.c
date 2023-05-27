@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -74,7 +74,10 @@ Q_DEFINE_THIS_MODULE("qxk_mutex")
 void QXMutex_init(QXMutex * const me,
     QPrioSpec const prioSpec)
 {
-    Q_REQUIRE_ID(100, (prioSpec & 0xFF00U) == 0U);
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(100, (prioSpec & 0xFF00U) == 0U);
+    QF_CRIT_X_();
 
     me->ao.prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority */
     me->ao.pthre = 0U;   /* preemption-threshold (not used) */
@@ -94,20 +97,26 @@ bool QXMutex_lock(QXMutex * const me,
 
     QXThread * const curr = QXK_PTR_CAST_(QXThread*, QXK_attr_.curr);
 
-    Q_REQUIRE_ID(200, (!QXK_ISR_CONTEXT_()) /* don't call from an ISR! */
-        && (curr != (QXThread *)0) /* current thread must be extended */
+    /* the thread must:
+    * - must NOT be called from an ISR;
+    * - must be called from an extended thread;
+    * - the mutex-priority must be in range;
+    * - the thread must NOT be already blocked on any object.
+    */
+    Q_REQUIRE_NOCRIT_(200, (!QXK_ISR_CONTEXT_())
+        && (curr != (QXThread *)0)
         && (me->ao.prio <= QF_MAX_ACTIVE)
-        && (curr->super.super.temp.obj == (QMState *)0)); /* not blocked */
-    /*! @pre also: the thread must NOT be holding a scheduler lock. */
-    Q_REQUIRE_ID(201, QXK_attr_.lockHolder != curr->super.prio);
+        && (curr->super.super.temp.obj == (QMState *)0));
+    /* also: the thread must NOT be holding a scheduler lock. */
+    Q_REQUIRE_NOCRIT_(201, QXK_attr_.lockHolder != curr->super.prio);
 
     /* is the mutex available? */
     bool locked = true; /* assume that the mutex will be locked */
     if (me->ao.eQueue.nFree == 0U) {
         me->ao.eQueue.nFree = 1U; /* mutex lock nesting */
 
-        /*! @pre also: the newly locked mutex must have no holder yet */
-        Q_REQUIRE_ID(202, me->ao.thread == (void *)0);
+        /* also: the newly locked mutex must have no holder yet */
+        Q_REQUIRE_NOCRIT_(202, me->ao.thread == (void *)0);
 
         /* set the new mutex holder to the curr thread and
         * save the thread's prio in the mutex
@@ -127,7 +136,7 @@ bool QXMutex_lock(QXMutex * const me,
             /* the holder priority must be lower than that of the mutex
             * and the priority slot must be occupied by this mutex
             */
-            Q_ASSERT_ID(210, (curr->super.prio < me->ao.prio)
+            Q_ASSERT_NOCRIT_(210, (curr->super.prio < me->ao.prio)
                 && (QActive_registry_[me->ao.prio] == &me->ao));
 
             /* remove the thread's original prio from the ready set
@@ -135,7 +144,9 @@ bool QXMutex_lock(QXMutex * const me,
             */
             QPSet_remove(&QF_readySet_, (uint_fast8_t)me->ao.eQueue.head);
             QPSet_insert(&QF_readySet_, (uint_fast8_t)me->ao.prio);
-
+    #ifndef Q_UNSAFE
+            QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
             /* put the thread into the AO registry in place of the mutex */
             QActive_registry_[me->ao.prio] = &curr->super;
 
@@ -149,7 +160,7 @@ bool QXMutex_lock(QXMutex * const me,
         /* the nesting level beyond the arbitrary but high limit
         * most likely means cyclic or recursive locking of a mutex.
         */
-        Q_ASSERT_ID(220, me->ao.eQueue.nFree < 0xFFU);
+        Q_ASSERT_NOCRIT_(220, me->ao.eQueue.nFree < 0xFFU);
 
         ++me->ao.eQueue.nFree; /* lock one more level */
 
@@ -162,11 +173,11 @@ bool QXMutex_lock(QXMutex * const me,
     }
     else { /* the mutex is already locked by a different thread */
         /* the mutex holder must be valid */
-        Q_ASSERT_ID(230, me->ao.thread != (void *)0);
+        Q_ASSERT_NOCRIT_(230, me->ao.thread != (void *)0);
 
         if (me->ao.prio != 0U) { /* priority-ceiling protocol used? */
             /* the prio slot must be occupied by the thr. holding the mutex */
-            Q_ASSERT_ID(240, QActive_registry_[me->ao.prio]
+            Q_ASSERT_NOCRIT_(240, QActive_registry_[me->ao.prio]
                              == QXK_PTR_CAST_(QActive *, me->ao.thread));
         }
 
@@ -175,6 +186,9 @@ bool QXMutex_lock(QXMutex * const me,
         */
         uint_fast8_t const p = (uint_fast8_t)curr->super.prio;
         QPSet_remove(&QF_readySet_, p);
+    #ifndef Q_UNSAFE
+        QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
         QPSet_insert(&me->waitSet,  p);
 
         /* set the blocking object (this mutex) */
@@ -196,7 +210,7 @@ bool QXMutex_lock(QXMutex * const me,
         /* AFTER unblocking... */
         QF_CRIT_E_();
         /* the blocking object must be this mutex */
-        Q_ASSERT_ID(240, curr->super.super.temp.obj
+        Q_ASSERT_NOCRIT_(240, curr->super.super.temp.obj
                          == QXK_PTR_CAST_(QMState*, me));
 
         /* did the blocking time-out? (signal of zero means that it did) */
@@ -208,7 +222,7 @@ bool QXMutex_lock(QXMutex * const me,
         }
         else { /* blocking did NOT time out */
             /* the thread must NOT be waiting on this mutex */
-            Q_ASSERT_ID(250, !QPSet_hasElement(&me->waitSet, p));
+            Q_ASSERT_NOCRIT_(250, !QPSet_hasElement(&me->waitSet, p));
         }
         curr->super.super.temp.obj = (QMState *)0; /* clear blocking obj. */
     }
@@ -228,17 +242,23 @@ bool QXMutex_tryLock(QXMutex * const me) {
         curr = QActive_registry_[QXK_attr_.actPrio];
     }
 
-    Q_REQUIRE_ID(300, (!QXK_ISR_CONTEXT_()) /* don't call from an ISR! */
-        && (curr != (QActive *)0) /* current thread must be valid */
+    /* this mutex must:
+    * - NOT be called from an ISR;
+    * - the calling thread must be valid;
+    * - the mutex-priority must be in range
+    */
+    Q_REQUIRE_NOCRIT_(300, (!QXK_ISR_CONTEXT_())
+        && (curr != (QActive *)0)
         && (me->ao.prio <= QF_MAX_ACTIVE));
-    Q_REQUIRE_ID(301, QXK_attr_.lockHolder != curr->prio);
+    /* also: the thread must NOT be holding a scheduler lock. */
+    Q_REQUIRE_NOCRIT_(301, QXK_attr_.lockHolder != curr->prio);
 
     /* is the mutex available? */
     if (me->ao.eQueue.nFree == 0U) {
         me->ao.eQueue.nFree = 1U;  /* mutex lock nesting */
 
-        /*! @pre also: the newly locked mutex must have no holder yet */
-        Q_REQUIRE_ID(302, me->ao.thread == (void *)0);
+        /* also the newly locked mutex must have no holder yet */
+        Q_REQUIRE_NOCRIT_(302, me->ao.thread == (void *)0);
 
         /* set the new mutex holder to the curr thread and
         * save the thread's prio in the mutex
@@ -258,7 +278,7 @@ bool QXMutex_tryLock(QXMutex * const me) {
             /* the holder priority must be lower than that of the mutex
             * and the priority slot must be occupied by this mutex
             */
-            Q_ASSERT_ID(210, (curr->prio < me->ao.prio)
+            Q_ASSERT_NOCRIT_(210, (curr->prio < me->ao.prio)
                 && (QActive_registry_[me->ao.prio] == &me->ao));
 
             /* remove the thread's original prio from the ready set
@@ -266,7 +286,9 @@ bool QXMutex_tryLock(QXMutex * const me) {
             */
             QPSet_remove(&QF_readySet_, (uint_fast8_t)me->ao.eQueue.head);
             QPSet_insert(&QF_readySet_, (uint_fast8_t)me->ao.prio);
-
+    #ifndef Q_UNSAFE
+            QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
             /* put the thread into the AO registry in place of the mutex */
             QActive_registry_[me->ao.prio] = curr;
 
@@ -277,7 +299,7 @@ bool QXMutex_tryLock(QXMutex * const me) {
     /* is the mutex locked by this thread already (nested locking)? */
     else if (me->ao.thread == curr) {
         /* the nesting level must not exceed the specified limit */
-        Q_ASSERT_ID(320, me->ao.eQueue.nFree < 0xFFU);
+        Q_ASSERT_NOCRIT_(320, me->ao.eQueue.nFree < 0xFFU);
 
         ++me->ao.eQueue.nFree; /* lock one more level */
 
@@ -291,7 +313,7 @@ bool QXMutex_tryLock(QXMutex * const me) {
     else { /* the mutex is already locked by a different thread */
         if (me->ao.prio != 0U) {  /* priority-ceiling protocol used? */
             /* the prio slot must be occupied by the thr. holding the mutex */
-            Q_ASSERT_ID(340, QActive_registry_[me->ao.prio]
+            Q_ASSERT_NOCRIT_(340, QActive_registry_[me->ao.prio]
                              == QXK_PTR_CAST_(QActive *, me->ao.thread));
         }
 
@@ -320,10 +342,10 @@ void QXMutex_unlock(QXMutex * const me) {
         curr = QActive_registry_[QXK_attr_.actPrio];
     }
 
-    Q_REQUIRE_ID(400, (!QXK_ISR_CONTEXT_()) /* don't call from an ISR! */
-        && (curr != (QActive *)0)); /* current thread must be valid */
-    Q_REQUIRE_ID(401, me->ao.eQueue.nFree > 0U);
-    Q_REQUIRE_ID(402, me->ao.thread == curr);
+    Q_REQUIRE_NOCRIT_(400, (!QXK_ISR_CONTEXT_())
+        && (curr != (QActive *)0));
+    Q_REQUIRE_NOCRIT_(401, me->ao.eQueue.nFree > 0U);
+    Q_REQUIRE_NOCRIT_(402, me->ao.thread == curr);
 
     /* is this the last nesting level? */
     if (me->ao.eQueue.nFree == 1U) {
@@ -341,6 +363,9 @@ void QXMutex_unlock(QXMutex * const me) {
             */
             QPSet_remove(&QF_readySet_, (uint_fast8_t)me->ao.prio);
             QPSet_insert(&QF_readySet_, (uint_fast8_t)me->ao.eQueue.head);
+    #ifndef Q_UNSAFE
+            QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
         }
 
         QS_BEGIN_NOCRIT_PRE_(QS_MTX_UNLOCK, curr->prio)
@@ -360,6 +385,9 @@ void QXMutex_unlock(QXMutex * const me) {
             */
             QPSet_remove(&me->waitSet,  p);
             QPSet_insert(&QF_readySet_, p);
+    #ifndef Q_UNSAFE
+            QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
 
             QXThread * const thr =
                 QXK_PTR_CAST_(QXThread*, QActive_registry_[p]);
@@ -370,7 +398,7 @@ void QXMutex_unlock(QXMutex * const me) {
             * - be an extended thread
             * - be blocked on this mutex
             */
-            Q_ASSERT_ID(410, (thr != (QXThread *)0)
+            Q_ASSERT_NOCRIT_(410, (thr != (QXThread *)0)
                 && (thr->super.prio == (uint8_t)p)
                 && (thr->super.super.state.act == Q_ACTION_CAST(0))
                 && (thr->super.super.temp.obj
@@ -395,7 +423,7 @@ void QXMutex_unlock(QXMutex * const me) {
 
             if (me->ao.prio != 0U) { /* priority-ceiling protocol used? */
                 /* the holder priority must be lower than that of the mutex */
-                Q_ASSERT_ID(410, thr->super.prio < me->ao.prio);
+                Q_ASSERT_NOCRIT_(410, thr->super.prio < me->ao.prio);
 
                 /* put the thread into AO registry in place of the mutex */
                 QActive_registry_[me->ao.prio] = &thr->super;
@@ -421,7 +449,7 @@ void QXMutex_unlock(QXMutex * const me) {
         }
     }
     else { /* releasing one level of nested mutex lock */
-        Q_ASSERT_ID(420, me->ao.eQueue.nFree > 0U);
+        Q_ASSERT_NOCRIT_(420, me->ao.eQueue.nFree > 0U);
         --me->ao.eQueue.nFree; /* unlock one level */
 
         QS_BEGIN_NOCRIT_PRE_(QS_MTX_UNLOCK_ATTEMPT, curr->prio)

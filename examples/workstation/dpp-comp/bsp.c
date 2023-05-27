@@ -49,7 +49,7 @@ static uint32_t l_rnd; /* random seed */
     };
 
     /* QSpy source IDs */
-    static QSpyId const l_clock_tick = { 0U };
+    static QSpyId const l_clock_tick = { QS_AP_ID };
 #endif
 
 /*..........................................................................*/
@@ -66,10 +66,10 @@ void BSP_init(int argc, char *argv[]) {
 
     BSP_randomSeed(1234U);
 
-    Q_ALLEGE(QS_INIT((argc > 1) ? argv[1] : (void *)0));
-
-    QS_OBJ_DICTIONARY(&l_clock_tick); /* must be called *after* QF_init() */
-    QS_USR_DICTIONARY(PHILO_STAT);
+    /* initialize the QS software tracing */
+    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+        Q_ERROR();
+    }
 
     /* global signals */
     QS_SIG_DICTIONARY(DONE_SIG,      (void *)0);
@@ -80,6 +80,9 @@ void BSP_init(int argc, char *argv[]) {
     QS_SIG_DICTIONARY(HUNGRY_SIG,    (void *)0);
     QS_SIG_DICTIONARY(HUNGRY_SIG,    (void *)0);
     QS_SIG_DICTIONARY(TIMEOUT_SIG,   (void *)0);
+
+    QS_OBJ_DICTIONARY(&l_clock_tick); /* must be called *after* QF_init() */
+    QS_USR_DICTIONARY(PHILO_STAT);
 
     /* setup the QS filters... */
     QS_GLB_FILTER(QS_ALL_RECORDS);
@@ -131,7 +134,7 @@ void QF_onCleanup(void) {
 }
 /*..........................................................................*/
 void QF_onClockTick(void) {
-    QTIMEEVT_TICK_X(0U, &l_clock_tick); /* perform the QF clock tick processing */
+    QTIMEEVT_TICK_X(0U, &l_clock_tick); /* QF clock tick processing */
 
     QS_RX_INPUT(); /* handle the QS-RX input */
     QS_OUTPUT();   /* handle the QS output */
@@ -181,11 +184,16 @@ void QS_onCommand(uint8_t cmdId,
 /*--------------------------------------------------------------------------*/
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
-    FPRINTF_S(stderr, "Assertion failed in %s:%d", module, loc);
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
+    FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
     QF_onCleanup();
     QS_EXIT();
     exit(-1);
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 

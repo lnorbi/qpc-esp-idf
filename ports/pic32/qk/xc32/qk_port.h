@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QK/C port, preemptive QK kernel, MPLAB-X XC32 compiler
 */
-#ifndef QK_PORT_H
-#define QK_PORT_H
+#ifndef QK_PORT_H_
+#define QK_PORT_H_
 
 /* QK interrupt entry and exit */
 #define QK_ISR_ENTRY() do { \
@@ -63,4 +63,4 @@ void QK_init(void);
 * use by QK.
 */
 
-#endif /* QK_PORT_H */
+#endif /* QK_PORT_H_ */

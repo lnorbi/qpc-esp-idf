@@ -1,7 +1,7 @@
 /*============================================================================
 * Product: DPP example, NUCLEO-L053R8 board, preemptive QK kernel
-* Last updated for version 7.2.1
-* Last updated on  2023-01-24
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -425,18 +425,24 @@ void QK_onIdle(void) { /* called with interrupts enabled */
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
 
 #ifndef NDEBUG
     BSP_wait4SW1();
 #endif
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/

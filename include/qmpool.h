@@ -38,6 +38,9 @@
 /*$endhead${include::qmpool.h} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief QP native, platform-independent memory pool ::QMPool interface.
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QMPOOL_H_
 #define QMPOOL_H_
@@ -53,6 +56,7 @@
 
     /*! The data type to store the block-size based on the macro
     * #QF_MPOOL_SIZ_SIZE.
+    *
     * @details
     * The dynamic range of this data type determines the maximum size
     * of blocks that can be managed by the native QF event pool.
@@ -78,6 +82,7 @@
 
     /*! The data type to store the block-counter based on the macro
     * #QF_MPOOL_CTR_SIZE.
+    *
     * @details
     * The dynamic range of this data type determines the maximum number
     * of blocks that can be stored in the pool.
@@ -93,7 +98,11 @@
 
 /*! Memory pool element to allocate correctly aligned storage
 * for QMPool class.
-* @param[in] evType_ event type (name of the subclass of QEvt)
+*
+* @param[in] evType_ event type (name of the subclass of ::QEvt)
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
 */
 #define QF_MPOOL_EL(evType_) \
     struct { void *sto_[((sizeof(evType_) - 1U)/sizeof(void*)) + 1U]; }
@@ -208,6 +217,10 @@ typedef struct {
 * @note
 * Many QF ports use memory pools to implement the event pools.
 *
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
+* - @tr{DVR-QP-MC3-R17_08}
+*
 * @usage
 * The following example illustrates how to invoke QMPool_init():
 * @include qmp_init.c
@@ -227,6 +240,7 @@ void QMPool_init(QMPool * const me,
 * @param[in,out] me      current instance pointer (see @ref oop)
 * @param[in]     margin  the minimum number of unused blocks still available
 *                        in the pool after the allocation.
+* @param[in] qs_id   QS-id of this state machine (for QS local filter)
 *
 * @returns
 * A pointer to a memory block or NULL if no more blocks are available in
@@ -248,7 +262,9 @@ void QMPool_init(QMPool * const me,
 * @sa QMPool_put()
 *
 * @trace
-* @tr{PQP18_3}
+* - @tr{DVR-QP-MC3-R18_03}
+* - @tr{DVR-QP-MC3-R11_05}
+* - @tr{DVR-QP-MC3-R18_03}
 *
 * @usage
 * The following example illustrates how to use QMPool_get():
@@ -266,6 +282,7 @@ void * QMPool_get(QMPool * const me,
 *
 * @param[in,out] me   current instance pointer (see @ref oop)
 * @param[in]     b    pointer to the memory block that is being recycled
+* @param[in] qs_id   QS-id of this state machine (for QS local filter)
 *
 * @precondition{qf_mem,200}
 * - the number of free blocks cannot exceed the total # blocks
@@ -280,6 +297,10 @@ void * QMPool_get(QMPool * const me,
 *
 * @sa
 * QMPool_get()
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
+* - @tr{DVR-QP-MC3-R18_03}
 *
 * @usage
 * The following example illustrates how to use QMPool_put():

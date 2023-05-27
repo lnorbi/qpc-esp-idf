@@ -296,13 +296,14 @@ void QK_onIdle(void) { /* called with interrupts enabled */
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
 
 #ifndef NDEBUG
     BSP_wait4SW1();
@@ -313,7 +314,7 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
 void *__stack_chk_guard = (void *)0xDEADBEEF;
 __attribute__((noreturn)) void __stack_chk_fail(void);
 __attribute__((noreturn)) void __stack_chk_fail(void) {
-    Q_onAssert("Stack ERROR", 0);
+    Q_onError("Stack ERROR", 0);
     for (;;) {}
 }
 

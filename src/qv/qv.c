@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope internal interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -78,7 +78,11 @@ void QF_init(void) {
 
     QF_bzero(&QTimeEvt_timeEvtHead_[0], sizeof(QTimeEvt_timeEvtHead_));
     QF_bzero(&QActive_registry_[0],     sizeof(QActive_registry_));
-    QF_bzero(&QF_readySet_,             sizeof(QF_readySet_));
+
+    QPSet_setEmpty(&QF_readySet_);
+    #ifndef Q_UNSAFE
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
 
     #ifdef QV_INIT
     QV_INIT(); /* port-specific initialization of the QV kernel */
@@ -117,8 +121,13 @@ int_t QF_run(void) {
 
     for (;;) { /* QV event loop... */
 
+         /* check internal integrity (duplicate storage) */
+         Q_ASSERT_NOCRIT_(202, QPSet_verify(&QF_readySet_,
+                                            &QF_readySet_inv_));
+
         /* find the maximum priority AO ready to run */
         if (QPSet_notEmpty(&QF_readySet_)) {
+
             uint8_t const p = (uint8_t)QPSet_findMax(&QF_readySet_);
             QActive * const a = QActive_registry_[p];
 
@@ -147,7 +156,8 @@ int_t QF_run(void) {
             * 3. determine if event is garbage and collect it if so
             */
             QEvt const * const e = QActive_get_(a);
-            QHSM_DISPATCH(&a->super, e, a->prio);
+            /* dispatch event (virtual call) */
+            (*a->super.vptr->dispatch)(&a->super, e, p);
     #if (QF_MAX_EPOOL > 0U)
             QF_gc(e);
     #endif
@@ -155,6 +165,9 @@ int_t QF_run(void) {
 
             if (a->eQueue.frontEvt == (QEvt *)0) { /* empty queue? */
                 QPSet_remove(&QF_readySet_, p);
+    #ifndef Q_UNSAFE
+                QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
             }
         }
         else { /* no AO ready to run --> idle */
@@ -209,7 +222,10 @@ void QActive_start_(QActive * const me,
     Q_UNUSED_PAR(stkSto);  /* not needed in QV */
     Q_UNUSED_PAR(stkSize); /* not needed in QV */
 
-    Q_REQUIRE_ID(300, stkSto == (void *)0);
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(300, stkSto == (void *)0);
+    QF_CRIT_X_();
 
     me->prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority of the AO */
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
@@ -217,7 +233,8 @@ void QActive_start_(QActive * const me,
 
     QEQueue_init(&me->eQueue, qSto, qLen); /* init the built-in queue */
 
-    QHSM_INIT(&me->super, par, me->prio); /* top-most initial tran. */
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 }
 /*$enddef${QV::QActive} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/

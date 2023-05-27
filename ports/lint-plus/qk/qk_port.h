@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-13
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QK/C port example for a generic C compiler.
 */
-#ifndef QK_PORT_H
-#define QK_PORT_H
+#ifndef QK_PORT_H_
+#define QK_PORT_H_
 
 /****************************************************************************/
 
@@ -81,5 +81,5 @@
 
 uint32_t get_IPSR(void);
 
-#endif /* QK_PORT_H */
+#endif /* QK_PORT_H_ */
 

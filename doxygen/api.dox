@@ -3,11 +3,14 @@
 @nav{tut_low,deprecated}
 @endif
 
-@section api_qep QEP (Hierarchical State Machines)
-QEP is a universal, UML-compliant event processor that enables developers to code UML state machines in highly readable ANSI-C, in which every state machine element is mapped to code precisely, unambiguously, and exactly once (traceability). QEP fully supports hierarchical state nesting, which is the fundamental mechanism for reusing behavior across many states instead of repeating the same actions and transitions over and over again.
+@section api_hsm State Machines
+The QP Framework supports @ref srs_evt "event-driven", @ref srs_sm "hierarchical state machines" through the following bases classes:
+
+<b>::QEvt class</b> (see also @ref api_dyn "Event Management")
+- @ref ::QEvt "QEvt"
+- Q_EVT_CAST()
 
 
-@subsection api_qep_qhsm Hierarchical State Machines
 <b>::QHsm class</b>
 - @ref QHsm::QHsm_ctor()  "QHsm_ctor()"
 - QHSM_INIT()
@@ -27,11 +30,9 @@ QEP is a universal, UML-compliant event processor that enables developers to cod
 - Q_STATE_CAST()
 
 
-@section api_qf QF (Active Object Framework)
-QF is a portable, event-driven, real-time framework for execution of active objects (concurrent state machines) specifically designed for real-time embedded (RTE) systems.
+@section api_ao Active Objects
+The QP Framework supports @ref srs_ao "Active Objects" through the following base classes.
 
-
-@subsection api_qf_qact Active Objects (QActive)
 <b>::QActive class</b>
 - @ref QActive::QActive_ctor()   "QActive_ctor()"
 - QACTIVE_START()
@@ -51,7 +52,6 @@ QF is a portable, event-driven, real-time framework for execution of active obje
 - QACTIVE_PUBLISH()
 
 
-@subsection api_qf_qmact Active Objects (QMActive)
 <b>::QMActive class (derived from ::QActive)</b>
 - @ref QMActive::QMActive_ctor() "QMActive_ctor()"
 - QACTIVE_START()     (inherited from ::QActive)
@@ -61,9 +61,7 @@ QF is a portable, event-driven, real-time framework for execution of active obje
 - QACTIVE_PUBLISH()   (inherited from ::QActive)
 
 
-@subsection api_qf_evt Event Management
-<b>::QEvt class</b>
-- Q_EVT_CAST()
+@section api_dyn Dynamic (Mutable) Event Management
 - @ref QF::QF_poolInit() "QF_poolInit()"
 - Q_NEW()
 - Q_NEW_X()
@@ -71,8 +69,13 @@ QF is a portable, event-driven, real-time framework for execution of active obje
 - Q_DELETE_REF()
 - @ref QF::QF_gc() "QF_gc()"
 
+<b>::QMPool class (for dynamic events, but also other objects)</b>
+- @ref QMPool::QMPool_init()  "QMPool_init()"
+- @ref QMPool::QMPool_get()   "QMPool_get()"
+- @ref QMPool::QMPool_put()   "QMPool_put()"
 
-@subsection api_qf_time Time Management
+
+@section api_time Time Management
 <b>::QTimeEvt class</b>
 - QTIMEEVT_TICK()
 - @ref QTimeEvt::QTimeEvt_ctorX()   "QTimeEvt_ctorX()"
@@ -84,7 +87,7 @@ QF is a portable, event-driven, real-time framework for execution of active obje
 <b>::QTicker active object (derived from ::QTimeEvt)</b>
 
 
-@subsection api_qf_queue Event Queues (raw thread-safe)
+@section api_queue Event Queues (raw thread-safe)
 <b>::QEQueue class</b>
 - @ref QEQueue::QEQueue_init()     "QEQueue_init()"
 - @ref QEQueue::QEQueue_post()     "QEQueue_post()"
@@ -95,15 +98,8 @@ QF is a portable, event-driven, real-time framework for execution of active obje
 - @ref QEQueue::QEQueue_isEmpty()  "QEQueue_isEmpty()"
 
 
-@subsection api_qf_mem Memory Pools
-<b>::QMPool class</b>
-- @ref QMPool::QMPool_init()  "QMPool_init()"
-- @ref QMPool::QMPool_get()   "QMPool_get()"
-- @ref QMPool::QMPool_put()   "QMPool_put()"
-
-
-@section api_qs QS (Software Tracing)
-QS is a software tracing system that enables developers to monitor live event-driven QP applications with minimal target system resources and without stopping or significantly slowing down the code. QS is an ideal tool for testing, troubleshooting, and optimizing QP applications. QS can even be used to support acceptance testing in product manufacturing.
+@section api_qs Software Tracing
+@ref srs_qs "QS" is a software tracing system that enables developers to monitor live event-driven QP applications with minimal target system resources and without stopping or significantly slowing down the code. QS is an ideal tool for testing, troubleshooting, and optimizing QP applications. QS can even be used to support acceptance testing in product manufacturing.
 
 
 @subsection api_qs_tx QS-Transmit (QS-TX)
@@ -149,15 +145,7 @@ QS is a software tracing system that enables developers to monitor live event-dr
 
 
 @section api_qv QV (Cooperative Kernel)
-QV is a simple **cooperative** kernel (previously called "Vanilla" kernel). This kernel executes active objects one at a time, with priority-based scheduling performed before processing of each event. Due to naturally short duration of event processing in state machines, the simple QV kernel is often adequate for many real-time systems.
-
-The QV scheduler is engaged after every RTC step of any active object to choose the next active object to execute. The QV scheduler always chooses the highest-priority active object that has any events in its event queue. The QV scheduler then extracts the next event from this queue and dispatches it to the state machine associated with the active object. The state machine runs to completion, after which the QV scheduler runs and the cycle repeats.
-
-Please note that because the state machines always return to the QV scheduler after each RTC step, a single stack can be used to process all state machines (memory-friendly architecture).
-
-The QV scheduler can also very easily detect when all event queues are empty, at which point it can call the idle callback to let the application put the CPU and peripherals to a low-power sleep mode (power-friendly architecture).
-
-Given the simplicity, portability, and low-resource consumption, the QV scheduler is very attractive. It allows you to partition the problem into active objects and execute these active objects orderly. The task-level response of this scheduler is the longest RTC step in the whole system, but because event-driven active objects don’t block, the RTC steps tend to be very short (typically just a few microseconds). Also, often you can break up longer RTC steps into shorter pieces, by posting an event to self and returning (“Reminder” state pattern). The self-posted event then triggers the continuation of longer processing.
+@ref srs_qv "QV" is a simple **cooperative** kernel (previously called "Vanilla" kernel). This kernel executes active objects one at a time, with priority-based scheduling performed before processing of each event. Due to naturally short duration of event processing in state machines, the simple QV kernel is often adequate for many real-time systems.
 
 
 @subsection api_qv_init Kernel Initialization and Control
@@ -168,8 +156,7 @@ Given the simplicity, portability, and low-resource consumption, the QV schedule
 
 
 @section api_qk QK (Preemptive RTC Kernel)
-QK is a tiny **preemptive**, run-to-completion (RTC) kernel designed specifically for executing active objects. QK runs active objects in the same way as prioritized interrupt controller (such as NVIC in ARM Cortex-M) runs interrupts using the single stack. Active objects process their events in run-to-completion (RTC) fashion and remove themselves from the call stack, the same way as nested interrupts remove themselves from the stack upon completion. At the same time high-priority active objects can preempt lower-priority active objects, just like interrupts can preempt each other under a prioritized interrupt controller. QK meets all the requirement of the Rate Monotonic Scheduling (a.k.a. Rate Monotonic Analysis RMA) and can be used in hard real-time systems.
-
+@ref srs_qk "QK" is a lightweight **preemptive**, priority-based, run-to-completion (RTC) kernel designed specifically for executing event-driven active objects.
 
 @subsection api_qk_ctrl Kernel Initialization and Control
 - QK_INIT()
@@ -184,7 +171,7 @@ QK is a tiny **preemptive**, run-to-completion (RTC) kernel designed specificall
 
 
 @section api_qxk QXK (Dual-Mode Kernel)
-QXK is a small, preemptive, priority-based, dual-mode (run-to-completion/<b>blocking</b>) kernel that executes active objects like the @ref srs_qk "QK kernel", but can also execute traditional __blocking__ threads (extended threads). In this respect, QXK behaves exactly as a conventional __RTOS__ (Real-Time Operating System). QXK has been designed specifically for mixing event-driven active objects with traditional blocking code, such as commercial middleware (TCP/IP stacks, UDP stacks, embedded file systems, etc.) or legacy software.
+@ref srs_qxk "QXK" is a lightweight, **preemptive**, priority-based, dual-mode (run-to-completion/<b>blocking</b>) kernel that executes active objects like the @ref srs_qk "QK kernel", but can also execute traditional __blocking__ threads (extended threads). In this respect, QXK behaves exactly as a conventional __RTOS__ (Real-Time Operating System). QXK has been designed specifically for mixing event-driven active objects with traditional blocking code, such as commercial middleware (TCP/IP stacks, UDP stacks, embedded file systems, etc.) or legacy software.
 
 
 @subsection api_qxk_ctrl Kernel Initialization and Control
@@ -193,6 +180,7 @@ QXK is a small, preemptive, priority-based, dual-mode (run-to-completion/<b>bloc
 - @ref QXK::QXK_onIdle()      "QXK_onIdle()"
 - @ref QXK::QXK_schedLock()   "QXK_schedLock("
 - @ref QXK::QXK_schedUnlock() "QXK_schedUnlock()"
+- @ref QXK::QXK_onIdle()      "QXK_onIdle()"
 
 <b>QXK Interrupt Management</b>
 - QXK_ISR_ENTRY()
@@ -206,10 +194,11 @@ QXK is a small, preemptive, priority-based, dual-mode (run-to-completion/<b>bloc
 - @ref QXThread::QXThread_delay()    "QXThread_delay()"
 - @ref QXThread::QXThread_delayCancel() "QXThread_delayCancel()"
 - @ref QXThread::QXThread_queueGet() "QXThread_queueGet("
-- @ref QXThread::QXK_current()       "QXK_current()"
+- @ref QXK::QXK_current()            "QXK_current()"
 - QXK_TLS()
 
-<b>QXThread Message Queues</a>
+
+<b>QXThread Message Queues</b>
 - QXTHREAD_POST_X() - posting messages to blocking threads
 - QACTIVE_POST_X()  - posting events to Active Objects
 - @ref QXThread::QXThread_queueGet() "QXThread_queueGet()"

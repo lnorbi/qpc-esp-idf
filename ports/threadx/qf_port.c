@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-04-12
-* @version Last updated for: @ref qpc_7_2_2
+* @date Last updated on: 2023-05-18
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C, port to ThreadX
@@ -32,7 +32,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"
-#include "qassert.h"
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS package-scope internal interface */
@@ -47,11 +47,10 @@ void QF_init(void) {
 }
 /*..........................................................................*/
 int_t QF_run(void) {
-    QS_CRIT_STAT_
-
     QF_onStartup();  /* QF callback to configure and start interrupts */
 
     /* produce the QS_QF_RUN trace record */
+    QS_CRIT_STAT_
     QS_BEGIN_PRE_(QS_QF_RUN, 0U)
     QS_END_PRE_()
 
@@ -78,14 +77,14 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
                     void * const stkSto, uint_fast16_t const stkSize,
                     void const * const par)
 {
-    /* allege that the ThreadX queue is created successfully */
-    Q_ALLEGE_ID(210,
-        tx_queue_create(&me->eQueue,
+    UINT tx_err;
+
+    tx_err = tx_queue_create(&me->eQueue,
             me->thread.tx_thread_name,
             TX_1_ULONG,
             (VOID *)qSto,
-            (ULONG)(qLen * sizeof(ULONG)))
-        == TX_SUCCESS);
+            (ULONG)(qLen * sizeof(ULONG)));
+    Q_ASSERT_ID(210, tx_err == TX_SUCCESS);
 
     me->prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority */
     me->pthre = (uint8_t)(prioSpec >> 8U); /* preemption-threshold */
@@ -94,8 +93,7 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
     QHSM_INIT(&me->super, par, me->prio); /* initial tran. (virtual) */
     QS_FLUSH(); /* flush the trace buffer to the host */
 
-    Q_ALLEGE_ID(220,
-        tx_thread_create(
+    tx_err = tx_thread_create(
             &me->thread, /* ThreadX thread control block */
             me->thread.tx_thread_name, /* unique thread name */
             &thread_function, /* thread function */
@@ -105,8 +103,8 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
             QF_TX_PRIO_OFFSET + QF_MAX_ACTIVE - me->prio, /* ThreadX prio */
             QF_TX_PRIO_OFFSET + QF_MAX_ACTIVE - me->pthre, /* preempt-thre */
             TX_NO_TIME_SLICE,
-            TX_AUTO_START)
-        == TX_SUCCESS);
+            TX_AUTO_START);
+    Q_ASSERT_ID(220, tx_err == TX_SUCCESS);
 }
 /*..........................................................................*/
 void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
@@ -139,7 +137,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
         }
         else {
             status = false; /* cannot post */
-            Q_ERROR_ID(510); /* must be able to post the event */
+            Q_ERROR_NOCRIT_(510); /* must be able to post the event */
         }
     }
     else if (nFree > (QEQueueCtr)margin) {
@@ -164,13 +162,14 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
         if (e->poolId_ != 0U) { /* is it a pool event? */
             QEvt_refCtr_inc_(e); /* increment the reference counter */
         }
-
         QF_CRIT_X_();
 
+        UINT tx_err = tx_queue_send(&me->eQueue, (VOID *)&e, TX_NO_WAIT);
+
         /* posting to the ThreadX message queue must succeed, see NOTE3 */
-        Q_ALLEGE_ID(520,
-            tx_queue_send(&me->eQueue, (VOID *)&e, TX_NO_WAIT)
-            == TX_SUCCESS);
+        QF_CRIT_E_();
+        Q_ASSERT_NOCRIT_(520, tx_err == TX_SUCCESS);
+        QF_CRIT_X_();
     }
     else {
 
@@ -206,58 +205,63 @@ void QActive_postLIFO_(QActive * const me, QEvt const * const e) {
     if (e->poolId_ != 0U) { /* is it a pool event? */
         QEvt_refCtr_inc_(e); /* increment the reference counter */
     }
-
     QF_CRIT_X_();
 
+    UINT tx_err = tx_queue_front_send(&me->eQueue, (VOID *)&e, TX_NO_WAIT);
+
     /* LIFO posting must succeed, see NOTE3 */
-    Q_ALLEGE_ID(610,
-        tx_queue_front_send(&me->eQueue, (VOID *)&e, TX_NO_WAIT)
-        == TX_SUCCESS);
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(610, tx_err == TX_SUCCESS);
+    QF_CRIT_X_();
 }
 /*..........................................................................*/
 QEvt const *QActive_get_(QActive * const me) {
     QEvt const *e;
-    QS_CRIT_STAT_
+    UINT tx_err = tx_queue_receive(&me->eQueue, (VOID *)&e, TX_WAIT_FOREVER);
 
-    Q_ALLEGE_ID(710,
-        tx_queue_receive(&me->eQueue, (VOID *)&e, TX_WAIT_FOREVER)
-        == TX_SUCCESS);
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(710, tx_err == TX_SUCCESS);
 
-    QS_BEGIN_PRE_(QS_QF_ACTIVE_GET, me->prio)
+    QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_GET, me->prio)
         QS_TIME_PRE_();       /* timestamp */
         QS_SIG_PRE_(e->sig);  /* the signal of this event */
         QS_OBJ_PRE_(me);      /* this active object */
         QS_2U8_PRE_(e->poolId_, e->refCtr_); /* pool Id & ref Count */
         QS_EQC_PRE_(me->eQueue.tx_queue_available_storage);/* # free */
-    QS_END_PRE_()
+    QS_END_NOCRIT_PRE_()
+    QF_CRIT_X_();
 
     return e;
 }
 
 /*..........................................................................*/
 void QFSchedLock_(QFSchedLock * const lockStat, uint_fast8_t prio) {
-    UINT tx_err;
 
     lockStat->lockHolder = tx_thread_identify();
 
     /*! @pre must be thread level, so current TX thread must be valid */
-    Q_REQUIRE_ID(800, lockStat->lockHolder != (TX_THREAD *)0);
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(800, lockStat->lockHolder != (TX_THREAD *)0);
+    QF_CRIT_X_();
 
     /* change the preemption threshold of the current thread */
-    tx_err = tx_thread_preemption_change(lockStat->lockHolder,
+    UINT tx_err = tx_thread_preemption_change(lockStat->lockHolder,
                      (QF_TX_PRIO_OFFSET + QF_MAX_ACTIVE - prio),
                      &lockStat->prevThre);
 
     if (tx_err == TX_SUCCESS) {
-        QS_CRIT_STAT_
         lockStat->lockPrio = prio;
 
-        QS_BEGIN_PRE_(QS_SCHED_LOCK, 0U)
+        QF_CRIT_E_();
+        QS_BEGIN_NOCRIT_PRE_(QS_SCHED_LOCK, 0U)
             QS_TIME_PRE_(); /* timestamp */
             QS_2U8_PRE_((QF_TX_PRIO_OFFSET + QF_MAX_ACTIVE
                          - lockStat->prevThre),
                         prio); /* new lock prio */
-        QS_END_PRE_()
+        QS_END_NOCRIT_PRE_()
+        QF_CRIT_X_();
     }
     else if (tx_err == TX_THRESH_ERROR) {
         /* threshold was greater than (lower prio) than the current prio */
@@ -265,30 +269,37 @@ void QFSchedLock_(QFSchedLock * const lockStat, uint_fast8_t prio) {
     }
     else {
         /* no other errors are tolerated */
-        Q_ERROR_ID(810);
+        QF_CRIT_E_();
+        Q_ERROR_NOCRIT_(810);
+        //QF_CRIT_X_();
     }
 }
 
 /*..........................................................................*/
 void QFSchedUnlock_(QFSchedLock const * const lockStat) {
-    UINT old_thre;
-    QS_CRIT_STAT_
 
     /*! @pre the lock holder must be valid and the scheduler must be locked */
-    Q_REQUIRE_ID(900, (lockStat->lockHolder != (TX_THREAD *)0)
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(900, (lockStat->lockHolder != (TX_THREAD *)0)
                       && (lockStat->lockPrio != 0U));
 
-    QS_BEGIN_PRE_(QS_SCHED_LOCK, 0U)
+    QS_BEGIN_NOCRIT_PRE_(QS_SCHED_LOCK, 0U)
         QS_TIME_PRE_(); /* timestamp */
         QS_2U8_PRE_(lockStat->lockPrio, /* prev lock prio */
                     (QF_TX_PRIO_OFFSET + QF_MAX_ACTIVE
                           - lockStat->prevThre)); /* new lock prio */
-    QS_END_PRE_()
+    QS_END_NOCRIT_PRE_()
+    QF_CRIT_X_();
 
-    /* restore the preemption threshold of the lock holder */
-    Q_ALLEGE_ID(910, tx_thread_preemption_change(lockStat->lockHolder,
+    UINT old_thre;
+    UINT tx_err = tx_thread_preemption_change(lockStat->lockHolder,
                      lockStat->prevThre,
-                     &old_thre) == TX_SUCCESS);
+                     &old_thre);
+    /* restore the preemption threshold of the lock holder */
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(910, tx_err == TX_SUCCESS);
+    QF_CRIT_X_();
 }
 
 /*============================================================================

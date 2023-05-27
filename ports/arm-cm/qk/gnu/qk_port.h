@@ -29,8 +29,8 @@
 * @file
 * @brief QK/C port to ARM Cortex-M, GNU-ARM toolset
 */
-#ifndef QK_PORT_H
-#define QK_PORT_H
+#ifndef QK_PORT_H_
+#define QK_PORT_H_
 
 /* determination if the code executes in the ISR context */
 #define QK_ISR_CONTEXT_() (QK_get_IPSR() != 0U)
@@ -91,5 +91,5 @@ void QK_thread_ret(void);
 
 #include "qk.h" /* QK platform-independent public interface */
 
-#endif /* QK_PORT_H */
+#endif /* QK_PORT_H_ */
 

@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-04-20
-* @version Last updated for: @ref qpc_7_2_2
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to POSIX API (single-threaded, like QV kernel)
@@ -36,7 +36,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"
-#include "qassert.h"
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS package-scope internal interface */
@@ -111,6 +111,7 @@ int_t QF_run(void) {
 
     l_isRunning = true; /* QF is running */
 
+    QF_CRIT_STAT_
     /* system clock tick configured? */
     if ((l_tick.tv_sec != 0) || (l_tick.tv_nsec != 0)) {
         pthread_attr_t attr;
@@ -143,7 +144,9 @@ int_t QF_run(void) {
             pthread_attr_setschedparam(&attr, &param);
             err = pthread_create(&ticker, &attr, &ticker_thread, 0);
         }
-        Q_ASSERT_ID(310, err == 0); /* ticker thread must be created */
+        QF_CRIT_E_();
+        Q_ASSERT_NOCRIT_(310, err == 0); /* ticker thread must be created */
+        QF_CRIT_X_();
 
         //pthread_attr_getschedparam(&attr, &param);
         //printf("param.sched_priority==%d\n", param.sched_priority);
@@ -152,7 +155,6 @@ int_t QF_run(void) {
     }
 
     /* the combined event-loop and background-loop of the QV kernel */
-    QF_CRIT_STAT_
     QF_CRIT_E_();
 
     /* produce the QS_QF_RUN trace record */
@@ -164,12 +166,12 @@ int_t QF_run(void) {
         if (QPSet_notEmpty(&QF_readySet_)) {
             uint_fast8_t p = QPSet_findMax(&QF_readySet_);
             QActive *a = QActive_registry_[p];
-            QF_CRIT_X_();
 
             /* the active object 'a' must still be registered in QF
             * (e.g., it must not be stopped)
             */
-            Q_ASSERT_ID(320, a != (QActive *)0);
+            Q_ASSERT_NOCRIT_(320, a != (QActive *)0);
+            QF_CRIT_X_();
 
             /* perform the run-to-completion (RTS) step...
             * 1. retrieve the event from the AO's event queue, which by this
@@ -178,13 +180,16 @@ int_t QF_run(void) {
             * 3. determine if event is garbage and collect it if so
             */
             QEvt const *e = QActive_get_(a);
-            QHSM_DISPATCH(&a->super, e, a->prio);
+            /* dispatch event (virtual call) */
+            (*a->super.vptr->dispatch)(&a->super, e, a->prio);
             QF_gc(e);
 
             QF_CRIT_E_();
-
             if (a->eQueue.frontEvt == (QEvt *)0) { /* empty queue? */
                 QPSet_remove(&QF_readySet_, p);
+#ifndef Q_UNSAFE
+                QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+#endif
             }
         }
         else {
@@ -225,6 +230,9 @@ void QF_stop(void) {
     /* unblock the event-loop so it can terminate */
     p = 1U;
     QPSet_insert(&QF_readySet_, p);
+#ifndef Q_UNSAFE
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+#endif
     pthread_cond_signal(&QV_condVar_);
 }
 
@@ -263,30 +271,33 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
                     void * const stkSto, uint_fast16_t const stkSize,
                     void const * const par)
 {
-    (void)stkSize; /* unused parameter in the POSIX port */
+    Q_UNUSED_PAR(stkSize);
 
     /* no external stack storage needed for this port */
     Q_REQUIRE_ID(600, (stkSto == (void *)0));
+
     QEQueue_init(&me->eQueue, qSto, qLen);
 
     me->prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority of the AO */
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
     QActive_register_(me); /* register this AO */
 
-    /* the top-most initial tran. (virtual) */
-    QHSM_INIT(&me->super, par, me->prio);
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 }
 /*..........................................................................*/
 #ifdef QF_ACTIVE_STOP
 void QActive_stop(QActive * const me) {
-    QF_CRIT_STAT_
-
     QActive_unsubscribeAll(me); /* unsubscribe from all events */
 
     /* make sure the AO is no longer in "ready set" */
+    QF_CRIT_STAT_
     QF_CRIT_E_();
     QPSet_remove(&QF_readySet_, me->prio);
+#ifndef Q_UNSAFE
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+#endif
     QF_CRIT_X_();
 
     QActive_unregister_(me); /* un-register this active object */
@@ -294,10 +305,10 @@ void QActive_stop(QActive * const me) {
 #endif
 /*..........................................................................*/
 void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
-    (void)me;    /* unused parameter */
-    (void)attr1; /* unused parameter */
-    (void)attr2; /* unused parameter */
-    Q_ERROR_ID(900); /* this function should not be called in this QP port */
+    Q_UNUSED_PAR(me);
+    Q_UNUSED_PAR(attr1);
+    Q_UNUSED_PAR(attr2);
+    Q_ERROR_NOCRIT_(900); /* should not be called in this QP port */
 }
 
 /*--------------------------------------------------------------------------*/
@@ -335,7 +346,7 @@ static void *ticker_thread(void *arg) { /* for pthread_create() */
 }
 /*..........................................................................*/
 static void sigIntHandler(int dummy) {
-    (void)dummy; /* unused parameter */
+    Q_UNUSED_PAR(dummy);
     QF_onCleanup();
     exit(-1);
 }

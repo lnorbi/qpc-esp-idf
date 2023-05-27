@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-18
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Win32 API (single-threaded, like the QV kernel)
@@ -32,7 +32,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS package-scope internal interface */
@@ -58,10 +58,15 @@ static DWORD WINAPI ticker_thread(LPVOID arg);
 
 /* QF functions ============================================================*/
 void QF_init(void) {
+    QPSet_setEmpty(&QF_readySet_);
+#ifndef Q_UNSAFE
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+#endif
+
     InitializeCriticalSection(&l_win32CritSect);
     QV_win32Event_ = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_enterCriticalSection_(void) {
     EnterCriticalSection(&l_win32CritSect);
 }
@@ -69,12 +74,12 @@ void QF_enterCriticalSection_(void) {
 void QF_leaveCriticalSection_(void) {
     LeaveCriticalSection(&l_win32CritSect);
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_stop(void) {
     l_isRunning = false;  /* terminate the QV event loop and ticker thread */
     SetEvent(QV_win32Event_); /* unblock the event-loop so it can terminate */
 }
-/****************************************************************************/
+/*..........................................................................*/
 int_t QF_run(void) {
     QF_CRIT_STAT_
 
@@ -86,7 +91,9 @@ int_t QF_run(void) {
         /* create the ticker thread... */
         HANDLE ticker = CreateThread(NULL, 1024, &ticker_thread,
                                     (void *)0, 0, NULL);
-        Q_ASSERT_ID(310, ticker != (HANDLE)0); /* thread must be created */
+        QF_CRIT_E_();
+        Q_ASSERT_NOCRIT_(310, ticker != 0); /* thread must be created */
+        QF_CRIT_X_();
     }
 
     /* the combined event-loop and background-loop of the QV kernel */
@@ -97,16 +104,18 @@ int_t QF_run(void) {
     QS_END_NOCRIT_PRE_()
 
     while (l_isRunning) {
+        Q_ASSERT_NOCRIT_(200, QPSet_verify(&QF_readySet_, &QF_readySet_inv_));
+
         /* find the maximum priority AO ready to run */
         if (QPSet_notEmpty(&QF_readySet_)) {
             uint_fast8_t p = QPSet_findMax(&QF_readySet_);
             QActive *a = QActive_registry_[p];
-            QF_CRIT_X_();
 
             /* the active object 'a' must still be registered in QF
             * (e.g., it must not be stopped)
             */
-            Q_ASSERT_ID(320, a != (QActive *)0);
+            Q_ASSERT_NOCRIT_(320, a != (QActive *)0);
+            QF_CRIT_X_();
 
             /* perform the run-to-completion (RTS) step...
             * 1. retrieve the event from the AO's event queue, which by this
@@ -115,13 +124,17 @@ int_t QF_run(void) {
             * 3. determine if event is garbage and collect it if so
             */
             QEvt const *e = QActive_get_(a);
-            QHSM_DISPATCH(&a->super, e, a->prio);
+            /* dispatch event (virtual call) */
+            (*a->super.vptr->dispatch)(&a->super, e, a->prio);
             QF_gc(e);
 
             QF_CRIT_E_();
 
             if (a->eQueue.frontEvt == (QEvt *)0) { /* empty queue? */
                 QPSet_remove(&QF_readySet_, p);
+#ifndef Q_UNSAFE
+                QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+#endif
             }
         }
         else {
@@ -143,7 +156,7 @@ int_t QF_run(void) {
 
     return 0; /* return success */
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_setTickRate(uint32_t ticksPerSec, int_t tickPrio) {
     if (ticksPerSec != 0U) {
         l_tickMsec = 1000UL / ticksPerSec;
@@ -181,7 +194,10 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
     Q_UNUSED_PAR(stkSize);
 
     /* no per-AO stack needed for this port */
-    Q_REQUIRE_ID(600, stkSto == (void *)0);
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(600, stkSto == (void *)0);
+    QF_CRIT_X_();
 
     me->prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority of the AO */
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
@@ -189,20 +205,22 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
 
     QEQueue_init(&me->eQueue, qSto, qLen);
 
-    /* the top-most initial tran. (virtual) */
-    QHSM_INIT(&me->super, par, me->prio);
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 }
 /*..........................................................................*/
 #ifdef QF_ACTIVE_STOP
 void QActive_stop(QActive * const me) {
-    QF_CRIT_STAT_
-
     QActive_unsubscribeAll(me); /* unsubscribe from all events */
 
     /* make sure the AO is no longer in "ready set" */
+    QF_CRIT_STAT_
     QF_CRIT_E_();
     QPSet_remove(&QF_readySet_, me->prio);
+#ifndef Q_UNSAFE
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+#endif
     QF_CRIT_X_();
 
     QActive_unregister_(me); /* un-register this active object */
@@ -210,14 +228,16 @@ void QActive_stop(QActive * const me) {
 #endif
 /*..........................................................................*/
 void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
-    (void)me;    /* unused parameter */
-    (void)attr1; /* unused parameter */
-    (void)attr2; /* unused parameter */
-    Q_ERROR_ID(900); /* this function should not be called in this QP port */
+    Q_UNUSED_PAR(me);
+    Q_UNUSED_PAR(attr1);
+    Q_UNUSED_PAR(attr2);
+    Q_ERROR_NOCRIT_(900); /* should not be called in this QP port */
 }
 
-/****************************************************************************/
+/*==========================================================================*/
 static DWORD WINAPI ticker_thread(LPVOID arg) { /* for CreateThread() */
+    Q_UNUSED_PAR(arg);
+
     int threadPrio = THREAD_PRIORITY_NORMAL;
 
     /* set the ticker thread priority according to selection made in
@@ -236,8 +256,6 @@ static DWORD WINAPI ticker_thread(LPVOID arg) { /* for CreateThread() */
         Sleep(l_tickMsec); /* wait for the tick interval */
         QF_onClockTick();  /* callback (must call QTIMEEVT_TICK_X()) */
     }
-
-    (void)arg; /* unused parameter */
 
     return 0U; /* return success */
 }

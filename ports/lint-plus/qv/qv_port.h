@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-07-29
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QV/C port example for a generic C compiler.
 */
-#ifndef QV_PORT_H
-#define QV_PORT_H
+#ifndef QV_PORT_H_
+#define QV_PORT_H_
 
 /*! Macro to put the CPU to sleep safely in the cooperative
 * QV kernel (inside QV_onIdle()).
@@ -51,5 +51,5 @@
 
 #include "qv.h" /* QV platform-independent public interface */
 
-#endif /* QV_PORT_H */
+#endif /* QV_PORT_H_ */
 

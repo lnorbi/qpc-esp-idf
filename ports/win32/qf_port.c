@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-16
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Win32 API
@@ -32,7 +32,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS package-scope internal interface */
@@ -64,22 +64,21 @@ void QF_init(void) {
     InitializeCriticalSection(&l_startupCritSect);
     EnterCriticalSection(&l_startupCritSect);
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_enterCriticalSection_(void) {
     EnterCriticalSection(&l_win32CritSect);
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_leaveCriticalSection_(void) {
     LeaveCriticalSection(&l_win32CritSect);
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_stop(void) {
     l_isRunning = false;  /* terminate the main (ticker) thread */
 }
-/****************************************************************************/
+/*..........................................................................*/
 int_t QF_run(void) {
     int threadPrio = THREAD_PRIORITY_NORMAL;
-
 
     QF_onStartup(); /* application-specific startup callback */
 
@@ -116,13 +115,13 @@ int_t QF_run(void) {
     /*DeleteCriticalSection(&l_win32CritSect);*/
     return 0; /* return success */
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_setTickRate(uint32_t ticksPerSec, int_t tickPrio) {
     Q_REQUIRE_ID(600, ticksPerSec != 0U);
     l_tickMsec = 1000UL / ticksPerSec;
     l_tickPrio = tickPrio;
 }
-/****************************************************************************/
+/*..........................................................................*/
 void QF_setWin32Prio(QActive *act, int_t win32Prio) {
     HANDLE win32thread = (HANDLE)act->thread;
 
@@ -174,13 +173,13 @@ void QActive_stop(QActive * const me) {
 #endif
 /*..........................................................................*/
 void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
-    (void)me;    /* unused parameter */
-    (void)attr1; /* unused parameter */
-    (void)attr2; /* unused parameter */
-    Q_ERROR_ID(900); /* this function should not be called in this QP port */
+    Q_UNUSED_PAR(me);
+    Q_UNUSED_PAR(attr1);
+    Q_UNUSED_PAR(attr2);
+    Q_ERROR_NOCRIT_(900); /* should not be called in this QP port */
 }
 
-/****************************************************************************/
+/*==========================================================================*/
 void QF_consoleSetup(void) {
 }
 /*..........................................................................*/
@@ -198,7 +197,7 @@ int QF_consoleWaitForKey(void) {
     return (int)_getwch();
 }
 
-/****************************************************************************/
+/*==========================================================================*/
 static DWORD WINAPI ao_thread(LPVOID arg) { /* for CreateThread() */
     QActive *act = (QActive *)arg;
 

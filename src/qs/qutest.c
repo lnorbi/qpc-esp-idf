@@ -38,6 +38,9 @@
 /*$endhead${src::qs::qutest.c} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief QUTest unit testing harness
+*
+* @trace
+* - @tr{DVP-QS-MC3-R15_05}
 */
 
 /* Include this content in the build only when Q_UTEST is defined */
@@ -46,7 +49,7 @@
 #define QP_IMPL       /* this is QP implementation */
 #include "qf_port.h"  /* QF port */
 #include "qf_pkg.h"   /* QF package-scope interface */
-#include "qassert.h"  /* QP embedded systems-friendly assertions */
+#include "qsafety.h"  /* QP Functional Safety (FuSa) System */
 #include "qs_port.h"  /* include QS port */
 #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
 
@@ -79,10 +82,9 @@ uint32_t QS_getTestProbe_(QSpyFunPtr const api) {
         uint_fast8_t j;
 
         if (QS_testData.tpBuf[i].addr == (QSFun)api) {
-            QS_CRIT_STAT_
-
             data = QS_testData.tpBuf[i].data;
 
+            QS_CRIT_STAT_
             QS_CRIT_E_();
             QS_beginRec_((uint_fast8_t)QS_TEST_PROBE_GET);
                 QS_TIME_PRE_();    /* timestamp */
@@ -106,13 +108,13 @@ uint32_t QS_getTestProbe_(QSpyFunPtr const api) {
 /*$enddef${QUTest} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(
-    char const * module,
-    int_t location)
+Q_NORETURN Q_onError(
+    char const * const module,
+    int_t const id)
 {
     QS_BEGIN_NOCRIT_PRE_(QS_ASSERT_FAIL, 0U)
         QS_TIME_PRE_();
-        QS_U16_PRE_(location);
+        QS_U16_PRE_(id);
         QS_STR_PRE_((module != (char *)0) ? module : "?");
     QS_END_NOCRIT_PRE_()
 
@@ -133,7 +135,7 @@ QSTimeCtr QS_onGetTime(void) {
 * NOT be needed for testing QP itself. In that case, the build process
 * can define Q_UTEST=0 to exclude the QP-stub from the build.
 */
-#if Q_UTEST != 0
+#if (Q_UTEST != 0)
 
 Q_DEFINE_THIS_MODULE("qutest")
 
@@ -224,7 +226,8 @@ void QActive_start_(QActive * const me,
 
     QEQueue_init(&me->eQueue, qSto, qLen); /* initialize the built-in queue */
 
-    QHSM_INIT(&me->super, par, me->prio); /* the top-most initial tran. */
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
 }
 
 /*${QUTest-stub::QActive::stop} ............................................*/
@@ -242,8 +245,8 @@ void QTimeEvt_tick1_(
     uint_fast8_t const tickRate,
     void const * const sender)
 {
-    QF_CRIT_STAT_
-    QF_CRIT_E_();
+    QS_CRIT_STAT_
+    QS_CRIT_E_();
 
     QTimeEvt *prev = &QTimeEvt_timeEvtHead_[tickRate];
 
@@ -258,12 +261,12 @@ void QTimeEvt_tick1_(
     if (t != (QTimeEvt *)0) {
 
         /* the time event must be armed */
-        Q_ASSERT_ID(810, t->ctr != 0U);
+        Q_ASSERT_NOCRIT_(810, t->ctr != 0U);
 
         QActive * const act = (QActive * const)(t->act);
 
         /* the recipient AO must be provided */
-        Q_ASSERT_ID(820, act != (QActive *)0);
+        Q_ASSERT_NOCRIT_(820, act != (QActive *)0);
 
         /* periodic time evt? */
         if (t->interval != 0U) {
@@ -289,11 +292,11 @@ void QTimeEvt_tick1_(
             QS_U8_PRE_(tickRate);      /* tick rate */
         QS_END_NOCRIT_PRE_()
 
-        QF_CRIT_X_(); /* exit critical section before posting */
+        QS_CRIT_X_(); /* exit critical section before posting */
 
         QACTIVE_POST(act, &t->super, sender); /* asserts if queue overflows */
 
-        QF_CRIT_E_();
+        QS_CRIT_E_();
     }
 
     /* update the linked list of time events */
@@ -307,7 +310,7 @@ void QTimeEvt_tick1_(
             if (QTimeEvt_timeEvtHead_[tickRate].act != (void *)0) {
 
                 /* sanity check */
-                Q_ASSERT_CRIT_(830, prev != (QTimeEvt *)0);
+                Q_ASSERT_NOCRIT_(830, prev != (QTimeEvt *)0);
                 prev->next = (QTimeEvt *)QTimeEvt_timeEvtHead_[tickRate].act;
                 QTimeEvt_timeEvtHead_[tickRate].act = (void *)0;
                 t = prev->next;  /* switch to the new list */
@@ -323,22 +326,16 @@ void QTimeEvt_tick1_(
             /* mark time event 't' as NOT linked */
             t->super.refCtr_ &= (uint8_t)(~(uint8_t)QTE_IS_LINKED);
             /* do NOT advance the prev pointer */
-            QF_CRIT_X_(); /* exit crit. section to reduce latency */
-
-            /* prevent merging critical sections, see NOTE1 below  */
-            QF_CRIT_EXIT_NOP();
+            QS_CRIT_X_(); /* exit crit. section to reduce latency */
         }
         else {
             prev = t; /* advance to this time event */
-            QF_CRIT_X_(); /* exit crit. section to reduce latency */
-
-            /* prevent merging critical sections, see NOTE1 below  */
-            QF_CRIT_EXIT_NOP();
+            QS_CRIT_X_(); /* exit crit. section to reduce latency */
         }
-        QF_CRIT_E_(); /* re-enter crit. section to continue */
+        QS_CRIT_E_(); /* re-enter crit. section to continue */
     }
 
-    QF_CRIT_X_();
+    QS_CRIT_X_();
 
 }
 
@@ -460,8 +457,8 @@ void QActiveDummy_start_(
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
     QActive_register_(me); /* make QF aware of this active object */
 
-    /* the top-most initial tran. (virtual) */
-    QHSM_INIT(&me->super, par, me->prio);
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     //QS_FLUSH();
 }
 
@@ -480,7 +477,7 @@ bool QActiveDummy_post_(
         status = false;
         if (margin == QF_NO_MARGIN) {
             /* fake assertion Mod=qf_actq,Loc=110 */
-            Q_onAssert("qf_actq", 110);
+            Q_onError("qf_actq", 110);
         }
     )
 
@@ -533,7 +530,7 @@ void QActiveDummy_postLIFO_(
     /* test-probe#1 for faking queue overflow */
     QS_TEST_PROBE_ID(1,
         /* fake assertion Mod=qf_actq,Loc=210 */
-        Q_onAssert("qf_actq", 210);
+        Q_onError("qf_actq", 210);
     )
 
     QF_CRIT_STAT_

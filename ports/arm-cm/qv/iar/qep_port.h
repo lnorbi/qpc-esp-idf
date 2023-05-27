@@ -1,5 +1,5 @@
 /*============================================================================
-* QP/C Real-Time Embedded Framework (RTEF)
+* QEP/C port to ARM Cortex-M, IAR
 * Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 *
 * SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-06-12
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QEP/C port, generic IAR compiler
 */
-#ifndef QEP_PORT_H
-#define QEP_PORT_H
+#ifndef QEP_PORT_H_
+#define QEP_PORT_H_
 
 /*! no-return function specifier (IAR compiler) */
 #define Q_NORETURN  __noreturn void
@@ -40,4 +40,5 @@
 
 #include "qep.h"     /* QEP platform-independent public interface */
 
-#endif /* QEP_PORT_H */
+#endif /* QEP_PORT_H_ */
+

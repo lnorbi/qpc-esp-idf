@@ -638,11 +638,6 @@
               <FilePath>..\..\..\..\..\src\qs\qs_fp.c</FilePath>
             </File>
             <File>
-              <FileName>qs_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
-            </File>
-            <File>
               <FileName>qs_rx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
@@ -1283,11 +1278,6 @@
               <FilePath>..\..\..\..\..\src\qs\qs_fp.c</FilePath>
             </File>
             <File>
-              <FileName>qs_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
-            </File>
-            <File>
               <FileName>qs_rx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
@@ -1857,11 +1847,6 @@
               <FileName>qs_fp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_fp.c</FilePath>
-            </File>
-            <File>
-              <FileName>qs_pkg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
             </File>
             <File>
               <FileName>qs_rx.c</FileName>

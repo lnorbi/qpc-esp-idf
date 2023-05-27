@@ -104,8 +104,13 @@ void QF_onClockTick(void) {
 
 /*..........................................................................*/
 /* this function is used by the QP embedded systems-friendly assertions */
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
-    FPRINTF_S(stderr, "Assertion failed in %s:%d", module, loc);
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
     QF_onCleanup();
     exit(-1);
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }

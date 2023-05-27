@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -99,10 +99,9 @@ void QActive_publish_(
     Q_UNUSED_PAR(qs_id);
     #endif
 
-    Q_REQUIRE_ID(200, e->sig < (QSignal)QActive_maxPubSignal_);
-
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(200, e->sig < (QSignal)QActive_maxPubSignal_);
 
     QS_BEGIN_NOCRIT_PRE_(QS_QF_PUBLISH, qs_id)
         QS_TIME_PRE_();          /* the timestamp */
@@ -135,8 +134,11 @@ void QActive_publish_(
 
         QF_SCHED_LOCK_(a->prio); /* lock the scheduler up to AO's prio */
         do { /* loop over all subscribers */
+
             /* the prio of the AO must be registered with the framework */
-            Q_ASSERT_ID(210, a != (QActive *)0);
+            QF_CRIT_E_();
+            Q_ASSERT_NOCRIT_(210, a != (QActive *)0);
+            QF_CRIT_X_();
 
             /* QACTIVE_POST() asserts internally if the queue overflows */
             QACTIVE_POST(a, e, sender);
@@ -172,13 +174,13 @@ void QActive_subscribe(QActive const * const me,
 {
     uint_fast8_t const p = (uint_fast8_t)me->prio;
 
-    Q_REQUIRE_ID(300, ((enum_t)Q_USER_SIG <= sig)
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+
+    Q_REQUIRE_NOCRIT_(300, ((enum_t)Q_USER_SIG <= sig)
               && (sig < QActive_maxPubSignal_)
               && (0U < p) && (p <= QF_MAX_ACTIVE)
               && (QActive_registry_[p] == me));
-
-    QF_CRIT_STAT_
-    QF_CRIT_E_();
 
     QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_SUBSCRIBE, me->prio)
         QS_TIME_PRE_();    /* timestamp */
@@ -201,13 +203,13 @@ void QActive_unsubscribe(QActive const * const me,
 {
     uint_fast8_t const p = (uint_fast8_t)me->prio;
 
-    Q_REQUIRE_ID(400, ((enum_t)Q_USER_SIG <= sig)
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+
+    Q_REQUIRE_NOCRIT_(400, ((enum_t)Q_USER_SIG <= sig)
               && (sig < QActive_maxPubSignal_)
               && (0U < p) && (p <= QF_MAX_ACTIVE)
               && (QActive_registry_[p] == me));
-
-    QF_CRIT_STAT_
-    QF_CRIT_E_();
 
     QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_UNSUBSCRIBE, me->prio)
         QS_TIME_PRE_();    /* timestamp */
@@ -228,11 +230,13 @@ void QActive_unsubscribe(QActive const * const me,
 void QActive_unsubscribeAll(QActive const * const me) {
     uint_fast8_t const p = (uint_fast8_t)me->prio;
 
-    Q_REQUIRE_ID(500, (0U < p) && (p <= QF_MAX_ACTIVE)
-                        && (QActive_registry_[p] == me));
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(500, (0U < p) && (p <= QF_MAX_ACTIVE)
+                           && (QActive_registry_[p] == me));
+    QF_CRIT_X_();
 
     for (enum_t sig = (enum_t)Q_USER_SIG; sig < QActive_maxPubSignal_; ++sig) {
-        QF_CRIT_STAT_
         QF_CRIT_E_();
         if (QPSet_hasElement(&QActive_subscrList_[sig], p)) {
             QPSet_remove(&QActive_subscrList_[sig], p);

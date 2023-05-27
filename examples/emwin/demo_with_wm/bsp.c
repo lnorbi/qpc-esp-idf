@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: BSP for SEGGER emWin (version 6.28), Win32 simulation
-* Last updated for version 7.1.3
-* Last updated on  2022-11-16
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -103,12 +103,15 @@ void QF_onClockTick(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const file, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     char str[256];
-
-    QF_CRIT_ENTRY(dummy); /* make sure nothing else is running */
-    SNPRINTF_S(str, sizeof(str), "%s:%d", file, loc);
-    MessageBox(NULL, str, "Assertion Failure", MB_TASKMODAL | MB_OK);
+    SNPRINTF_S(str, sizeof(str), "%s:%d", module, id);
+    MessageBox(NULL, str, "ERROR", MB_TASKMODAL | MB_OK);
     QF_stop(); /* terminate the QF, causes termination of the MainTask() */
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 

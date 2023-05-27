@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -70,9 +70,12 @@ void QMPool_init(QMPool * const me,
     uint_fast32_t poolSize,
     uint_fast16_t blockSize)
 {
-    Q_REQUIRE_ID(100, (poolSto != (void *)0)
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(100, (poolSto != (void *)0)
             && (poolSize >= (uint_fast32_t)sizeof(QFreeBlock))
             && ((uint_fast16_t)(blockSize + sizeof(QFreeBlock)) > blockSize));
+    QF_CRIT_X_();
 
     me->free_head = poolSto;
 
@@ -88,7 +91,9 @@ void QMPool_init(QMPool * const me,
     blockSize = (uint_fast16_t)me->blockSize; /* round-up to nearest block */
 
     /* the pool buffer must fit at least one rounded-up block */
-    Q_ASSERT_ID(110, poolSize >= blockSize);
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(110, poolSize >= blockSize);
+    QF_CRIT_X_();
 
     /* chain all blocks together in a free-list... */
     poolSize -= (uint_fast32_t)blockSize; /* don't count the last block */
@@ -132,7 +137,7 @@ void * QMPool_get(QMPool * const me,
         fb = (QFreeBlock *)me->free_head; /* get a free block */
 
         /* the pool has some free blocks, so a free block must be available */
-        Q_ASSERT_CRIT_(310, fb != (QFreeBlock *)0);
+        Q_ASSERT_NOCRIT_(310, fb != (QFreeBlock *)0);
 
         fb_next = fb->next; /* put volatile into temporary */
 
@@ -140,7 +145,7 @@ void * QMPool_get(QMPool * const me,
         --me->nFree; /* one less free block */
         if (me->nFree == 0U) {
             /* pool is becoming empty, so the next free block must be NULL */
-            Q_ASSERT_CRIT_(320, fb_next == (QFreeBlock *)0);
+            Q_ASSERT_NOCRIT_(320, fb_next == (QFreeBlock *)0);
 
             me->nMin = 0U; /* remember that the pool got empty */
         }
@@ -153,7 +158,7 @@ void * QMPool_get(QMPool * const me,
             * when the client code writes past the memory block, thus
             * corrupting the next block.
             */
-            Q_ASSERT_CRIT_(330,
+            Q_ASSERT_NOCRIT_(330,
                 (me->start <= fb_next) && (fb_next <= me->end));
 
             /* is the number of free blocks the new minimum so far? */
@@ -197,11 +202,11 @@ void QMPool_put(QMPool * const me,
     Q_UNUSED_PAR(qs_id);
     #endif
 
-    Q_REQUIRE_ID(200, (me->nFree < me->nTot)
-                      && (me->start <= b) && (b <= me->end));
-
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(200, (me->nFree < me->nTot)
+                      && (me->start <= b) && (b <= me->end));
+
     ((QFreeBlock *)b)->next = (QFreeBlock *)me->free_head;/* link into list */
     me->free_head = b;      /* set as new head of the free list */
     ++me->nFree;            /* one more free block in this pool */

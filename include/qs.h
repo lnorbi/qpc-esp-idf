@@ -38,6 +38,9 @@
 /*$endhead${include::qs.h} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief QS/C platform-independent public interface.
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QS_H_
 #define QS_H_
@@ -679,7 +682,7 @@ void QS_mem_fmt_(
 * @note This function is only to be used through macro QS_SIG_DICTIONARY()
 */
 void QS_sig_dict_pre_(
-    enum_t const sig,
+    QSignal const sig,
     void const * const obj,
     char const * const name);
 
@@ -740,7 +743,7 @@ void QS_enum_dict_pre_(
 * @static @public @memberof QS_tx
 *
 * @details
-* This trace record is intended to use from the Q_onAssert() callback.
+* This trace record is intended to use from the Q_onError() callback.
 */
 void QS_ASSERTION(
     char const * const module,
@@ -750,6 +753,9 @@ void QS_ASSERTION(
 /*${QS::QS-tx::target_info_pre_} ...........................................*/
 /*! Helper function to output the predefined Target-info trace record
 * @static @private @memberof QS_tx
+*
+* @trace
+* - @tr{DVR-QS-MC3-R19_02}
 */
 void QS_target_info_pre_(uint8_t const isReset);
 
@@ -797,6 +803,9 @@ void QS_u64_fmt_(
 /*! Output 32-bit floating point data element with format information
 * @static @private @memberof QS_tx
 *
+* @trace
+* - @tr{DVR-QS-MC3-R19_02}
+*
 * @sa QS_F32()
 */
 void QS_f32_fmt_(
@@ -806,6 +815,9 @@ void QS_f32_fmt_(
 /*${QS::QS-tx-fp::f64_fmt_} ................................................*/
 /*! Output 64-bit floating point data element with format information
 * @static @private @memberof QS_tx
+*
+* @trace
+* - @tr{DVR-QS-MC3-R19_02}
 *
 * @sa QS_F64()
 */
@@ -957,6 +969,9 @@ void QS_rxParse(void);
 /*${QS::QS-rx::rxHandleGoodFrame_} .........................................*/
 /*! internal function to handle incoming (QS-RX) packet
 * @static @private @memberof QS_rx
+*
+* @trace
+* - @tr{DVR-QS-MC3-R11_06}
 */
 void QS_rxHandleGoodFrame_(uint8_t const state);
 
@@ -994,6 +1009,9 @@ bool QS_RX_PUT(uint8_t const b);
 * routine if #Q_SPY is defined, or do nothing if #Q_SPY is not defined.
 * @sa QS_onStartup(), example of setting up a QS filter in
 * QS_GLB_FILTER()
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_INIT(arg_) (QS_onStartup(arg_))
 
@@ -1004,6 +1022,9 @@ bool QS_RX_PUT(uint8_t const b);
 * This macro provides an indirection layer to invoke the QS cleanup
 * routine if #Q_SPY is defined, or do nothing if #Q_SPY is not defined.
 * @sa QS_onCleanup()
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_EXIT() (QS_onCleanup())
 
@@ -1012,6 +1033,9 @@ bool QS_RX_PUT(uint8_t const b);
 *
 * @note
 * If this macro is used, the application must define QS_output().
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_OUTPUT() (QS_output())
 
@@ -1020,6 +1044,9 @@ bool QS_RX_PUT(uint8_t const b);
 *
 * @note
 * If this macro is used, the application must define QS_doInput().
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_RX_INPUT() (QS_rx_input())
 
@@ -1033,6 +1060,9 @@ bool QS_RX_PUT(uint8_t const b);
 * @sa
 * - enum QSpyGroups - QS record groups that can be used as `rec_`
 * - enum QSpyPre - predefined QS records that can be used as `rec_`
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 *
 * @usage
 * The following example shows how to use QS filters:
@@ -1051,6 +1081,10 @@ bool QS_RX_PUT(uint8_t const b);
 * - enum QSpyIdGroups - QS ID groups that can be used as `qs_id_`
 * - enum QSpyIdOffsets - QS ID offsets for `qs_id_` (e.g., QS_AP_IDS + 5)
 *
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*
+* @usage
 * The following example shows how to use QS filters:
 * @include qs_filter.c
 */
@@ -1067,6 +1101,10 @@ bool QS_RX_PUT(uint8_t const b);
 * @note
 * Must always be used in pair with QS_END()
 *
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*
+* @usage
 * @include qs_ap.c
 */
 #define QS_BEGIN_ID(rec_, qs_id_) \
@@ -1081,6 +1119,9 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 *
 * @sa example for QS_BEGIN_ID()
 * @note Must always be used in pair with QS_BEGIN_ID()
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_END() } \
     QS_endRec_(); \
@@ -1095,11 +1136,18 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 * function to flush the QS trace buffer to the host. The function
 * typically busy-waits until all the data in the buffer is sent to
 * the host. This is acceptable only in the initial transient.
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_FLUSH() (QS_onFlush())
 
 /*${QS-macros::QS_BEGIN_NOCRIT} ............................................*/
-/*! Begin an application-specific QS record WITHOUT entering critical section */
+/*! Begin an application-specific QS record WITHOUT entering critical section
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_BEGIN_NOCRIT(rec_, qs_id_) \
 if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
     QS_beginRec_((uint_fast8_t)(rec_)); \
@@ -1112,13 +1160,21 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 }
 
 /*${QS-macros::QS_GLB_CHECK_} ..............................................*/
-/*! Helper macro for checking the global QS filter */
+/*! Helper macro for checking the global QS filter
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_GLB_CHECK_(rec_) \
     (((uint_fast8_t)QS_priv_.glbFilter[(uint_fast8_t)(rec_) >> 3U]  \
           & ((uint_fast8_t)1U << ((uint_fast8_t)(rec_) & 7U))) != 0U)
 
 /*${QS-macros::QS_LOC_CHECK_} ..............................................*/
-/*! Helper macro for checking the local QS filter */
+/*! Helper macro for checking the local QS filter
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_LOC_CHECK_(qs_id_) \
     (((uint_fast8_t)QS_priv_.locFilter[(uint_fast8_t)(qs_id_) >> 3U] \
           & ((uint_fast8_t)1U << ((uint_fast8_t)(qs_id_) & 7U))) != 0U)
@@ -1134,53 +1190,93 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 #endif /* ndef QS_REC_DONE */
 
 /*${QS-macros::QS_I8} ......................................................*/
-/*! Output formatted int8_t to the QS record */
+/*! Output formatted int8_t to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_I8(width_, data_) \
     (QS_u8_fmt_((uint8_t)(((width_) << 4U) & 0x7U) | (uint8_t)QS_I8_ENUM_T, \
                 (data_)))
 
 /*${QS-macros::QS_U8} ......................................................*/
-/*! Output formatted uint8_t to the QS record */
+/*! Output formatted uint8_t to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_U8(width_, data_) \
     (QS_u8_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_U8_T, (data_)))
 
 /*${QS-macros::QS_I16} .....................................................*/
-/*! Output formatted int16_t to the QS record */
+/*! Output formatted int16_t to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_I16(width_, data_) \
     (QS_u16_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_I16_T, (data_)))
 
 /*${QS-macros::QS_U16} .....................................................*/
-/*! Output formatted uint16_t to the QS record */
+/*! Output formatted uint16_t to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_U16(width_, data_) \
     (QS_u16_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_U16_T, (data_)))
 
 /*${QS-macros::QS_I32} .....................................................*/
-/*! Output formatted int32_t to the QS record */
+/*! Output formatted int32_t to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_I32(width_, data_) \
     (QS_u32_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_I32_T, (data_)))
 
 /*${QS-macros::QS_U32} .....................................................*/
-/*! Output formatted uint32_t to the QS record */
+/*! Output formatted uint32_t to the QS record\
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_U32(width_, data_) \
     (QS_u32_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_U32_T, (data_)))
 
 /*${QS-macros::QS_I64} .....................................................*/
-/*! Output formatted int64_t to the QS record */
+/*! Output formatted int64_t to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_I64(width_, data_) \
     (QS_u64_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_I64_T, (data_)))
 
 /*${QS-macros::QS_U64} .....................................................*/
-/*! Output formatted uint64_t to the QS record */
+/*! Output formatted uint64_t to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_U64(width_, data_) \
     (QS_u64_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_U64_T, (data_)))
 
 /*${QS-macros::QS_F32} .....................................................*/
-/*! Output formatted 32-bit floating point number to the QS record */
+/*! Output formatted 32-bit floating point number to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_F32(width_, data_) \
     (QS_f32_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_F32_T, (data_)))
 
 /*${QS-macros::QS_F64} .....................................................*/
-/*! Output formatted 64-bit floating point number to the QS record */
+/*! Output formatted 64-bit floating point number to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_F64(width_, data_) \
     (QS_f64_fmt_((uint8_t)(((width_) << 4)) | (uint8_t)QS_F64_T, (data_)))
 
@@ -1189,11 +1285,19 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 #define QS_STR(str_) (QS_str_fmt_((str_)))
 
 /*${QS-macros::QS_MEM} .....................................................*/
-/*! Output formatted memory block of up to 255 bytes to the QS record */
+/*! Output formatted memory block of up to 255 bytes to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_MEM(mem_, size_) (QS_mem_fmt_((mem_), (size_)))
 
 /*${QS-macros::QS_ENUM} ....................................................*/
-/*! Output formatted enumeration to the QS record */
+/*! Output formatted enumeration to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_ENUM(group_, value_) \
     (QS_u8_fmt_((uint8_t)(0x80U | ((group_) << 4U)) | (uint8_t)QS_I8_ENUM_T,\
                 (uint8_t)(value_)))
@@ -1202,6 +1306,9 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 #if (QS_TIME_SIZE == 4U)
 /*! Output time stamp to a QS record (used in predefined
 * and application-specific trace records)
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_TIME_PRE_() (QS_u32_raw_(QS_onGetTime()))
 #endif /*  (QS_TIME_SIZE == 4U) */
@@ -1218,7 +1325,11 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 
 /*${QS-macros::QS_OBJ} .....................................................*/
 #if (QS_OBJ_PTR_SIZE == 4U)
-/*! Output formatted object pointer to the QS record */
+/*! Output formatted object pointer to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_OBJ(obj_) (QS_u32_fmt_(QS_OBJ_T, (uint32_t)(obj_)))
 #endif /*  (QS_OBJ_PTR_SIZE == 4U) */
 
@@ -1239,7 +1350,11 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 
 /*${QS-macros::QS_FUN} .....................................................*/
 #if (QS_FUN_PTR_SIZE == 4U)
-/* Output formatted function pointer to the QS record */
+/* Output formatted function pointer to the QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_FUN(fun_) (QS_u32_fmt_(QS_FUN_T, (uint32_t)(fun_)))
 #endif /*  (QS_FUN_PTR_SIZE == 4U) */
 
@@ -1262,6 +1377,9 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 #if (Q_SIGNAL_SIZE == 4U)
 /*! Output formatted event signal (of type ::QSignal) and
 * the state machine object to the user QS record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_SIG(sig_, obj_) \
         QS_u32_fmt_(QS_SIG_T, (sig_)); \
@@ -1310,13 +1428,18 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 * hand, is global (0 `obj_` pointer):
 * @include qs_sigDic.c
 *
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QP-MC3-R10_03}
+*
+* @usage
 * The following QSpy log example shows the signal dictionary records
 * generated from the Table initial transition and subsequent records that
 * show human-readable names of the signals:
 * @include qs_sigLog.txt
 */
 #define QS_SIG_DICTIONARY(sig_, obj_) \
-    (QS_sig_dict_pre_((sig_), (obj_), #sig_))
+    (QS_sig_dict_pre_((QSignal)(sig_), (obj_), #sig_))
 
 /*${QS-macros::QS_OBJ_DICTIONARY} ..........................................*/
 /*! Output object dictionary record
@@ -1327,6 +1450,11 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 *
 * @param[in] obj_  pointer to the object (any object)
 *
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QS-MC3-R20_10}
+*
+* @usage
 * The following example shows the definition of object dictionary entry
 * for the Table active object:
 * @include qs_objDic.c
@@ -1345,6 +1473,11 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 * @param[in] obj_  pointer to the object (any object)
 * @param[in] idx_  array index
 *
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QS-MC3-R20_10}
+*
+* @usage
 * The following example shows the definition of object array dictionary
 * for `Philo::inst[n]` and `Philo::inst[n].m_timeEvt`:
 * @include qs_objArrDic.c
@@ -1363,6 +1496,12 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 * of the QS log, because instead of dealing with cryptic machine addresses
 * the QSpy host utility can display human-readable function names.
 *
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QS-MC3-R11_01}
+* - @tr{DVP-QS-MC3-R20_10}
+*
+* @usage
 * The example from #QS_SIG_DICTIONARY shows the definition of a function
 * dictionary.
 */
@@ -1375,6 +1514,10 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 * @details
 * A user QS record dictionary record associates the numerical value of a
 * user record with the human-readable identifier.
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QS-MC3-R20_10}
 */
 #define QS_USR_DICTIONARY(rec_) \
     (QS_usr_dict_pre_((rec_), #rec_))
@@ -1385,16 +1528,28 @@ if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
 * @details
 * An enum QS record dictionary record associates the numerical value of
 * an enumeration with the human-readable identifier.
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QS-MC3-R20_10}
 */
 #define QS_ENUM_DICTIONARY(value_, group_) \
     (QS_enum_dict_pre_((value_), (group_), #value_))
 
 /*${QS-macros::QF_QS_CRIT_ENTRY} ...........................................*/
-/*! Output the critical section entry record */
+/*! Output the critical section entry record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 void QF_QS_CRIT_ENTRY(void);
 
 /*${QS-macros::QF_QS_CRIT_EXIT} ............................................*/
-/*! Output the critical section exit record */
+/*! Output the critical section exit record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 void QF_QS_CRIT_EXIT(void);
 
 /*${QS-macros::QF_QS_ISR_ENTRY} ............................................*/
@@ -1404,13 +1559,21 @@ void QF_QS_ISR_ENTRY(
     uint_fast8_t const prio_);
 
 /*${QS-macros::QF_QS_ISR_EXIT} .............................................*/
-/*! Output the ISR exit trace record */
+/*! Output the ISR exit trace record
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 void QF_QS_ISR_EXIT(
     uint_fast8_t isrnest,
     uint_fast8_t prio);
 
 /*${QS-macros::QF_QS_ACTION} ...............................................*/
-/*! Execute an action that is only necessary for QS output */
+/*! Execute an action that is only necessary for QS output
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QF_QS_ACTION(act_) (act_)
 
 /*${QS-macros::QS_EOD} .....................................................*/
@@ -1437,64 +1600,28 @@ void QF_QS_ISR_EXIT(
 /* Facilities for QS critical section */
 
 /* QS-specific critical section */
-#ifdef QS_CRIT_ENTRY /* separate QS critical section defined? */
+#ifndef QS_CRIT_STAT_
 
-#ifndef QS_CRIT_STAT_TYPE
-    #define QS_CRIT_STAT_
-    #define QS_CRIT_E_()     QS_CRIT_ENTRY(dummy)
-    #define QS_CRIT_X_()     QS_CRIT_EXIT(dummy); QS_REC_DONE()
-#else
-    #define QS_CRIT_STAT_    QS_CRIT_STAT_TYPE critStat_;
-    #define QS_CRIT_E_()     QS_CRIT_ENTRY(critStat_)
-    #define QS_CRIT_X_()     QS_CRIT_EXIT(critStat_); QS_REC_DONE()
-#endif /* QS_CRIT_STAT_TYPE */
-
-#else /* separate QS critical section not defined--use the QF definition */
-
-#ifndef QF_CRIT_STAT_TYPE
-    /*! This is an internal macro for defining the critical section
-    * status type.
-    * @details
-    * The purpose of this macro is to enable writing the same code for the
-    * case when critical section status type is defined and when it is not.
-    * If the macro #QF_CRIT_STAT_TYPE is defined, this internal macro
-    * provides the definition of the critical section status variable.
-    * Otherwise this macro is empty.
-    * @sa #QF_CRIT_STAT_TYPE
+    /*! This is an internal QS macro for defining the critical section
+    * status to be preserved.
     */
-    #define QS_CRIT_STAT_
+    #define QS_CRIT_STAT_ QF_CRIT_STAT_
 
     /*! This is an internal macro for entering a critical section.
-    * @details
-    * The purpose of this macro is to enable writing the same code for the
-    * case when critical section status type is defined and when it is not.
-    * If the macro #QF_CRIT_STAT_TYPE is defined, this internal macro
-    * invokes QF_CRIT_ENTRY() passing the key variable as the parameter.
-    * Otherwise QF_CRIT_ENTRY() is invoked with a dummy parameter.
-    * @sa QF_CRIT_ENTRY()
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
-    #define QS_CRIT_E_()     QF_CRIT_ENTRY(dummy)
+    #define QS_CRIT_E_()  QF_CRIT_E_()
 
     /*! This is an internal macro for exiting a critical section.
-    * @details
-    * The purpose of this macro is to enable writing the same code for the
-    * case when critical section status type is defined and when it is not.
-    * If the macro #QF_CRIT_STAT_TYPE is defined, this internal macro
-    * invokes QF_CRIT_EXIT() passing the key variable as the parameter.
-    * Otherwise QF_CRIT_EXIT() is invoked with a dummy parameter.
-    * @sa QF_CRIT_EXIT()
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
-    #define QS_CRIT_X_()     QF_CRIT_EXIT(dummy); QS_REC_DONE()
+    #define QS_CRIT_X_()  QF_CRIT_X_()
 
-#elif (!defined QS_CRIT_STAT_)
-
-    #define QS_CRIT_STAT_    QF_CRIT_STAT_TYPE critStat_;
-    #define QS_CRIT_E_()     QF_CRIT_ENTRY(critStat_)
-    #define QS_CRIT_X_()     QF_CRIT_EXIT(critStat_); QS_REC_DONE()
-
-#endif /* simple unconditional interrupt disabling used */
-
-#endif /* separate QS critical section not defined */
+#endif /* nfdef QS_CRIT_STAT_ */
 
 /*==========================================================================*/
 /* Macros for use in QUTest only */
@@ -1527,7 +1654,13 @@ extern struct QS_TestData QS_testData;
 void QS_test_pause_(void);
 
 /*${QUTest::QS::getTestProbe_} .............................................*/
-/*! get the test probe data for the given API */
+/*! get the test probe data for the given API
+*
+* @trace
+* - @tr{DVP-QS-MC3-R11_01}
+* - @tr{DVR-QS-MC3-R11_04}
+* - @tr{DVR-QS-MC3-R11_06}
+*/
 uint32_t QS_getTestProbe_(QSpyFunPtr const api);
 
 /*${QUTest::QS::onTestSetup} ...............................................*/
@@ -1596,6 +1729,9 @@ void QHsmDummy_ctor(QHsmDummy * const me);
 
 /*! override for QHsm_init_()
 * @private @memberof QHsmDummy
+*
+* @trace
+* - @tr{DVR-QS-MC3-R08_13}
 */
 void QHsmDummy_init_(
     QHsm * const me,
@@ -1604,6 +1740,9 @@ void QHsmDummy_init_(
 
 /*! override for QHsm_dispatch_()
 * @private @memberof QHsmDummy
+*
+* @trace
+* - @tr{DVR-QS-MC3-R08_13}
 */
 void QHsmDummy_dispatch_(
     QHsm * const me,
@@ -1635,6 +1774,9 @@ void QActiveDummy_ctor(QActiveDummy * const me);
 
 /*! override for QHsm_init_()
 * @private @memberof QActiveDummy
+*
+* @trace
+* - @tr{DVR-QS-MC3-R08_13}
 */
 void QActiveDummy_init_(
     QHsm * const me,
@@ -1643,6 +1785,9 @@ void QActiveDummy_init_(
 
 /*! override for QHsm_dispatch_()
 * @private @memberof QActiveDummy
+*
+* @trace
+* - @tr{DVR-QS-MC3-R08_13}
 */
 void QActiveDummy_dispatch_(
     QHsm * const me,
@@ -1651,6 +1796,9 @@ void QActiveDummy_dispatch_(
 
 /*! override for QActive_start_()
 * @private @memberof QActiveDummy
+*
+* @trace
+* - @tr{DVR-QS-MC3-R08_13}
 */
 void QActiveDummy_start_(
     QActive * const me,
@@ -1679,11 +1827,19 @@ void QActiveDummy_postLIFO_(
 /*$enddecl${QUTest-stub::QActiveDummy} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 #endif /* Q_UTEST != 0 */
 
-/*! QS macro to define the Test-Probe for a given `fun_` */
+/*! QS macro to define the Test-Probe for a given `fun_`
+*
+* @trace
+* - @tr{DVP-QS-MC3-R11_01}
+*/
 #define QS_TEST_PROBE_DEF(fun_) \
     uint32_t const qs_tp_ = QS_getTestProbe_((void (*)(void))(fun_));
 
-/*! QS macro to apply a Test-Probe */
+/*! QS macro to apply a Test-Probe
+*
+* @trace
+* - @tr{DVR-QS-MC3-R11_05}
+*/
 #define QS_TEST_PROBE(code_) \
     if (qs_tp_ != 0U) { code_ }
 

@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-18
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QK/C port to ARM Cortex-M, ARM-CLANG toolset
 */
-#ifndef QK_PORT_H
-#define QK_PORT_H
+#ifndef QK_PORT_H_
+#define QK_PORT_H_
 
 /* determination if the code executes in the ISR context */
 #define QK_ISR_CONTEXT_() (QK_get_IPSR() != 0U)
@@ -91,5 +91,5 @@ void QK_thread_ret(void);
 
 #include "qk.h" /* QK platform-independent public interface */
 
-#endif /* QK_PORT_H */
+#endif /* QK_PORT_H_ */
 

@@ -1,7 +1,7 @@
 /*============================================================================
 * Product: BSP for system-testing of QXK kernel, NUCLEO-C031C6 board
-* Last updated for version 7.2.2
-* Last updated on  2023-02-02
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -200,27 +200,8 @@ void BSP_init(void) {
     /* setup the MPU... */
     STM32C031C6_MPU_setup();
 
-
-    /* enable GPIOA clock port for the LD4 User LED */
-    RCC->IOPENR |= (1U << 0U);
-
-    /* configure LD4 pin as push-pull output, no pull-up, pull-down */
-    GPIOA->MODER   &= ~((3U << 2U*LD4_PIN));
-    GPIOA->MODER   |=  ((1U << 2U*LD4_PIN));
-    GPIOA->OTYPER  &= ~((1U <<    LD4_PIN));
-    GPIOA->OSPEEDR &= ~((3U << 2U*LD4_PIN));
-    GPIOA->OSPEEDR |=  ((1U << 2U*LD4_PIN));
-    GPIOA->PUPDR   &= ~((3U << 2U*LD4_PIN));
-
-    /* enable GPIOC clock port for the Button B1 */
-    RCC->IOPENR |=  (1U << 2U);
-
-    /* configure Button B1 pin on GPIOC as input, no pull-up, pull-down */
-    GPIOC->MODER &= ~(3U << 2U*B1_PIN);
-    GPIOC->PUPDR &= ~(3U << 2U*B1_PIN);
-
     /* initialize the QS software tracing... */
-    if (QS_INIT((void *)0) == 0) { /* initialize the QS software tracing */
+    if (QS_INIT((void *)0) == 0U) {
         Q_ERROR();
     }
 
@@ -341,8 +322,8 @@ void QXK_onIdle(void) {
 }
 
 /* fault handler called from the exception handlers in the startup code */
-void assert_failed(char const * const module, int const loc) {
-    Q_onAssert(module, loc);
+void assert_failed(char const * const module, int const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/

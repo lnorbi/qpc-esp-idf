@@ -2,11 +2,11 @@
 
 /* includes for the CUT... */
 #include "qf_port.h"
-#include "qassert.h"  /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY /* software tracing enabled? */
-#include "qs_port.h"   /* QS/C port from the port directory */
+#include "qs_port.h"      /* QS/C port from the port directory */
 #else
-#include "qs_dummy.h"  /* QS/C dummy (inactive) interface */
+#include "qs_dummy.h"     /* QS/C dummy (inactive) interface */
 #endif
 
 enum { QUEUE_SIZE = 10 };
@@ -52,7 +52,7 @@ TEST("no-buffer queue can hold only 1 (expected assertion)") {
 /* =========================================================================*/
 /* dependencies for the CUT ... */
 
-uint_fast8_t QF_intLock_;
+uint_fast8_t volatile QF_intLock_;
 
 /*..........................................................................*/
 void QF_poolInit(void * const poolSto, uint_fast32_t const poolSize,
@@ -99,10 +99,15 @@ void QF_gc(QEvt const * const e) {
 QActive *QActive_registry_[QF_MAX_ACTIVE + 1U];
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const location) {
+Q_NORETURN Q_onError(char const * const module, int_t const location) {
     VERIFY_ASSERT(module, location);
     for (;;) { /* explicitly make it "noreturn" */
     }
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /*--------------------------------------------------------------------------*/

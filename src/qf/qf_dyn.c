@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -89,15 +89,17 @@ void QF_poolInit(
     uint_fast32_t const poolSize,
     uint_fast16_t const evtSize)
 {
-    /*! @pre cannot exceed the number of available memory pools */
-    Q_REQUIRE_ID(200, QF_maxPool_ < QF_MAX_EPOOL);
+    /* see precondition{qf_dyn,200} */
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(200, QF_maxPool_ < QF_MAX_EPOOL);
+    Q_REQUIRE_NOCRIT_(201,
+        (QF_maxPool_ == 0U)
+         || (QF_EPOOL_EVENT_SIZE_(QF_ePool_[QF_maxPool_ - 1U])
+             < evtSize));
+    QF_CRIT_X_();
 
-    /*! @pre please initialize event pools in ascending order of evtSize: */
-    Q_REQUIRE_ID(201, (QF_maxPool_ == 0U)
-        || (QF_EPOOL_EVENT_SIZE_(QF_ePool_[QF_maxPool_ - 1U])
-            < evtSize));
-
-    /* perform the platform-dependent initialization of the pool */
+    /* perform the port-dependent initialization of the event-pool */
     QF_EPOOL_INIT_(QF_ePool_[QF_maxPool_], poolSto, poolSize, evtSize);
     ++QF_maxPool_; /* one more pool */
 
@@ -106,7 +108,9 @@ void QF_poolInit(
     {
         uint8_t obj_name[9] = "EvtPool?";
         obj_name[7] = (uint8_t)(((uint8_t)'0' + QF_maxPool_) & 0x7FU);
+        QF_CRIT_E_();
         QS_obj_dict_pre_(&QF_ePool_[QF_maxPool_ - 1U], (char const *)obj_name);
+        QF_CRIT_X_();
     }
     #endif /* Q_SPY*/
 }
@@ -120,12 +124,11 @@ uint_fast16_t QF_poolGetMaxBlockSize(void) {
 /*${QF::QF-dyn::getPoolMin} ................................................*/
 /*! @static @public @memberof QF */
 uint_fast16_t QF_getPoolMin(uint_fast8_t const poolId) {
-    /*! @pre the poolId must be in range */
-    Q_REQUIRE_ID(400, (poolId <= QF_MAX_EPOOL)
-                      && (0U < poolId) && (poolId <= QF_maxPool_));
-
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(400, (poolId <= QF_MAX_EPOOL)
+                      && (0U < poolId) && (poolId <= QF_maxPool_));
+
     uint_fast16_t const min = (uint_fast16_t)QF_ePool_[poolId - 1U].nMin;
     QF_CRIT_X_();
 
@@ -147,12 +150,15 @@ QEvt * QF_newX_(
             break;
         }
     }
+
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
     /* cannot run out of registered pools */
-    Q_ASSERT_ID(310, idx < QF_maxPool_);
+    Q_REQUIRE_NOCRIT_(300, idx < QF_maxPool_);
+    QF_CRIT_X_();
 
-    /* get e -- platform-dependent */
+    /* get event e (port-dependent)... */
     QEvt *e;
-
     #ifdef Q_SPY
     QF_EPOOL_GET_(QF_ePool_[idx], e,
                   ((margin != QF_NO_MARGIN) ? margin : 0U),
@@ -162,46 +168,48 @@ QEvt * QF_newX_(
                   ((margin != QF_NO_MARGIN) ? margin : 0U), 0U);
     #endif
 
-    /* was e allocated correctly? */
-    QS_CRIT_STAT_
-    if (e != (QEvt *)0) {
+    QF_CRIT_E_();
+    if (e != (QEvt *)0) { /* was e allocated correctly? */
         e->sig = (QSignal)sig;     /* set signal for this event */
         e->poolId_ = (uint8_t)(idx + 1U); /* store the pool ID */
         e->refCtr_ = 0U; /* set the reference counter to 0 */
 
-        QS_BEGIN_PRE_(QS_QF_NEW, (uint_fast8_t)QS_EP_ID + e->poolId_)
+        QS_BEGIN_NOCRIT_PRE_(QS_QF_NEW,
+               (uint_fast8_t)QS_EP_ID + e->poolId_)
             QS_TIME_PRE_();        /* timestamp */
             QS_EVS_PRE_(evtSize);  /* the size of the event */
             QS_SIG_PRE_(sig);      /* the signal of the event */
-        QS_END_PRE_()
+        QS_END_NOCRIT_PRE_()
     }
-    /* event cannot be allocated */
-    else {
+    else { /* event was not allocated */
         /* This assertion means that the event allocation failed,
          * and this failure cannot be tolerated. The most frequent
          * reason is an event leak in the application.
          */
-        Q_ASSERT_ID(320, margin != QF_NO_MARGIN);
+        Q_ASSERT_NOCRIT_(320, margin != QF_NO_MARGIN);
 
-        QS_BEGIN_PRE_(QS_QF_NEW_ATTEMPT, (uint_fast8_t)QS_EP_ID + idx + 1U)
+        QS_BEGIN_NOCRIT_PRE_(QS_QF_NEW_ATTEMPT,
+               (uint_fast8_t)QS_EP_ID + idx + 1U)
             QS_TIME_PRE_();        /* timestamp */
             QS_EVS_PRE_(evtSize);  /* the size of the event */
             QS_SIG_PRE_(sig);      /* the signal of the event */
-        QS_END_PRE_()
+        QS_END_NOCRIT_PRE_()
     }
-    return e; /* can't be NULL if we can't tolerate failed allocation */
+    QF_CRIT_X_();
+
+    /* the returned event e is guaranteed to be valid (not NULL)
+    * if we can't tolerate failed allocation
+    */
+    return e;
 }
 
 /*${QF::QF-dyn::gc} ........................................................*/
 /*! @static @public @memberof QF */
 void QF_gc(QEvt const * const e) {
-    /* is it a dynamic event? */
-    if (e->poolId_ != 0U) {
+    if (e->poolId_ != 0U) { /* is it a pool event (dynamic)? */
         QF_CRIT_STAT_
         QF_CRIT_E_();
-
-        /* isn't this the last reference? */
-        if (e->refCtr_ > 1U) {
+        if (e->refCtr_ > 1U) { /* isn't this the last reference? */
 
             QS_BEGIN_NOCRIT_PRE_(QS_QF_GC_ATTEMPT,
                                  (uint_fast8_t)QS_EP_ID + e->poolId_)
@@ -214,8 +222,7 @@ void QF_gc(QEvt const * const e) {
 
             QF_CRIT_X_();
         }
-        /* this is the last reference to this event, recycle it */
-        else {
+        else {  /* this is the last reference to this event, recycle it */
             uint_fast8_t const idx = (uint_fast8_t)e->poolId_ - 1U;
 
             QS_BEGIN_NOCRIT_PRE_(QS_QF_GC,
@@ -225,10 +232,10 @@ void QF_gc(QEvt const * const e) {
                 QS_2U8_PRE_(e->poolId_, e->refCtr_); /* pool Id & ref Count */
             QS_END_NOCRIT_PRE_()
 
-            QF_CRIT_X_();
-
             /* pool ID must be in range */
-            Q_ASSERT_ID(410, idx < QF_maxPool_);
+            Q_ASSERT_NOCRIT_(410, idx < QF_maxPool_);
+
+            QF_CRIT_X_();
 
             /* cast 'const' away, which is OK, because it's a pool event */
     #ifdef Q_SPY
@@ -247,18 +254,15 @@ QEvt const * QF_newRef_(
     QEvt const * const e,
     void const * const evtRef)
 {
-    #ifdef Q_NASSERT
+    #ifdef Q_UNSAFE
     Q_UNUSED_PAR(evtRef);
     #endif
 
-    /*! @pre the event must be dynamic and the provided event reference
-    * must not be already in use */
-    Q_REQUIRE_ID(500,
-        (e->poolId_ != 0U)
-        && (evtRef == (void *)0));
-
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(500,
+        (e->poolId_ != 0U)
+        && (evtRef == (void *)0));
 
     QEvt_refCtr_inc_(e); /* increments the ref counter */
 
@@ -277,9 +281,9 @@ QEvt const * QF_newRef_(
 /*${QF::QF-dyn::deleteRef_} ................................................*/
 /*! @static @private @memberof QF */
 void QF_deleteRef_(void const * const evtRef) {
-    QS_CRIT_STAT_
     QEvt const * const e = (QEvt const *)evtRef;
 
+    QS_CRIT_STAT_
     QS_BEGIN_PRE_(QS_QF_DELETE_REF,
                   (uint_fast8_t)QS_EP_ID + e->poolId_)
         QS_TIME_PRE_();      /* timestamp */

@@ -38,6 +38,9 @@
 /*$endhead${include::qf.h} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief QF/C platform-independent public interface.
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QF_H_
 #define QF_H_
@@ -160,7 +163,9 @@ typedef uint8_t QTimeEvtCtr;
 #ifndef QF_LOG2
 /*! Log-base-2 calculation when hardware acceleration
 * is NOT provided (#QF_LOG2 not defined).
-* @static @private @memberof QF
+*
+* @trace
+* - @tr{DVR-QP-MC3-R17_08}
 */
 uint_fast8_t QF_LOG2(QPSetBits x);
 #endif /* ndef QF_LOG2 */
@@ -229,53 +234,52 @@ typedef uint_fast16_t QSchedStatus;
 typedef struct {
 /* public: */
 
-#if (QF_MAX_ACTIVE <= 32)
     /*! bitmask with a bit for each element */
-    QPSetBits volatile bits;
-#endif /*  (QF_MAX_ACTIVE <= 32) */
-
-#if (32 < QF_MAX_ACTIVE)
-    /*! bitmasks with a bit for each element */
-    QPSetBits volatile bits[2];
-#endif /*  (32 < QF_MAX_ACTIVE) */
+    QPSetBits volatile bits[(QF_MAX_ACTIVE + 31U)/32U];
 } QPSet;
 
 /* public: */
 
-/*! Make the priority set empty */
+/*! Make the priority set empty
+* @memberof QPSet
+*/
 static inline void QPSet_setEmpty(QPSet * const me) {
-    #if (QF_MAX_ACTIVE <= 32)
-        me->bits = 0U;
-    #else
-        me->bits[0] = 0U;
+    me->bits[0] = 0U;
+    #if (QF_MAX_ACTIVE > 32)
         me->bits[1] = 0U;
     #endif
 }
 
-/*! Return 'true' if the priority set is empty */
+/*! Return 'true' if the priority set is empty
+* @memberof QPSet
+*/
 static inline bool QPSet_isEmpty(QPSet const * const me) {
-    #if (QF_MAX_ACTIVE <= 32)
-        return (me->bits == 0U);
+    #if (QF_MAX_ACTIVE <= 32U)
+        return (me->bits[0] == 0U);
     #else
         return (me->bits[0] == 0U) ? (me->bits[1] == 0U) : false;
     #endif
 }
 
-/*! Return 'true' if the priority set is NOT empty */
+/*! Return 'true' if the priority set is NOT empty
+* @memberof QPSet
+*/
 static inline bool QPSet_notEmpty(QPSet const * const me) {
-    #if (QF_MAX_ACTIVE <= 32)
-        return (me->bits != 0U);
+    #if (QF_MAX_ACTIVE <= 32U)
+        return (me->bits[0] != 0U);
     #else
         return (me->bits[0] != 0U) ? true : (me->bits[1] != 0U);
     #endif
 }
 
-/*! Return 'true' if the priority set has the element n. */
+/*! Return 'true' if the priority set has the element n.
+* @memberof QPSet
+*/
 static inline bool QPSet_hasElement(QPSet const * const me,
     uint_fast8_t const n)
 {
     #if (QF_MAX_ACTIVE <= 32U)
-        return (me->bits & (1U << (n - 1U))) != 0U;
+        return (me->bits[0] & (1U << (n - 1U))) != 0U;
     #else
         return (n <= 32U)
         ? ((me->bits[0] & ((uint32_t)1U << (n - 1U))) != 0U)
@@ -283,12 +287,14 @@ static inline bool QPSet_hasElement(QPSet const * const me,
     #endif
 }
 
-/*! insert element `n` into the set (n = 1..::QF_MAX_ACTIVE) */
+/*! insert element `n` into the set (n = 1..::QF_MAX_ACTIVE)
+* @memberof QPSet
+*/
 static inline void QPSet_insert(QPSet * const me,
     uint_fast8_t const n)
 {
     #if (QF_MAX_ACTIVE <= 32U)
-        me->bits = (me->bits | (1U << (n - 1U)));
+        me->bits[0] = (me->bits[0] | (1U << (n - 1U)));
     #else
         if (n <= 32U) {
             me->bits[0] = (me->bits[0] | ((uint32_t)1U << (n - 1U)));
@@ -299,12 +305,14 @@ static inline void QPSet_insert(QPSet * const me,
     #endif
 }
 
-/*! Remove element `n` from the set (n = 1U..::QF_MAX_ACTIVE) */
+/*! Remove element `n` from the set (n = 1U..::QF_MAX_ACTIVE)
+* @memberof QPSet
+*/
 static inline void QPSet_remove(QPSet * const me,
     uint_fast8_t const n)
 {
     #if (QF_MAX_ACTIVE <= 32U)
-        me->bits = (me->bits &
+        me->bits[0] = (me->bits[0] &
             (QPSetBits)(~((QPSetBits)1U << (n - 1U))));
     #else
         if (n <= 32U) {
@@ -316,16 +324,61 @@ static inline void QPSet_remove(QPSet * const me,
     #endif
 }
 
-/*! Find the maximum element in the set, returns zero if the set is empty */
+/*! Find the maximum element in the set, returns zero if the set is empty
+* @memberof QPSet
+*/
 static inline uint_fast8_t QPSet_findMax(QPSet const * const me) {
-    #if (QF_MAX_ACTIVE <= 32)
-        return QF_LOG2(me->bits);
+    #if (QF_MAX_ACTIVE <= 32U)
+        return QF_LOG2(me->bits[0]);
     #else
         return (me->bits[1] != 0U)
             ? (QF_LOG2(me->bits[1]) + 32U)
             : (QF_LOG2(me->bits[0]));
     #endif
 }
+
+/* private: */
+
+#ifndef QP_NDBC
+/*! udate the given redundant inverted copy (Software Self-Monitoring (SSM))
+* @private @memberof QPSet
+*
+* @param[in]     me  current instance pointer (see @ref oop)
+* @param[in,out] rmc pointer to the Redundant Mirror Copy (RMC)
+*/
+static inline void QPSet_update(QPSet const * const me,
+    QPSet * const rmc)
+{
+    rmc->bits[0] = ~me->bits[0];
+    #if (QF_MAX_ACTIVE > 32U)
+        rmc->bits[1] = ~me->bits[1];
+    #endif
+}
+#endif /* ndef QP_NDBC */
+
+#ifndef QP_NDBC
+/*! verify match with the duplicate storage (inverted copy)
+* @private @memberof QPSet
+*
+* @param[in]  me  current instance pointer (see @ref oop)
+* @param[in]  dus pointer to the duplicate storage (inverted bits)
+*
+* @returns
+* 'true' if this set matches the mirror copy and 'false' otherwise.
+*/
+static inline bool QPSet_verify(QPSet const * const me,
+    QPSet const * const dus)
+{
+    #if (QF_MAX_ACTIVE <= 32U)
+        QPSetBits tmp = me->bits[0];
+        return tmp == (QPSetBits)(~dus->bits[0]);
+    #else
+        QPSetBits tmp = me->bits[0];
+        return (tmp == (QPSetBits)(~dus->bits[0]))
+               && (me->bits[1] == (QPSetBits)(~dus->bits[1]));
+    #endif
+}
+#endif /* ndef QP_NDBC */
 
 /*${QF-types::QSubscrList} .................................................*/
 /*! Subscriber List (for publish-subscribe)
@@ -363,6 +416,9 @@ typedef QPSet QSubscrList;
 * applications.
 *
 * @sa QMActive
+*
+* @trace
+* - @tr{ARC-QP-02_30}
 *
 * @usage
 * The following example illustrates how to derive an active object from
@@ -442,6 +498,7 @@ typedef struct QActive {
 * @param[in,out] me  current instance pointer (see @ref oop)
 * @param[in] initial pointer to the top-most initial state-handler
 *                    function in the derived active object
+*
 * @sa QHsm_ctor()
 */
 void QActive_ctor(QActive * const me,
@@ -464,6 +521,9 @@ void QActive_ctor(QActive * const me,
 * @param[in] stkSto   pointer to the stack storage (might be NULL)
 * @param[in] stkSize  stack size [bytes]
 * @param[in] par      pointer to an extra parameter (might be NULL)
+*
+* @trace
+* - @tr{DVR-QP-MC3-R08_13}
 *
 * @usage
 * The following example shows starting an AO when a per-task stack
@@ -612,7 +672,7 @@ QEvt const * QActive_get_(QActive * const me);
 *
 * The following example shows how the Table active object subscribes
 * to three signals in the initial transition:
-* @include qf_subscribe.cpp
+* @include qf_subscribe.c
 *
 * @sa
 * QActive_publish_(), QActive_unsubscribe(), and
@@ -751,6 +811,7 @@ void QActive_publish_(
 * the RTC step. Later, the active object might recall one event at a
 * time from the event queue.
 *
+* @param[in,out] me current instance pointer (see @ref oop)
 * @param[in] eq  pointer to a "raw" thread-safe queue to recall
 *                an event from.
 * @param[in] e   pointer to the event to be deferred
@@ -779,6 +840,7 @@ bool QActive_defer(QActive const * const me,
 * deferred event queue `eq` and posted (LIFO) to the event queue of
 * the active object.
 *
+* @param[in,out] me current instance pointer (see @ref oop)
 * @param[in]  eq  pointer to a "raw" thread-safe queue to recall
 *                 an event from.
 *
@@ -803,6 +865,7 @@ bool QActive_recall(QActive * const me,
 * can use this function to flush a given QF event queue. The function
 * makes sure that the events are not leaked.
 *
+* @param[in,out] me current instance pointer (see @ref oop)
 * @param[in]  eq  pointer to a "raw" thread-safe queue to flush.
 *
 * @returns
@@ -973,7 +1036,8 @@ typedef struct QActiveVtable {
 * as the base class for derivation of active objects in the application.
 *
 * @trace
-* @tr{AQP214}
+* - @tr{REQ-QP-02_21}
+* - @tr{ARC-QP-02_50}
 *
 * @usage
 * The following example illustrates how to derive an active object from
@@ -1050,7 +1114,7 @@ typedef QActiveVtable QMActiveVtable;
 * @sa ::QTimeEvt for the description of the data members
 *
 * @trace
-* @tr{AQP215}
+* - @tr{ARC-QP-02_60}
 *
 * @note
 * QF manages the time events in the QTIMEEVT_TICK_X() macro, which must
@@ -1165,6 +1229,9 @@ void QTimeEvt_ctorX(QTimeEvt * const me,
 * a programming error. The QP/C framework will assert if it detects an
 * attempt to arm an already armed time event.
 *
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
+*
 * @usage
 * The following example shows how to arm a periodic time event as well as
 * one-shot time event from a state machine of an active object:
@@ -1223,6 +1290,9 @@ bool QTimeEvt_disarm(QTimeEvt * const me);
 * - tick rate must be in range
 * - nTicks must not be zero,
 * - the signal of this time event must be valid
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
 */
 bool QTimeEvt_rearm(QTimeEvt * const me,
     QTimeEvtCtr const nTicks);
@@ -1294,6 +1364,9 @@ QTimeEvtCtr QTimeEvt_currCtr(QTimeEvt const * const me);
 * serviced from interrupts while others from tasks (active objects).
 *
 * @sa ::QTimeEvt.
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
 */
 void QTimeEvt_tick_(
     uint_fast8_t const tickRate,
@@ -1394,6 +1467,9 @@ bool QTicker_post_(
 
 /*! post-LIFO (override)
 * @private @memberof QTicker
+*
+* @trace
+* - @tr{DVP-QP-PCLP-2707}
 */
 void QTicker_postLIFO_(
     QActive * const me,
@@ -1435,6 +1511,9 @@ extern uint_fast8_t volatile QF_intNest_;
 * QF_init() clears the internal QF variables, so that the framework
 * can start correctly even if the startup code fails to clear the
 * uninitialized data (as is required by the C Standard).
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_08}
 */
 void QF_init(void);
 
@@ -1558,19 +1637,27 @@ void QF_onCleanup(void);
 * @param[in] evtSize  the block-size of the pool in bytes, which determines
 *            the maximum size of events that can be allocated from the pool.
 *
-* @attention
+* @precondition{qf_dyn,200}
+* - the number of event-pools initialized so far must not exceed
+*   the maximum #QF_MAX_EPOOL
+* @precondition{qf_dyn,201}
+* - except the firt event-pool, the event-size of the previously
+*   initialized event pool must not exceed the next event size.
+
 * You might initialize many event pools by making many consecutive calls
 * to the QF_poolInit() function. However, for the simplicity of the internal
 * implementation, you must initialize event pools in the **ascending order**
 * of the event size.
 *
+* @remark
 * Many RTOSes provide fixed block-size heaps, a.k.a. memory pools that can
-* be adapted for QF event pools. In case such support is missing, QF provides
-* a native QF event pool implementation. The macro #QF_EPOOL_TYPE_ determines
-* the type of event pool used by a particular QF port. See structure ::QMPool
-* for more information.
+* be adapted for QF event-pools. In case the pools from the RTOS are not used,
+* QF provides a native QF memory pool implementation. The macro #QF_EPOOL_TYPE_
+* determines the type of event pool used by a particular QF port. See
+* class ::QMPool for more information.
 *
-* @note The actual number of events available in the pool might be actually
+* @note
+* The actual number of events available in the pool might be actually
 * less than (`poolSize` / `evtSize`) due to the internal alignment
 * of the blocks that the pool might perform. You can always check the
 * capacity of the pool by calling QF_getPoolMin().
@@ -1606,9 +1693,12 @@ uint_fast16_t QF_poolGetMaxBlockSize(void);
 * @param[in] poolId  event pool ID in the range 1..QF_maxPool_, where
 *                    QF_maxPool_ is the number of event pools initialized
 *                    with the function QF_poolInit().
-*
 * @returns
 * the minimum number of unused blocks in the given event pool.
+*
+* @precondition{qf_dyn:400}
+* - the poolId must be in range
+*
 */
 uint_fast16_t QF_getPoolMin(uint_fast8_t const poolId);
 
@@ -1630,6 +1720,9 @@ uint_fast16_t QF_getPoolMin(uint_fast8_t const poolId);
 * pointer to the newly allocated event. This pointer can be NULL only if
 * margin != #QF_NO_MARGIN and the event cannot be allocated with the
 * specified margin still available in the given pool.
+*
+* @precondition{qf_dyn,300}
+* - the event size must fit one of the initialized event pools
 *
 * @note
 * The internal QF function QF_newX_() raises an assertion when the
@@ -1671,6 +1764,9 @@ QEvt * QF_newX_(
 * queues are processed outside of QF and the automatic garbage collection
 * is **NOT** performed for these events. In this case you need to call
 * QF_gc() explicitly.
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_08}
 */
 void QF_gc(QEvt const * const e);
 
@@ -1686,6 +1782,10 @@ void QF_gc(QEvt const * const e);
 *
 * @returns
 * the newly created reference to the event `e`
+*
+* @precondition{qf_dyn,500}
+* - the event must be from a pool (dynamic event)
+* - the provided event reference must not be already in use
 *
 * @note
 * The application code should not call this function directly.
@@ -1707,6 +1807,9 @@ QEvt const * QF_newRef_(
 * @note
 * The application code should not call this function directly.
 * The only allowed use is thorough the macro Q_DELETE_REF().
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
 */
 void QF_deleteRef_(void const * const evtRef);
 /*$enddecl${QF::QF-dyn} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
@@ -1774,6 +1877,11 @@ void QF_onContextSw(
 * class being allocated. The constructor is then called by means
 * of the placement-new operator.
 *
+* @trace
+* - @tr{DVP-QP-MC3-R10_03}
+* - @tr{DVP-QP-MC3-R11_03B}
+* - @tr{DVP-QP-PCLP-826}
+*
 * @usage
 * The following example illustrates dynamic allocation of an event:
 * @include qf_post.c
@@ -1816,6 +1924,11 @@ void QF_onContextSw(
 * takes all the arguments needed by the constructor of the event
 * class being allocated. The constructor is then called by means
 * of the placement-new operator.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R10_03}
+* - @tr{DVP-QP-MC3-R11_03B}
+* - @tr{DVP-QP-PCLP-826}
 *
 * @usage
 * The following example illustrates dynamic allocation of an event:
@@ -1935,6 +2048,10 @@ void QF_onContextSw(
 * unambiguously identify the sender of the event.
 *
 * @sa QActive_post_()
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_03A}
+* - @tr{DVP-QP-PCLP-826}
 */
 #define QACTIVE_POST(me_, e_, sender_) \
     ((void)(*((QActiveVtable const *)((Q_HSM_UPCAST(me_))->vptr))->post)(\
@@ -1982,6 +2099,10 @@ void QF_onContextSw(
 * interrupt or other context, you can create a unique object just to
 * unambiguously identify the sender of the event.
 *
+* @trace
+* - @tr{DVP-QP-MC3-R11_03A}
+* - @tr{DVP-QP-PCLP-826}
+*
 * @usage
 * @include qf_postx.c
 */
@@ -2003,6 +2124,10 @@ void QF_onContextSw(
 *
 * @param[in,out] me_   current instance pointer (see @ref oop)
 * @param[in]     e_    pointer to the event to post
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_03A}
+* - @tr{DVP-QP-PCLP-826}
 */
 #define QACTIVE_POST_LIFO(me_, e_) \
     ((*((QActiveVtable const *)((Q_HSM_UPCAST(me_))->vptr))->postLIFO)( \

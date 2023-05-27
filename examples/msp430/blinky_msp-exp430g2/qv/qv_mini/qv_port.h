@@ -23,15 +23,15 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-07-30
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QV/C port port to MSP430
 */
-#ifndef QV_PORT_H
-#define QV_PORT_H
+#ifndef QV_PORT_H_
+#define QV_PORT_H_
 
 #include "qv.h"  /* QV platform-independent public interface */
 
-#endif /* QV_PORT_H */
+#endif /* QV_PORT_H_ */

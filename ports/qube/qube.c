@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-16
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief Qube command-line QP execution environment
@@ -35,7 +35,7 @@
 
 #define QP_IMPL       /* this is QP implementation */
 #include "qf_port.h"  /* QF port */
-#include "qassert.h"  /* QP embedded systems-friendly assertions */
+#include "qsafety.h"  /* QP Functional Safety (FuSa) System */
 #include "qs_port.h"  /* QS port */
 #include "qs_pkg.h"   /* QS package-scope interface */
 
@@ -428,9 +428,9 @@ QSTimeCtr QS_onGetTime(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
-    QS_ASSERTION(module, loc, 0U); /* report assertion to QS */
-    FPRINTF_S(stderr, "Assertion failed in %s:%d", module, loc);
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
+    QS_ASSERTION(module, id, 0U); /* report assertion to QS */
     QF_onCleanup();
     QS_EXIT();
     exit(-1);

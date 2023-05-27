@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-18
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QV/C port to ARM Cortex-M, IAR-ARM toolset
 */
-#ifndef QV_PORT_H
-#define QV_PORT_H
+#ifndef QV_PORT_H_
+#define QV_PORT_H_
 
 #if (__ARM_ARCH == 6) /* ARMv6-M? */
 
@@ -74,5 +74,5 @@ void QV_init(void);
 
 #include "qv.h" /* QV platform-independent public interface */
 
-#endif /* QV_PORT_H */
+#endif /* QV_PORT_H_ */
 

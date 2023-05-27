@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C "port" for QUTest unit test harness, Win32 with GNU or VisualC++
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* QUTest event queue and thread types */
 #define QF_EQUEUE_TYPE QEQueue
@@ -51,9 +51,9 @@
 #define QF_INT_ENABLE()      (--QF_intLock_)
 
 /* QUTest critical section */
-/* QF_CRIT_STAT_TYPE not defined */
-#define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
-#define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()         QF_INT_DISABLE()
+#define QF_CRIT_X_()         QF_INT_ENABLE()
 
 /* QF_LOG2 not defined -- use the internal LOG2() implementation */
 
@@ -62,7 +62,7 @@
 #include "qmpool.h"    /* QUTest port uses QMPool memory-pool */
 #include "qf.h"        /* QF platform-independent public interface */
 
-/****************************************************************************/
+/*==========================================================================*/
 /* interface used only inside QF implementation, but not in applications */
 #ifdef QP_IMPL
 
@@ -73,9 +73,15 @@
 
     /* native event queue operations */
     #define QACTIVE_EQUEUE_WAIT_(me_) \
-        Q_ASSERT_ID(110, (me_)->eQueue.frontEvt != (QEvt *)0)
+        Q_ASSERT_NOCRIT_(302, (me_)->eQueue.frontEvt != (QEvt *)0)
+#ifndef Q_UNSAFE
+    #define QACTIVE_EQUEUE_SIGNAL_(me_) \
+        QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio); \
+        QPSet_update(&QF_readySet_, &QF_readySet_inv_)
+#else
     #define QACTIVE_EQUEUE_SIGNAL_(me_) \
         QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio)
+#endif
 
     /* native QF event pool operations */
     #define QF_EPOOL_TYPE_            QMPool
@@ -91,4 +97,4 @@
 
 #endif /* QP_IMPL */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */

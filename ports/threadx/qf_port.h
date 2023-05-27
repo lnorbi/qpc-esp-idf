@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-06-12
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C, port to ThreadX
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* ThreadX event queue and thread types */
 #define QF_EQUEUE_TYPE      TX_QUEUE
@@ -44,9 +44,9 @@
 #define QF_MAX_ACTIVE       (31U - QF_TX_PRIO_OFFSET)
 
 /* QF critical section for ThreadX, see NOTE3 */
-#define QF_CRIT_STAT_TYPE     UINT
-#define QF_CRIT_ENTRY(stat_)  ((stat_) = tx_interrupt_control(TX_INT_DISABLE))
-#define QF_CRIT_EXIT(stat_)   ((void)tx_interrupt_control(stat_))
+#define QF_CRIT_STAT_       UINT int_ctrl_;
+#define QF_CRIT_E_()        (int_ctrl_ = tx_interrupt_control(TX_INT_DISABLE))
+#define QF_CRIT_X_()        ((void)tx_interrupt_control(int_ctrl_))
 
 enum ThreadX_ThreadAttrs {
     THREAD_NAME_ATTR
@@ -59,9 +59,8 @@ enum ThreadX_ThreadAttrs {
 #include "qmpool.h"   /* native QF event pool */
 #include "qf.h"       /* QF platform-independent public interface */
 
-/*****************************************************************************
-* interface used only inside QF, but not in applications
-*/
+/*==========================================================================*/
+/* interface used only inside QF implementation, but not in applications */
 #ifdef QP_IMPL
 
     /*! ThreadX-specific scheduler locking (implemented in qf_port.c) */
@@ -92,7 +91,7 @@ enum ThreadX_ThreadAttrs {
     /* internal TX interrupt counter for TX_THREAD_GET_SYSTEM_STATE() */
     extern ULONG volatile _tx_thread_system_state;
 
-    /* native QF event pool operations */
+    /* native QF event pool customization */
     #define QF_EPOOL_TYPE_            QMPool
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
         (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
@@ -102,10 +101,10 @@ enum ThreadX_ThreadAttrs {
     #define QF_EPOOL_PUT_(p_, e_, qs_id_) \
         (QMPool_put(&(p_), (e_), (qs_id_)))
 
-#endif /* ifdef QP_IMPL */
+#endif /* QP_IMPL */
 
-/*****************************************************************************
-* NOTE1:
+/*==========================================================================*/
+/* NOTE1:
 * QF_TX_PRIO_OFFSET specifies the number of highest-urgency ThreadX
 * priorities not available to QP active objects. These highest-urgency
 * priorities might be used by ThreadX threads that run "above" QP active
@@ -130,5 +129,5 @@ enum ThreadX_ThreadAttrs {
 * the tx_interrupt_control() API.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 

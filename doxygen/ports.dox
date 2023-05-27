@@ -66,9 +66,6 @@ Because the QP distribution contains *all* ports, the number of sub-directories 
 /*##########################################################################*/
 /*! @page ports_lint PC-Lint-Plus
 
-@image html  pc-lint-plus.png "PC-Lint Plus"
-@image latex pc-lint-plus.png "PC-Lint Plus" width=2in
-
 The QP/C distribution contains a "port" to <a href="https://pclintplus.com" target="_blank" class="extern"><b>PC-Lint-Plus</b></a> static analysis tool from <a href="https://www.vector.com" target="_blank" class="extern">Vector</a>, which is a static analysis tool for C and C++ with one of the longest track records and best value of the money in the industry. The "PC-Lint-Plus port" allows you to statically analyze the QP/C source code and facilitates static analysis of your **application code** based on QP/C.
 
 The QP/C "port" to PC-Lint-Plus is located in the directory <span class="img folder">qpc/ports/lint-plus</span> and includes also lint configuration files, as well as an example of "linting" application code in the directory <span class="img folder">qpc/examples/arm-cm/dpp_ek-tm4c123gxl/lint-plus</span>. The following listing describes the most important files in these three directories.

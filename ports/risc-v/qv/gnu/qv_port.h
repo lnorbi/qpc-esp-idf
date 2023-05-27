@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-09-29
-* @version Last updated for: @ref qpc_7_1_2
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QV/C port to RISC-V, GNU compiler
 */
-#ifndef RISCV_QV_PORT_H_
-#define RISCV_QV_PORT_H_
+#ifndef QV_PORT_H_
+#define QV_PORT_H_
 
 /*! macro to put the CPU to sleep inside QV_onIdle() */
 /* The following QV_CPU_SLEEP() executes the WFI instruction with
@@ -50,4 +50,6 @@
 * But, according to the "The RISC-V Instruction Set Manual",
 * the `WFI` instruction *can* be executed when interrupts are disabled.
 */
-#endif /* RISCV_QV_PORT_H_ */
+
+#endif /* QV_PORT_H_ */
+

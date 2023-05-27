@@ -216,12 +216,13 @@ void QK_onIdle(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
 #ifndef NDEBUG
     /* for debugging, hang on in an endless loop toggling the RED LED... */
     while (GPIOF->DATA_Bits[BTN_SW1] != 0) {
@@ -230,6 +231,11 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
     }
 #endif
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /*****************************************************************************

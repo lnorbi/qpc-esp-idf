@@ -1,7 +1,7 @@
-/*****************************************************************************
+/*============================================================================
 * Product: "DPP" example on STM32F4-Discovery board, dual-mode QXK kernel
-* Last updated for version 6.9.3
-* Last updated on  2021-03-03
+* Last updated for version 7.3.0
+* Last updated on  2023-05-27
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -30,7 +30,7 @@
 * Contact information:
 * <www.state-machine.com/licensing>
 * <info@state-machine.com>
-*****************************************************************************/
+============================================================================*/
 #include "qpc.h"
 #include "dpp.h"
 #include "bsp.h"
@@ -144,6 +144,24 @@ void USART2_IRQHandler(void) {}
 
 /* BSP functions ===========================================================*/
 void BSP_init(void) {
+    /* Configure the MPU to prevent NULL-pointer dereferencing
+    * see: state-machine.com/null-pointer-protection-with-arm-cortex-m-mpu
+    */
+    /* enable the MemManage_Handler for MPU exception */
+    SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+
+    MPU->RBAR = 0x0U                          /* base address (NULL) */
+                | MPU_RBAR_VALID_Msk          /* valid region */
+                | (MPU_RBAR_REGION_Msk & 7U); /* region #7 */
+    MPU->RASR = (7U << MPU_RASR_SIZE_Pos)     /* 2^(7+1) region */
+                | (0x0U << MPU_RASR_AP_Pos)   /* no-access region */
+                | MPU_RASR_ENABLE_Msk;        /* region enable */
+
+    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk       /* enable background region */
+                | MPU_CTRL_ENABLE_Msk;        /* enable the MPU */
+    __ISB();
+    __DSB();
+
     GPIO_InitTypeDef GPIO_struct;
 
     /* NOTE: SystemInit() already called from the startup code
@@ -344,14 +362,20 @@ void QXK_onIdle(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/
@@ -437,7 +461,6 @@ void QS_onReset(void) {
 void QS_onCommand(uint8_t cmdId,
                   uint32_t param1, uint32_t param2, uint32_t param3)
 {
-    void assert_failed(char const *module, int loc);
     (void)cmdId;
     (void)param1;
     (void)param2;
@@ -451,9 +474,6 @@ void QS_onCommand(uint8_t cmdId,
 
     if (cmdId == 10U) {
         Q_ERROR();
-    }
-    else if (cmdId == 11U) {
-        assert_failed("QS_onCommand", 123);
     }
 }
 

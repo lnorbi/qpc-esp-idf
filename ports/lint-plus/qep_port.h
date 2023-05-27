@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-10-12
-* @version Last updated for: @ref qpc_7_1_3
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QEP/C port, generic C11 compiler
 */
-#ifndef QEP_PORT_H
-#define QEP_PORT_H
+#ifndef QEP_PORT_H_
+#define QEP_PORT_H_
 
 /*! no-return void function specifier (C11 Standard) */
 #define Q_NORETURN  _Noreturn  void
@@ -40,4 +40,5 @@
 
 #include "qep.h"     /* QEP platform-independent public interface */
 
-#endif /* QEP_PORT_H */
+#endif /* QEP_PORT_H_ */
+

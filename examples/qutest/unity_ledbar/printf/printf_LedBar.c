@@ -26,7 +26,12 @@ int main(int argc, char *argv[]) {
 /*..........................................................................*/
 #include <stdlib.h> /* for exit() */
 
-void Q_onAssert(char const * const module, int const loc) {
-    printf("Assertion in %s:%d\n", module, loc);
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    printf("ERROR in %s:%d\n", module, id);
     exit(-1);
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }

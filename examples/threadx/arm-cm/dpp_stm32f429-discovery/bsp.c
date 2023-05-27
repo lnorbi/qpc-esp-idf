@@ -223,20 +223,20 @@ void QF_onStartup(void) {
     * might choose to call QTIMEEVT_TICK_X() directly from timer interrupts
     * or from active object(s).
     */
-    Q_ALLEGE(tx_timer_create(&l_tick_timer, /* ThreadX timer object */
+    UINT tx_err = tx_timer_create(&l_tick_timer, /* ThreadX timer object */
         (CHAR *)"QP-tick", /* name of the timer */
         &timer_expiration, /* expiration function */
         0U,       /* expiration function input (tick rate) */
         1U,       /* initial ticks */
         1U,       /* reschedule ticks */
-        TX_AUTO_ACTIVATE) /* automatically activate timer */
-             == TX_SUCCESS);
+        TX_AUTO_ACTIVATE);
+    Q_ASSERT(tx_err == TX_SUCCESS);
 
 #ifdef Q_SPY
     //TBD: enable the UART ISR for receiving bytes...
 
     /* start a ThreadX "idle" thread. See NOTE1... */
-    Q_ALLEGE(tx_thread_create(&idle_thread, /* thread control block */
+    tx_err = tx_thread_create(&idle_thread, /* thread control block */
         (CHAR *)("idle"), /* thread name */
         &idle_thread_fun,       /* thread function */
         0LU,                    /* thread input (unsued) */
@@ -245,8 +245,8 @@ void QF_onStartup(void) {
         TX_MAX_PRIORITIES - 1U, /* ThreadX priority (LOWEST possible), NOTE1 */
         TX_MAX_PRIORITIES - 1U, /* preemption threshold disabled */
         TX_NO_TIME_SLICE,
-        TX_AUTO_START)
-             == TX_SUCCESS);
+        TX_AUTO_START);
+    Q_ASSERT(tx_err == TX_SUCCESS);
 #endif /* Q_SPY */
 }
 /*..........................................................................*/
@@ -254,14 +254,21 @@ void QF_onCleanup(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
     NVIC_SystemReset();
+    for (;;) {} /* explicitly no-retur */
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/
@@ -281,12 +288,10 @@ static void idle_thread_fun(ULONG thread_input) { /* see NOTE1 */
         LED_GPIO_PORT->BSRRH = LED6_PIN; /* turn LED off */
 
         if ((USART2->SR & 0x80U) != 0U) { /* is TXE empty? */
-            uint16_t b;
-            QF_CRIT_STAT_TYPE intStat;
-
-            QF_CRIT_ENTRY(intStat);
-            b = QS_getByte();
-            QF_CRIT_EXIT(intStat);
+            QF_CRIT_STAT_
+            QF_CRIT_E_();
+            uint16_t b = QS_getByte();
+            QF_CRIT_X_();
 
             if (b != QS_EOD) {  /* not End-Of-Data? */
                 USART2->DR  = (b & 0xFFU);  /* put into the DR register */
@@ -357,17 +362,16 @@ QSTimeCtr QS_onGetTime(void) {  /* NOTE: invoked with interrupts DISABLED */
 /*..........................................................................*/
 void QS_onFlush(void) {
     uint16_t b;
-    QF_CRIT_STAT_TYPE intStat;
-
-    QF_CRIT_ENTRY(intStat);
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
     while ((b = QS_getByte()) != QS_EOD) { /* while not End-Of-Data... */
-        QF_CRIT_EXIT(intStat);
+        QF_CRIT_X_();
         while ((USART2->SR & USART_FLAG_TXE) == 0) { /* while TXE not empty */
         }
         USART2->DR = (b & 0xFFU); /* put into the DR register */
-        QF_CRIT_ENTRY(intStat);
+        QF_CRIT_E_();
     }
-    QF_CRIT_EXIT(intStat);
+    QF_CRIT_X_();
 }
 /*..........................................................................*/
 /*! callback function to reset the target (to be implemented in the BSP) */

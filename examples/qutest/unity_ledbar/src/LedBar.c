@@ -2,7 +2,7 @@
 #include "LedBar.h"
 #include "Led.h"
 
-#include "qassert.h" /* for embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 
 Q_DEFINE_THIS_MODULE("LedBar")
 
