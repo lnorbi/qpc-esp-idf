@@ -23,8 +23,13 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
+<<<<<<< HEAD
 * @date Last updated on: 2023-04-12
 * @version Last updated for: @ref qpc_7_2_2
+=======
+* @date Last updated on: 2023-05-18
+* @version Last updated for: @ref qpc_7_3_0
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @file
 * @brief QF/C port to uC-OS2, generic C99 compiler
@@ -32,7 +37,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"
-#include "qassert.h"
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS package-scope internal interface */
@@ -54,12 +59,16 @@ int_t QF_run(void) {
     QF_onStartup();  /* QF callback to configure and start interrupts */
 
     /* produce the QS_QF_RUN trace record */
-    QS_CRIT_STAT_
-    QS_BEGIN_PRE_(QS_QF_RUN, 0U)
-    QS_END_PRE_()
+#ifdef Q_SPY
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    QS_beginRec_((uint_fast8_t)QS_QF_RUN);
+    QS_endRec_();
+    QF_CRIT_X_();
+#endif
 
-    OSStart();       /* start uC-OS2 multitasking */
-    Q_ERROR_ID(100); /* OSStart() should never return */
+    OSStart(); /* start uC-OS2 multitasking,  should never return */
+
     return 0; /* this unreachable return keeps the compiler happy */
 }
 /*..........................................................................*/
@@ -77,14 +86,19 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
     void * const task_name = (void *)me->eQueue;
 
     me->eQueue = OSQCreate((void **)qSto, qLen);  /* create uC-OS2 queue */
+
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
     /* the uC-OS2 queue must be created correctly */
-    Q_ASSERT_ID(210, me->eQueue != (OS_EVENT *)0);
+    Q_ASSERT_NOCRIT_(210, me->eQueue != (OS_EVENT *)0);
+    QF_CRIT_X_();
 
     me->prio  = (uint8_t)(prioSpec & 0xFFU); /* QF-priority of the AO */
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
     QActive_register_(me); /* register this AO */
 
-    QHSM_INIT(&me->super, par, me->prio); /* initial tran. (virtual) */
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 
     /* map from QP to uC/OS priority */
@@ -115,17 +129,21 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
              task_name,        /* pext */
              (INT16U)me->thread); /* task options, see NOTE1 */
 
+    QF_CRIT_E_();
     /* uC-OS2 task must be created correctly */
-    Q_ENSURE_ID(220, err == OS_ERR_NONE);
+    Q_ASSERT_NOCRIT_(220, err == OS_ERR_NONE);
+    QF_CRIT_X_();
 }
 /*..........................................................................*/
 void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
     switch (attr1) {
         case TASK_NAME_ATTR:
            /* this function must be called before QACTIVE_START(),
            * which implies that me->eQueue must not be used yet;
            */
-           Q_ASSERT_ID(300, me->eQueue == (OS_EVENT *)0);
+           Q_ASSERT_NOCRIT_(300, me->eQueue == (OS_EVENT *)0);
            /* temporarily store the name, cast 'const' away */
             me->eQueue = (OS_EVENT *)attr2;
             break;
@@ -134,15 +152,18 @@ void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
             me->thread = attr1;
             break;
     }
+    QF_CRIT_X_();
 }
 
 /*..........................................................................*/
 static void task_function(void *pdata) { /* uC-OS2 task signature */
+    QActive *act = (QActive *)pdata;
+
     /* event-loop */
     for (;;) { /* for-ever */
         QEvt const *e = QActive_get_((QActive *)pdata);
-        /* dispatch to the AO's SM */
-        QHSM_DISPATCH((QHsm *)pdata, e, ((QActive *)pdata)->prio);
+        /* dispatch event (virtual call) */
+        (*act->super.vptr->dispatch)(&act->super, e, act->prio);
         QF_gc(e); /* check if the event is garbage, and collect it if so */
     }
 }
@@ -162,7 +183,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
         }
         else {
             status = false;  /* cannot post */
-            Q_ERROR_ID(710); /* must be able to post the event */
+            Q_ERROR_NOCRIT_(710); /* must be able to post the event */
         }
     }
     else if (nFree > (QEQueueCtr)margin) {
@@ -190,9 +211,18 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
 
         QF_CRIT_X_();
 
+<<<<<<< HEAD
         /* posting to uC-OS2 message queue must succeed, see NOTE3 */
         Q_ALLEGE_ID(720,
             OSQPost(me->eQueue, (void *)e) == OS_ERR_NONE);
+=======
+        INT8U err = OSQPost(me->eQueue, (void *)e);
+
+        QF_CRIT_E_();
+        /* posting to uC-OS2 message queue must succeed, see NOTE3 */
+        Q_ASSERT_NOCRIT_(720, err == OS_ERR_NONE);
+        QF_CRIT_X_();
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     }
     else {
 
@@ -229,29 +259,39 @@ void QActive_postLIFO_(QActive * const me, QEvt const * const e) {
     if (e->poolId_ != 0U) {  /* is it a pool event? */
         QEvt_refCtr_inc_(e); /* increment the reference counter */
     }
-
     QF_CRIT_X_();
 
+<<<<<<< HEAD
         /* posting to uC-OS2 message queue must succeed, see NOTE3 */
     Q_ALLEGE_ID(810,
         OSQPostFront((OS_EVENT *)me->eQueue, (void *)e) == OS_ERR_NONE);
+=======
+    INT8U err = OSQPostFront((OS_EVENT *)me->eQueue, (void *)e);
+
+    QF_CRIT_E_();
+    /* posting to uC-OS2 message queue must succeed, see NOTE3 */
+    Q_ASSERT_NOCRIT_(810, err == OS_ERR_NONE);
+    QF_CRIT_X_();
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 }
 /*..........................................................................*/
 QEvt const *QActive_get_(QActive * const me) {
     INT8U err;
-    QEvt const *e = (QEvt *)OSQPend((OS_EVENT *)me->eQueue, 0U, &err);
+    QEvt const *e = (QEvt const *)OSQPend((OS_EVENT *)me->eQueue, 0U, &err);
 
-    Q_ASSERT_ID(910, err == OS_ERR_NONE);
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(910, err == OS_ERR_NONE);
 
-    QS_CRIT_STAT_
-    QS_BEGIN_PRE_(QS_QF_ACTIVE_GET, me->prio)
+    QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_GET, me->prio)
         QS_TIME_PRE_();      /* timestamp */
         QS_SIG_PRE_(e->sig); /* the signal of this event */
         QS_OBJ_PRE_(me);     /* this active object */
         QS_2U8_PRE_(e->poolId_, e->refCtr_); /* pool Id & ref Count */
         QS_EQC_PRE_(((OS_Q *)me->eQueue)->OSQSize
                     - ((OS_Q *)me->eQueue)->OSQEntries); /* # free entries */
-    QS_END_PRE_()
+    QS_END_NOCRIT_PRE_()
+    QF_CRIT_X_();
 
     return e;
 }

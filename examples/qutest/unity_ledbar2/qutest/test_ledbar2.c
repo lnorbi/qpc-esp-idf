@@ -13,7 +13,9 @@ int main(int argc, char *argv[]) {
     QF_init();  /* initialize the framework */
 
     /* initialize the QS software tracing */
-    Q_ALLEGE(QS_INIT(argc > 1 ? argv[1] : (void *)0));
+    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+        Q_ERROR();
+    }
 
     /* dictionaries... */
     Led_DICTIONARY();

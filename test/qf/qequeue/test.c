@@ -2,11 +2,19 @@
 
 /* includes for the CUT... */
 #include "qf_port.h"
+<<<<<<< HEAD
 #include "qassert.h"  /* QP embedded systems-friendly assertions */
 #ifdef Q_SPY /* software tracing enabled? */
 #include "qs_port.h"   /* QS/C port from the port directory */
 #else
 #include "qs_dummy.h"  /* QS/C dummy (inactive) interface */
+=======
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
+#ifdef Q_SPY /* software tracing enabled? */
+#include "qs_port.h"      /* QS/C port from the port directory */
+#else
+#include "qs_dummy.h"     /* QS/C dummy (inactive) interface */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 #endif
 
 enum { QUEUE_SIZE = 10 };
@@ -52,7 +60,11 @@ TEST("no-buffer queue can hold only 1 (expected assertion)") {
 /* =========================================================================*/
 /* dependencies for the CUT ... */
 
+<<<<<<< HEAD
 uint_fast8_t QF_intLock_;
+=======
+uint_fast8_t volatile QF_intLock_;
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 /*..........................................................................*/
 void QF_poolInit(void * const poolSto, uint_fast32_t const poolSize,
@@ -99,11 +111,23 @@ void QF_gc(QEvt const * const e) {
 QActive *QActive_registry_[QF_MAX_ACTIVE + 1U];
 
 /*..........................................................................*/
+<<<<<<< HEAD
 Q_NORETURN Q_onAssert(char const * const module, int_t const location) {
+=======
+Q_NORETURN Q_onError(char const * const module, int_t const location) {
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     VERIFY_ASSERT(module, location);
     for (;;) { /* explicitly make it "noreturn" */
     }
 }
+<<<<<<< HEAD
+=======
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
+}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 /*--------------------------------------------------------------------------*/
 #ifdef Q_SPY

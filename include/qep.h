@@ -40,7 +40,11 @@
 * @brief QEP/C platform-independent public interface.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP001}, @tr{RQP101}
+=======
+* - @tr{DVP-QP-MC3-D04_08}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 #ifndef QEP_H_
 #define QEP_H_
@@ -53,7 +57,11 @@
 * major version number, Y is a 1-digit minor version number, and Z is
 * a 1-digit release number.
 */
+<<<<<<< HEAD
 #define QP_VERSION 722U
+=======
+#define QP_VERSION 730U
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 /*! The current QP version as a zero terminated string literal.
 *
@@ -62,10 +70,17 @@
 * major version number, Y is a 1-digit minor version number, and Z is
 * a 1-digit release number.
 */
+<<<<<<< HEAD
 #define QP_VERSION_STR "7.2.2"
 
 /*! Encrypted  current QP release (7.2.2) and date (2023-03-01) */
 #define QP_RELEASE 0x76BAD85DU
+=======
+#define QP_VERSION_STR "7.3.0"
+
+/*! Encrypted  current QP release (7.3.0) and date (2023-06-16) */
+#define QP_RELEASE 0x768AC7A5U
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 /*==========================================================================*/
 /*$declare${glob-types} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
@@ -159,7 +174,12 @@ typedef uint32_t QSignal;
 * for derivation of events with parameters.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP001}, @tr{RQP004}, @tr{AQP210}
+=======
+* - @tr{REQ-QP-01_00}
+* - @tr{ARC-QP-02_10}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @usage
 * The following example illustrates how to add an event parameter by
@@ -174,7 +194,11 @@ typedef struct {
     * @public @memberof QEvt
     *
     * @trace
+<<<<<<< HEAD
     * @tr{RQP002}
+=======
+    * - @tr{REQ-QP-01_20}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     */
     QSignal sig;
 
@@ -184,7 +208,11 @@ typedef struct {
     * @private @memberof QEvt
     *
     * @trace
+<<<<<<< HEAD
     * @tr{RQP003}
+=======
+    * - @tr{REQ-QP-01_30}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     */
     uint8_t poolId_;
 
@@ -192,7 +220,11 @@ typedef struct {
     * @private @memberof QEvt
     *
     * @trace
+<<<<<<< HEAD
     * @tr{RQP003}
+=======
+    * - @tr{REQ-QP-01_30}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     */
     uint8_t volatile refCtr_;
 } QEvt;
@@ -207,7 +239,11 @@ typedef struct {
 * Available only when the macro #Q_EVT_CTOR is defined
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP005}
+=======
+* - @tr{REQ-QP-01_40}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 void QEvt_ctor(QEvt * const me,
     enum_t const sig);
@@ -276,7 +312,11 @@ typedef void (* QXThreadHandler )(struct QXThread * const me);
 * QMsm_dispatch() and QMsm_init() functions.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP104}
+=======
+* - @tr{REQ-QP-02_21}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @attention
 * The ::QMState class is only intended for the QM code generator and should
@@ -303,6 +343,9 @@ typedef struct QMTranActTable {
 * @details
 * This union represents possible values stored in the 'state' and 'temp'
 * attributes of the ::QHsm class.
+*
+* @trace
+* - @tr{DVP-QS-MC3-R19_02}
 */
 union QHsmAttr {
     QStateHandler   fun;         /*!< @private pointer to a state-handler */
@@ -310,6 +353,9 @@ union QHsmAttr {
     QXThreadHandler thr;         /*!< @private pointer to an thread-handler */
     QMTranActTable const *tatbl; /*!< @private transition-action table */
     struct QMState const *obj;   /*!< @private pointer to QMState object */
+#ifndef Q_UNSAFE
+    uintptr_t       uint;        /*!< @private unsidend int for FuSa */
+#endif
 };
 
 /*${QEP::QReservedSig} .....................................................*/
@@ -344,7 +390,13 @@ enum QReservedSig {
 * abstract base class for derivation of state machines in the QP application.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{AQP211}
+=======
+* - @tr{REQ-QP-02_00}
+* - @tr{REQ-QP-02_10}
+* - @tr{ARC-QP-02_20}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @usage
 * The following example illustrates how to derive a state machine class
@@ -359,7 +411,11 @@ typedef struct {
     * @private @memberof QHsm
     *
     * @trace
+<<<<<<< HEAD
     * @tr{RQP102}
+=======
+    * - @tr{REQ-QP-02_10}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     */
     struct QHsmVtable const * vptr;
 
@@ -372,6 +428,11 @@ typedef struct {
 
     /*! Temporary: target/act-table, etc.
     * @private @memberof QHsm
+    *
+    * The `temp` data member is used for passing information from the
+    * QP Application to the "event processor" of QP. The `temp` member
+    * is also used as a redundant copy of the `state` variable in between
+    * transitions (part of QP Functional Safety (FuSa) System).
     */
     union QHsmAttr temp;
 } QHsm;
@@ -394,11 +455,19 @@ typedef struct {
 * @returns
 *'true' if the HSM "is in" the `state` and 'false' otherwise
 *
+<<<<<<< HEAD
 * @precondition{qep_hsm,600}
 * - the state configuration must be stable
 *
 * @trace
 * @tr{RQP103}, @tr{RQP120S}
+=======
+* @precondition{qep_hsm,602}
+* - internal integrity check (Software Self-Monitoring (SSM))
+*
+* @trace
+* - @tr{REQ-QP-02_25}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 bool QHsm_isIn(QHsm * const me,
     QStateHandler const state);
@@ -443,7 +512,11 @@ static inline QStateHandler QHsm_state(QHsm * const me) {
 * However, the function establishes stable state configuration upon exit.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{RQP120H}
+=======
+* - @tr{REQ-QP-02_39}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 QStateHandler QHsm_childState(QHsm * const me,
     QStateHandler const parent);
@@ -472,7 +545,12 @@ QStateHandler QHsm_childState(QHsm * const me,
 * @include qep_qhsm_ctor.c
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}
+=======
+* - @tr{REQ-QP-02_00}
+* - @tr{REQ-QP-02_10}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 void QHsm_ctor(QHsm * const me,
     QStateHandler const initial);
@@ -495,7 +573,11 @@ void QHsm_ctor(QHsm * const me,
 * for conformance with the state-handler function signature ::QStateHandler.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{RQP120T}
+=======
+* - @tr{REQ-QP-02_40}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 QState QHsm_top(QHsm const * const me,
     QEvt const * const e);
@@ -518,7 +600,12 @@ QState QHsm_top(QHsm const * const me,
 * @note Must be called only ONCE after the QHsm_ctor().
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{RQP120I}, @tr{RQP120D}
+=======
+* - @tr{REQ-QP-02_10}
+* - @tr{REQ-QP-02_38}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 void QHsm_init_(QHsm * const me,
     void const * const e,
@@ -535,18 +622,28 @@ void QHsm_init_(QHsm * const me,
 * @param[in]     e  pointer to the event to be dispatched to the HSM
 * @param[in]     qs_id QS-id of this state machine (for QS local filter)
 *
+<<<<<<< HEAD
 * @precondition{qep_hsm,400}
 * - the current state must be initialized and
 * - the state configuration must be stable
+=======
+* @precondition{qep_hsm,302}
+* - the current state must be initialized and
+* - check the internal integrity (Software Self-Monitoring (SSM))
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @note
 * This function should be called only via the virtual table (see
 * QHSM_DISPATCH()) and should NOT be called directly in the applications.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{RQP120A}, @tr{RQP120B}, @tr{RQP120C},
 * @tr{RQP120D}, @tr{RQP120E}, @tr{RQP120E}, @tr{RQP120C},
 * @tr{RQP120B}
+=======
+* - @tr{REQ-QP-02_10}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 void QHsm_dispatch_(QHsm * const me,
     QEvt const * const e,
@@ -564,6 +661,7 @@ QStateHandler QHsm_getStateHandler_(QHsm * const me);
 /*! Helper function to execute transition sequence in a hierarchical state
 * machine (HSM).
 *
+* @param[in] me current instance pointer (see @ref oop)
 * @param[in,out] path array of pointers to state-handler functions
 *                     to execute the entry actions
 * @param[in] qs_id    QS-id of this state machine (for QS local filter)
@@ -572,7 +670,11 @@ QStateHandler QHsm_getStateHandler_(QHsm * const me);
 * the depth of the entry path stored in the `path` parameter.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{RQP120E}, @tr{RQP120F}
+=======
+* - @tr{REQ-QP-02_35}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 int_fast8_t QHsm_tran_(QHsm * const me,
     QStateHandler * const path,
@@ -582,6 +684,7 @@ int_fast8_t QHsm_tran_(QHsm * const me,
 * hierarchical state machine (HSM).
 * @private @memberof QHsm
 *
+* @param[in,out] me   current instance pointer (see @ref oop)
 * @param[in] state   state handler function
 * @param[in] qs_id   QS-id of this state machine (for QS local filter)
 */
@@ -593,6 +696,7 @@ void QHsm_state_entry_(QHsm * const me,
 * hierarchical state machine (HSM).
 * @private @memberof QHsm
 *
+* @param[in,out] me   current instance pointer (see @ref oop)
 * @param[in] state   state handler function
 * @param[in] qs_id   QS-id of this state machine (for QS local filter)
 *
@@ -608,7 +712,11 @@ bool QHsm_state_exit_(QHsm * const me,
 /*! @brief Virtual table for the ::QHsm class.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP102}
+=======
+* - @tr{REQ-QP-02_10}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 struct QHsmVtable {
     /*! Triggers the top-most initial transition in the HSM. */
@@ -642,7 +750,12 @@ struct QHsmVtable {
 * application code.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP104}
+=======
+* - @tr{REQ-QP-02_21}
+* - @tr{ARC-QP-02_40}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @usage
 * The following example illustrates how to derive a state machine class
@@ -785,8 +898,14 @@ void QMsm_init_(
 * @param[in]     e  pointer to the event to be dispatched to the MSM
 * @param[in]     qs_id QS-id of this state machine (for QS local filter)
 *
+<<<<<<< HEAD
 * @precondition{qep_msm,300}
 * - current state must be initialized
+=======
+* @precondition{qep_msm,302}
+* - current state must be initialized
+* - check the internal integrity (Software Self-Monitoring (SSM))
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @note
 * This function should be called only via the virtual table (see
@@ -820,6 +939,9 @@ QStateHandler QMsm_getStateHandler_(QHsm * const me);
 *
 * @returns
 * status of the last action from the transition-action table.
+*
+* @precondition{qep_msm,400}
+* - provided state table cannot be NULL
 *
 * @note
 * This function is for internal use inside the QEP event processor and
@@ -884,7 +1006,11 @@ QState QMsm_enterHistory_(
 * @note Must be called only ONCE after the SM "constructor".
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP102}
+=======
+* - @tr{REQ-QP-02_38}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @usage
 * The following example illustrates how to initialize a SM, and dispatch
@@ -920,7 +1046,11 @@ QState QMsm_enterHistory_(
 * @note Must be called after the "constructor" and after QHSM_INIT().
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP102}
+=======
+* - @tr{REQ-QP-02_10}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 #define QHSM_DISPATCH(me_, e_, qs_id_) \
     ((*(me_)->vptr->dispatch)((me_), (e_), (qs_id_)))
@@ -946,6 +1076,9 @@ QState QMsm_enterHistory_(
 * Rule 11.3(req) "A cast shall not be performed between a pointer to object
 * type and a pointer to a different object type". This macro encapsulates
 * this deviation and provides a descriptive name for the reason of this cast.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_03A} (upcast)
 */
 #define Q_HSM_UPCAST(ptr_) ((QHsm *)(ptr_))
 
@@ -963,50 +1096,77 @@ QState QMsm_enterHistory_(
 * Rule 11.3(req) "A cast shall not be performed between a pointer to object
 * type and a pointer to a different object type". This macro encapsulates
 * this deviation and provides a descriptive name for the reason of this cast.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define Q_TRAN(target_) \
-    ((Q_HSM_UPCAST(me))->temp.fun = Q_STATE_CAST(target_), Q_RET_TRAN)
+    ((Q_HSM_UPCAST(me))->temp.fun = Q_STATE_CAST(target_), \
+     (QState)Q_RET_TRAN)
 
 /*${QEP-macros::Q_TRAN_HIST} ...............................................*/
 /*! Macro to call in a state-handler when it executes a transition
 * to history. Applicable only to HSMs.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{RQP120H}
+=======
+* - @tr{REQ-QP-02_39}
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @usage
 * @include qep_qhist.c
 */
 #define Q_TRAN_HIST(hist_) \
-    ((Q_HSM_UPCAST(me))->temp.fun = (hist_), Q_RET_TRAN_HIST)
+    ((Q_HSM_UPCAST(me))->temp.fun = (hist_), \
+     (QState)Q_RET_TRAN_HIST)
 
 /*${QEP-macros::Q_SUPER} ...................................................*/
 /*! Macro to call in a state-handler when it designates the superstate
 * of a given state. Applicable only to ::QHsm subclasses.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}
+=======
+* - @tr{REQ-QP-02_31}
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @usage
 * @include qep_qsuper.c
 */
 #define Q_SUPER(super_) \
-    ((Q_HSM_UPCAST(me))->temp.fun = Q_STATE_CAST(super_), Q_RET_SUPER)
+    ((Q_HSM_UPCAST(me))->temp.fun = Q_STATE_CAST(super_), \
+     (QState)Q_RET_SUPER)
 
 /*${QEP-macros::Q_HANDLED} .................................................*/
 /*! Macro to call in a state-handler when it handles an event.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP103}, @tr{RQP120B}, @tr{RQP120C}
+=======
+* - @tr{REQ-QP-02_32}
+* - @tr{REQ-QP-02_33}
+* - @tr{REQ-QP-02_36}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
-#define Q_HANDLED() (Q_RET_HANDLED)
+#define Q_HANDLED() ((QState)Q_RET_HANDLED)
 
 /*${QEP-macros::Q_UNHANDLED} ...............................................*/
 /*! Macro to call in a state-handler when it attempts to handle
 * an event but a guard condition evaluates to 'false' and there is no other
 * explicit way of handling the event. Applicable only to ::QHsm subclasses.
 */
-#define Q_UNHANDLED() (Q_RET_UNHANDLED)
+#define Q_UNHANDLED() ((QState)Q_RET_UNHANDLED)
 
 /*${QEP-macros::Q_ACTION_NULL} .............................................*/
 /*! Macro to provide strictly-typed zero-action to terminate action lists
@@ -1026,12 +1186,20 @@ QState QMsm_enterHistory_(
 * @param class_  a subclass of ::QEvt
 *
 * @trace
+<<<<<<< HEAD
 * @tr{RQP003}, @tr{PQA11_3}
+=======
+* - @tr{REQ-QP-01_30}
+* - @tr{DVP-QP-MC3-D04_09A} (false-positive)
+* - @tr{DVP-QP-MC3-R11_03B} (downcast)
+* - @tr{DVP-QP-PCLP-826}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 #define Q_EVT_CAST(class_) ((class_ const *)(e))
 
 /*${QEP-macros::Q_STATE_CAST} ..............................................*/
 /*! Perform cast to ::QStateHandler.
+*
 * @details
 * This macro encapsulates the cast of a specific state handler function
 * pointer to ::QStateHandler, which violates MISRA:C-2012 Rule 11.1(req)
@@ -1039,7 +1207,12 @@ QState QMsm_enterHistory_(
 * any other type". This macro helps to localize this deviation.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{PQP11_1}, @tr{PQA11_1}
+=======
+* - @tr{DVP-QP-MC3-D04_09A} (false-positive)
+* - @tr{DVP-QP-MC3-R11_01}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @usage
 * @include qep_qhsm_ctor.c
@@ -1048,6 +1221,7 @@ QState QMsm_enterHistory_(
 
 /*${QEP-macros::Q_ACTION_CAST} .............................................*/
 /*! Perform cast to ::QActionHandler.
+*
 * @details
 * This macro encapsulates the cast of a specific action handler function
 * pointer to ::QActionHandler, which violates MISRA:C-2012 Rule 11.1(R)
@@ -1055,7 +1229,12 @@ QState QMsm_enterHistory_(
 * any other type". This macro helps to localize this deviation.
 *
 * @trace
+<<<<<<< HEAD
 * @tr{PQP11_1}, @tr{PQA11_1}
+=======
+* - @tr{DVP-QP-MC3-D04_09A} (false-positive)
+* - @tr{DVP-QP-MC3-R11_01}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 #define Q_ACTION_CAST(action_) ((QActionHandler)(action_))
 
@@ -1095,83 +1274,132 @@ QState QMsm_enterHistory_(
 #ifdef Q_SPY
 /*! Macro to call in a QM action-handler when it executes
 * an entry action. Applicable only to ::QMsm subclasses.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_ENTRY(state_) \
-    ((Q_HSM_UPCAST(me))->temp.obj = (state_), Q_RET_ENTRY)
+    ((Q_HSM_UPCAST(me))->temp.obj = (state_), \
+     (QState)Q_RET_ENTRY)
 #endif /* def Q_SPY */
 
 /*${QEP-macros::QM_ENTRY} ..................................................*/
 #ifndef Q_SPY
-#define QM_ENTRY(dummy) (Q_RET_ENTRY)
+#define QM_ENTRY(dummy) ((QState)Q_RET_ENTRY)
 #endif /* ndef Q_SPY */
 
 /*${QEP-macros::QM_EXIT} ...................................................*/
 #ifdef Q_SPY
 /*! Macro to call in a QM action-handler when it executes
 * an exit action. Applicable only to ::QMsm subclasses.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_EXIT(state_) \
-    ((Q_HSM_UPCAST(me))->temp.obj = (state_), Q_RET_EXIT)
+    ((Q_HSM_UPCAST(me))->temp.obj = (state_), \
+     (QState)Q_RET_EXIT)
 #endif /* def Q_SPY */
 
 /*${QEP-macros::QM_EXIT} ...................................................*/
 #ifndef Q_SPY
-#define QM_EXIT(dummy) (Q_RET_EXIT)
+#define QM_EXIT(dummy) ((QState)Q_RET_EXIT)
 #endif /* ndef Q_SPY */
 
 /*${QEP-macros::QM_SM_EXIT} ................................................*/
 /*! Macro to call in a QM submachine exit-handler.
 * Applicable only to subclasses of ::QMsm.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_SM_EXIT(state_) \
-    ((Q_HSM_UPCAST(me))->temp.obj = (state_), Q_RET_EXIT)
+    ((Q_HSM_UPCAST(me))->temp.obj = (state_), \
+     (QState)Q_RET_EXIT)
 
 /*${QEP-macros::QM_TRAN} ...................................................*/
 /*! Macro to call in a QM state-handler when it executes a regular
 * transition. Applicable only to ::QMsm subclasses.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R11_03A} (upcast)
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_TRAN(tatbl_) ((Q_HSM_UPCAST(me))->temp.tatbl \
-    = (struct QMTranActTable const *)(tatbl_), Q_RET_TRAN)
+    = (struct QMTranActTable const *)(tatbl_), \
+ (QState)Q_RET_TRAN)
 
 /*${QEP-macros::QM_TRAN_INIT} ..............................................*/
 /*! Macro to call in a QM state-handler when it executes an initial
 * transition. Applicable only to ::QMsm subclasses.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R11_03A} (upcast)
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_TRAN_INIT(tatbl_) ((Q_HSM_UPCAST(me))->temp.tatbl \
-    = (struct QMTranActTable const *)(tatbl_), Q_RET_TRAN_INIT)
+    = (struct QMTranActTable const *)(tatbl_), \
+ (QState)Q_RET_TRAN_INIT)
 
 /*${QEP-macros::QM_TRAN_HIST} ..............................................*/
 /*! Macro to call in a QM state-handler when it executes a transition
 * to history. Applicable only to ::QMsm subclasses.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_TRAN_HIST(history_, tatbl_) \
     ((((Q_HSM_UPCAST(me))->state.obj  = (history_)), \
       ((Q_HSM_UPCAST(me))->temp.tatbl = \
           (struct QMTranActTable const *)(tatbl_))), \
-     Q_RET_TRAN_HIST)
+     (QState)Q_RET_TRAN_HIST)
 
 /*${QEP-macros::QM_TRAN_EP} ................................................*/
 /*! Macro to call in a QM state-handler when it executes a transition
 * to the submachine via an entry point.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R11_03A} (upcast)
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_TRAN_EP(tatbl_) ((Q_HSM_UPCAST(me))->temp.tatbl \
-    = (struct QMTranActTable const *)(tatbl_), Q_RET_TRAN_EP)
+    = (struct QMTranActTable const *)(tatbl_), \
+ (QState)Q_RET_TRAN_EP)
 
 /*${QEP-macros::QM_TRAN_XP} ................................................*/
 /*! Macro to call in a QM state-handler when it executes a transition
 * to exit point. Applicable only to ::QMsm subclasses.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_01}
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_TRAN_XP(xp_, tatbl_) \
     ((((Q_HSM_UPCAST(me))->state.act  = (xp_)), \
       ((Q_HSM_UPCAST(me))->temp.tatbl = \
           (struct QMTranActTable const *)(tatbl_))), \
-     Q_RET_TRAN_XP)
+     (QState)Q_RET_TRAN_XP)
 
 /*${QEP-macros::QM_HANDLED} ................................................*/
 /*! Macro to call in a QM state-handler when it handled an event.
 * Applicable only to ::QMsm subclasses.
 */
-#define QM_HANDLED() (Q_RET_HANDLED)
+#define QM_HANDLED() ((QState)Q_RET_HANDLED)
 
 /*${QEP-macros::QM_UNHANDLED} ..............................................*/
 /*! Macro to call in a QM state-handler when when it attempts to
@@ -1179,20 +1407,25 @@ QState QMsm_enterHistory_(
 * no other explicit way of handling the event. Applicable only to
 * ::QMsm subclasses.
 */
-#define QM_UNHANDLED() (Q_RET_UNHANDLED)
+#define QM_UNHANDLED() ((QState)Q_RET_UNHANDLED)
 
 /*${QEP-macros::QM_SUPER} ..................................................*/
 /*! Macro to call in a QM state-handler when it designates the
 * superstate to handle an event. Applicable only to QMSMs.
 */
-#define QM_SUPER() (Q_RET_SUPER)
+#define QM_SUPER() ((QState)Q_RET_SUPER)
 
 /*${QEP-macros::QM_SUPER_SUB} ..............................................*/
 /*! Macro to call in a QM submachine-handler when it designates the
 * host state to handle an event. Applicable only to subclasses of ::QMsm.
+*
+* @trace
+* - @tr{DVP-QP-MC3-R12_03}
+* - @tr{DVP-QP-MC3-R13_04}
 */
 #define QM_SUPER_SUB(host_) \
-    ((Q_HSM_UPCAST(me))->temp.obj = (host_), Q_RET_SUPER_SUB)
+    ((Q_HSM_UPCAST(me))->temp.obj = (host_), \
+     (QState)Q_RET_SUPER_SUB)
 
 /*${QEP-macros::QM_STATE_NULL} .............................................*/
 /*! Macro to provide strictly-typed zero-state to use for submachines.

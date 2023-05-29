@@ -41,7 +41,7 @@
 */
 #define QP_IMPL           /* this is QP implementation */
 #include "qep_port.h"     /* QEP port */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -82,6 +82,7 @@ static QEvt const l_reservedEvt_[] = {
 /*! helper function to trigger reserved event in an QHsm
 * @private @memberof QHsm
 *
+* @param[in,out] me   current instance pointer (see @ref oop)
 * @param[in] state state handler function
 * @param[in] sig   reserved signal to trigger
 */
@@ -107,7 +108,11 @@ enum { QHSM_MAX_NEST_DEPTH_ = 6};
 bool QHsm_isIn(QHsm * const me,
     QStateHandler const state)
 {
+<<<<<<< HEAD
     Q_REQUIRE_ID(600, me->temp.fun == me->state.fun);
+=======
+    Q_REQUIRE_ID(602, me->state.uint == (uintptr_t)(~me->temp.uint));
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     bool inState = false; /* assume that this HSM is not in 'state' */
 
@@ -116,14 +121,17 @@ bool QHsm_isIn(QHsm * const me,
     do {
         /* do the states match? */
         if (me->temp.fun == state) {
-            inState = true;            /* 'true' means that match found */
+            inState = true;    /* 'true' means that match found */
             r = Q_RET_IGNORED; /* break out of the loop */
         }
         else {
             r = QHsm_reservedEvt_(me, me->temp.fun, Q_EMPTY_SIG);
         }
     } while (r != Q_RET_IGNORED); /* QHsm_top() state not reached */
-    me->temp.fun = me->state.fun; /* restore the stable state configuration */
+
+    #ifndef QP_NDBC
+    me->temp.uint = ~me->state.uint;
+    #endif
 
     return inState; /* return the status */
 }
@@ -137,7 +145,7 @@ QStateHandler QHsm_childState(QHsm * const me,
     bool isFound = false; /* start with the child not found */
 
     /* establish stable state configuration */
-    me->temp.fun = me->state.fun;
+    me->temp.fun = child;
     QState r;
     do {
         /* is this the parent of the current child? */
@@ -150,11 +158,17 @@ QStateHandler QHsm_childState(QHsm * const me,
             r = QHsm_reservedEvt_(me, me->temp.fun, Q_EMPTY_SIG);
         }
     } while (r != Q_RET_IGNORED); /* QHsm_top() state not reached */
-    me->temp.fun = me->state.fun; /* establish stable state configuration */
+
+<<<<<<< HEAD
+    Q_ENSURE_ID(890, isFound);
+=======
+    #ifndef QP_NDBC
+    me->temp.uint = ~me->state.uint;
+    #endif
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     Q_ENSURE_ID(890, isFound);
-
-    #ifdef Q_NASSERT
+    #ifdef QP_NDBC
     Q_UNUSED_PAR(isFound);
     #endif
 
@@ -266,7 +280,9 @@ void QHsm_init_(QHsm * const me,
     QS_END_PRE_()
 
     me->state.fun = t; /* change the current active state */
-    me->temp.fun  = t; /* mark the configuration as stable */
+    #ifndef QP_NDBC
+    me->temp.uint = ~me->state.uint;
+    #endif
 }
 
 /*${QEP::QHsm::dispatch_} ..................................................*/
@@ -279,22 +295,30 @@ void QHsm_dispatch_(QHsm * const me,
     Q_UNUSED_PAR(qs_id);
     #endif
 
-    QStateHandler t = me->state.fun;
+    QStateHandler s = me->state.fun;
+    QStateHandler t = s;
+
+    Q_REQUIRE_ID(302, (s != Q_STATE_CAST(0))
+                      && (me->state.uint == (uintptr_t)(~me->temp.uint)));
+
     QS_CRIT_STAT_
+<<<<<<< HEAD
 
     Q_REQUIRE_ID(400, (t != Q_STATE_CAST(0))
                        && (t == me->temp.fun));
 
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     QS_BEGIN_PRE_(QS_QEP_DISPATCH, qs_id)
         QS_TIME_PRE_();      /* time stamp */
         QS_SIG_PRE_(e->sig); /* the signal of the event */
         QS_OBJ_PRE_(me);     /* this state machine object */
-        QS_FUN_PRE_(t);      /* the current state */
+        QS_FUN_PRE_(s);      /* the current state */
     QS_END_PRE_()
 
-    QStateHandler s;
-    QState r;
     /* process the event hierarchically... */
+    QState r;
+    me->temp.fun = s;
     do {
         s = me->temp.fun;
         r = (*s)(me, e); /* invoke state handler s */
@@ -307,7 +331,7 @@ void QHsm_dispatch_(QHsm * const me,
                 QS_FUN_PRE_(s);      /* the current state */
             QS_END_PRE_()
 
-            r = QHsm_reservedEvt_(me, s, Q_EMPTY_SIG); /* find superstate of s */
+            r = QHsm_reservedEvt_(me, s, Q_EMPTY_SIG); /* superstate of s */
         }
     } while (r == Q_RET_SUPER);
 
@@ -315,9 +339,9 @@ void QHsm_dispatch_(QHsm * const me,
     if (r >= Q_RET_TRAN) {
         QStateHandler path[QHSM_MAX_NEST_DEPTH_];
 
-        path[0] = me->temp.fun; /* save the target of the transition */
-        path[1] = t;
-        path[2] = s;
+        path[0] = me->temp.fun; /* transition target */
+        path[1] = t; /* current state */
+        path[2] = s; /* transition source */
 
         /* exit current state to transition source s... */
         for (; t != s; t = me->temp.fun) {
@@ -349,7 +373,6 @@ void QHsm_dispatch_(QHsm * const me,
         me->temp.fun = t; /* update the next state */
 
         /* while nested initial transition... */
-        /*! @tr{RQP120I} */
         while (QHsm_reservedEvt_(me, t, Q_INIT_SIG) == Q_RET_TRAN) {
 
             QS_BEGIN_PRE_(QS_QEP_STATE_INIT, qs_id)
@@ -417,7 +440,9 @@ void QHsm_dispatch_(QHsm * const me,
     #endif /* Q_SPY */
 
     me->state.fun = t; /* change the current active state */
-    me->temp.fun  = t; /* mark the configuration as stable */
+    #ifndef QP_NDBC
+    me->temp.uint = ~me->state.uint;
+    #endif
 }
 
 /*${QEP::QHsm::getStateHandler_} ...........................................*/

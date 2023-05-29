@@ -4,20 +4,20 @@
 * command-line options)
 */
 
-/*! The preprocessor switch to disable checking assertions
+/*! Preprocessor switch to disable QP QP Functional Safety (FuSa) System
 *
 * @description
-* When defined, Q_NASSERT disables the following macros #Q_ASSERT,
-* #Q_REQUIRE, #Q_ENSURE, #Q_INVARIANT, #Q_ERROR as well as
-* #Q_ASSERT_ID, #Q_REQUIRE_ID, #Q_ENSURE_ID, #Q_INVARIANT_ID, and
-* #Q_ERROR_ID do _not_ evaluate the test condition passed as the
-* argument to these macros.
+* When defined, #Q_UNSAFE disables the **QP Functional Safety (FuSa)**
+* System. This means that there is no CPU overhead for internal integrity
+* checks and no memory overhead for duplicate storage, but there is
+* **no protection** against Uncontrolled System Failures (USFs) either.
 *
-* @note The notable exceptions are the macros #Q_ALLEGE and
-* #Q_ALLEGE_ID, that still evaluate the test condition, but do not
-* report assertion failures when the switch #Q_NASSERT is defined.
+* @attention
+* The QP Functional Safety (FuSa) system is enabled by default and
+* explicit disabling the SIS is **NOT** recommended, especially in
+* safety-related applications.
 */
-#define Q_NASSERT
+#define Q_UNSAFE
 
 /*! Enable the QActive_stop() API in the QF port.
 *
@@ -49,7 +49,8 @@
 /*! The preprocessor switch to enable constructor in the ::QEvt class
 * instrumentation in the code
 *
-* @tr{RQP005}
+* @trace
+* - @tr{REQ-QP-01_40}
 */
 #define Q_EVT_CTOR
 
@@ -62,4 +63,3 @@
 * be not defined for the application-level code
 */
 #define QP_IMPL
-

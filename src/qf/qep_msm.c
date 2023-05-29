@@ -38,7 +38,7 @@
 /*$endhead${src::qf::qep_msm.c} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 #define QP_IMPL           /* this is QP implementation */
 #include "qep_port.h"     /* QEP port */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -133,7 +133,7 @@ QMState const * QMsm_childStateObj(
 
     Q_ENSURE_ID(890, isFound);
 
-    #ifdef Q_NASSERT
+    #ifdef QP_NDBC
     Q_UNUSED_PAR(isFound);
     #endif
 
@@ -200,6 +200,10 @@ void QMsm_init_(
         QS_OBJ_PRE_(me);  /* this state machine object */
         QS_FUN_PRE_(me->state.obj->stateHandler); /* the new current state */
     QS_END_PRE_()
+
+    #ifndef QP_NDBC
+    me->temp.uint = ~me->state.uint;
+    #endif
 }
 
 /*${QEP::QMsm::dispatch_} ..................................................*/
@@ -216,7 +220,12 @@ void QMsm_dispatch_(
     QMState const *s = me->state.obj; /* store the current state */
     QMState const *t = s;
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(300, s != (QMState *)0);
+=======
+    Q_REQUIRE_ID(302, (s != (QMState *)0)
+                      && (me->state.uint == (uintptr_t)(~me->temp.uint)));
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     QS_CRIT_STAT_
     QS_BEGIN_PRE_(QS_QEP_DISPATCH, qs_id)
@@ -371,6 +380,10 @@ void QMsm_dispatch_(
     else {
         /* empty */
     }
+
+    #ifndef QP_NDBC
+    me->temp.uint = ~me->state.uint;
+    #endif
 }
 
 /*${QEP::QMsm::getStateHandler_} ...........................................*/
@@ -392,11 +405,11 @@ QState QMsm_execTatbl_(
     Q_UNUSED_PAR(qs_id);
     #endif
 
-    QState r = Q_RET_NULL;
-    QS_CRIT_STAT_
-
     /*! @pre the transition-action table pointer must not be NULL */
     Q_REQUIRE_ID(400, tatbl != (struct QMTranActTable *)0);
+
+    QState r = Q_RET_NULL;
+    QS_CRIT_STAT_
 
     for (QActionHandler const *a = &tatbl->act[0];
          *a != Q_ACTION_CAST(0);
@@ -471,10 +484,9 @@ void QMsm_exitToTranSource_(
     while (s != ts) {
         /* exit action provided in state 's'? */
         if (s->exitAction != Q_ACTION_CAST(0)) {
-            QS_CRIT_STAT_
-
             (void)(*s->exitAction)(me); /* execute the exit action */
 
+            QS_CRIT_STAT_
             QS_BEGIN_PRE_(QS_QEP_STATE_EXIT, qs_id)
                 QS_OBJ_PRE_(me);              /* this state machine object */
                 QS_FUN_PRE_(s->stateHandler); /* the exited state handler */
@@ -504,8 +516,8 @@ QState QMsm_enterHistory_(
     QMState const *s = hist;
     QMState const *ts = me->state.obj; /* transition source */
     QMState const *epath[QMSM_MAX_ENTRY_DEPTH_];
-    QS_CRIT_STAT_
 
+    QS_CRIT_STAT_
     QS_BEGIN_PRE_(QS_QEP_TRAN_HIST, qs_id)
         QS_OBJ_PRE_(me);                 /* this state machine object */
         QS_FUN_PRE_(ts->stateHandler);   /* source state handler */

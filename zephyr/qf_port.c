@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-10-18
-* @version Last updated for: Zephyr 3.1.99 and @ref qpc_7_1_3
+* @date Last updated on: 2023-05-24
+* @version Last updated for: Zephyr 3.1.99 and @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Zephyr RTOS (v 3.1.99)
@@ -52,13 +52,19 @@ void QF_init(void) {
 /*..........................................................................*/
 int_t QF_run(void) {
     QF_onStartup();
+
 #ifdef Q_SPY
 
-#if CONFIG_NUM_PREEMPT_PRIORITIES > 0
+#if (CONFIG_NUM_PREEMPT_PRIORITIES > 0)
     /* lower the priority of the main thread to the level of idle thread */
     k_thread_priority_set(k_current_get(),
                           CONFIG_NUM_PREEMPT_PRIORITIES - 1);
 #endif
+
+    /* produce the QS_QF_RUN trace record */
+    QS_CRIT_STAT_
+    QS_BEGIN_PRE_(QS_QF_RUN, 0U)
+    QS_END_PRE_()
 
     /* perform QS work... */
     while (true) {
@@ -76,14 +82,15 @@ void QF_stop(void) {
 
 /*..........................................................................*/
 static void thread_entry(void *p1, void *p2, void *p3) {
+    Q_UNUSED_PAR(p2);
+    Q_UNUSED_PAR(p3);
     QActive *act = (QActive *)p1;
-    (void)p2; /* unused parameter */
-    (void)p3; /* unused parameter */
 
     /* event-loop */
     for (;;) {  /* for-ever */
         QEvt const *e = QActive_get_(act);
-        QHSM_DISPATCH(&act->super, e, act->prio);
+        /* dispatch event (virtual call) */
+        (*a->super.vptr->dispatch)(&act->super, e, act->prio);
         QF_gc(e); /* check if the event is garbage, and collect it if so */
     }
 }
@@ -116,7 +123,8 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
     /* initialize the Zephyr message queue */
     k_msgq_init(&me->eQueue, (char *)qSto, sizeof(QEvt *), (uint32_t)qLen);
 
-    QHSM_INIT(&me->super, par, me->prio); /* the top-most initial tran. */
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 
     /* Zephyr uses the reverse priority numbering than QP */
@@ -154,6 +162,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
 {
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    /* NOTE: k_msgq_num_free_get() can be safely called from crit-section */
     uint_fast16_t nFree = (uint_fast16_t)k_msgq_num_free_get(&me->eQueue);
 
     bool status;
@@ -163,7 +172,7 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
         }
         else {
             status = false; /* cannot post */
-            Q_ERROR_ID(510); /* must be able to post the event */
+            Q_ERROR_NOCRIT_(510); /* must be able to post the event */
         }
     }
     else if (nFree > (QEQueueCtr)margin) {
@@ -188,13 +197,13 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
         if (e->poolId_ != 0U) { /* is it a pool event? */
             QEvt_refCtr_inc_(e); /* increment the reference counter */
         }
-
         QF_CRIT_X_();
 
+        int err = k_msgq_put(&me->eQueue, (void const *)&e, K_NO_WAIT);
+
         /* posting to the Zephyr message queue must succeed, see NOTE1 */
-        Q_ALLEGE_ID(520,
-                    k_msgq_put(&me->eQueue, (void const *)&e, K_NO_WAIT)
-                     == 0);
+        QF_CRIT_E_();
+        Q_ASSERT_NOCRIT_(520, err == 0);
     }
     else {
 
@@ -207,9 +216,8 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
             QS_EQC_PRE_(nFree);   /* # free entries available */
             QS_EQC_PRE_(0U);      /* min # free entries (unknown) */
         QS_END_NOCRIT_PRE_()
-
-        QF_CRIT_X_();
     }
+    QF_CRIT_X_();
 
     return status;
 }
@@ -230,29 +238,38 @@ void QActive_postLIFO_(QActive * const me, QEvt const * const e) {
     if (e->poolId_ != 0U) { /* is it a pool event? */
         QEvt_refCtr_inc_(e); /* increment the reference counter */
     }
-
     QF_CRIT_X_();
+
+    int err = k_msgq_put(&me->eQueue, (void *)&e, K_NO_WAIT);
 
     /* NOTE: Zephyr message queue does not currently support LIFO posting
     * so normal FIFO posting is used instead.
     */
-    Q_ALLEGE_ID(610, k_msgq_put(&me->eQueue, (void *)&e, K_NO_WAIT) == 0);
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(610, err == 0);
+    QF_CRIT_X_();
 }
 /*..........................................................................*/
 QEvt const *QActive_get_(QActive * const me) {
+
+    /* wait for an event (forever) */
     QEvt const *e;
-    QS_CRIT_STAT_
+    int err = k_msgq_get(&me->eQueue, (void *)&e, K_FOREVER);
 
-    /* wait for an event (forever), which must succeed */
-    Q_ALLEGE_ID(710, k_msgq_get(&me->eQueue, (void *)&e, K_FOREVER) == 0);
+    /* queue must succeed */
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(710, err == 0);
 
-    QS_BEGIN_PRE_(QS_QF_ACTIVE_GET, me->prio)
+    QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_GET, me->prio)
         QS_TIME_PRE_();       /* timestamp */
         QS_SIG_PRE_(e->sig);  /* the signal of this event */
         QS_OBJ_PRE_(me);      /* this active object */
         QS_2U8_PRE_(e->poolId_, e->refCtr_); /* pool Id & ref Count */
         QS_EQC_PRE_(k_msgq_num_free_get(&me->eQueue));/* # free */
-    QS_END_PRE_()
+    QS_END_NOCRIT_PRE_()
+
+    QF_CRIT_X_();
 
     return e;
 }

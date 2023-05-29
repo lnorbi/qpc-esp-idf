@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-18
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QXK/C port to ARM Cortex-M, IAR-ARM compiler
 */
-#ifndef QXK_PORT_H
-#define QXK_PORT_H
+#ifndef QXK_PORT_H_
+#define QXK_PORT_H_
 
 /* determination if the code executes in the ISR context */
 #define QXK_ISR_CONTEXT_() (__get_IPSR() != 0U)
@@ -87,5 +87,5 @@ void QXK_thread_ret(void);
 
 #include "qxk.h" /* QXK platform-independent public interface */
 
-#endif /* QXK_PORT_H */
+#endif /* QXK_PORT_H_ */
 

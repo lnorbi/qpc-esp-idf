@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope internal interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -75,7 +75,14 @@ void QXSemaphore_init(QXSemaphore * const me,
     uint_fast8_t const count,
     uint_fast8_t const max_count)
 {
+<<<<<<< HEAD
     Q_REQUIRE_ID(100, max_count > 0U);
+=======
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(100, max_count > 0U);
+    QF_CRIT_X_();
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     me->count     = (uint8_t)count;
     me->max_count = (uint8_t)max_count;
@@ -92,11 +99,26 @@ bool QXSemaphore_wait(QXSemaphore * const me,
 
     QXThread * const curr = QXK_PTR_CAST_(QXThread*, QXK_attr_.curr);
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(200, (!QXK_ISR_CONTEXT_()) /* can't wait inside an ISR */
         && (me->max_count > 0U) /* sema must be initialized */
         && (curr != (QXThread *)0) /* curr must be extended */
         && (curr->super.super.temp.obj == (QMState *)0)); /* NOT blocked */
     Q_REQUIRE_ID(201, QXK_attr_.lockHolder != curr->super.prio);
+=======
+    /*
+    * - must NOT be called from an ISR;
+    * - the semaphore must be initialized
+    * - be called from an extended thread;
+    * - the thread must NOT be already blocked on any object.
+    */
+    Q_REQUIRE_NOCRIT_(200, (!QXK_ISR_CONTEXT_())
+        && (me->max_count > 0U)
+        && (curr != (QXThread *)0)
+        && (curr->super.super.temp.obj == (QMState *)0));
+    /* - the thread must NOT be holding a scheduler lock. */
+    Q_REQUIRE_NOCRIT_(201, QXK_attr_.lockHolder != curr->super.prio);
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     bool signaled = true; /* assume that the semaphore will be signaled */
     if (me->count > 0U) {
@@ -115,6 +137,9 @@ bool QXSemaphore_wait(QXSemaphore * const me,
         * and insert to the waiting set on this semaphore
         */
         QPSet_remove(&QF_readySet_, p);
+    #ifndef Q_UNSAFE
+        QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
         QPSet_insert(&me->waitSet,  p);
 
         /* remember the blocking object (this semaphore) */
@@ -135,7 +160,7 @@ bool QXSemaphore_wait(QXSemaphore * const me,
 
         QF_CRIT_E_();   /* AFTER unblocking... */
         /* the blocking object must be this semaphore */
-        Q_ASSERT_ID(240, curr->super.super.temp.obj
+        Q_ASSERT_NOCRIT_(240, curr->super.super.temp.obj
                          == QXK_PTR_CAST_(QMState*, me));
 
         /* did the blocking time-out? (signal of zero means that it did) */
@@ -151,7 +176,7 @@ bool QXSemaphore_wait(QXSemaphore * const me,
         }
         else { /* blocking did NOT time out */
             /* the thread must NOT be waiting on this semaphore */
-            Q_ASSERT_ID(250,!QPSet_hasElement(&me->waitSet, p));
+            Q_ASSERT_NOCRIT_(250,!QPSet_hasElement(&me->waitSet, p));
             --me->count; /* semaphore taken: decrement the count */
         }
         curr->super.super.temp.obj = (QMState *)0; /* clear blocking obj. */
@@ -167,7 +192,12 @@ bool QXSemaphore_tryWait(QXSemaphore * const me) {
     QF_CRIT_STAT_
     QF_CRIT_E_();
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(300, me->max_count > 0U);
+=======
+    /* the semaphore must be initialized */
+    Q_REQUIRE_NOCRIT_(300, me->max_count > 0U);
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     #ifdef Q_SPY
     QActive const * const curr = QXK_PTR_CAST_(QActive*, QXK_attr_.curr);
@@ -204,10 +234,15 @@ bool QXSemaphore_tryWait(QXSemaphore * const me) {
 /*${QXK::QXSemaphore::signal} ..............................................*/
 /*! @public @memberof QXSemaphore */
 bool QXSemaphore_signal(QXSemaphore * const me) {
+<<<<<<< HEAD
     Q_REQUIRE_ID(400, me->max_count > 0U);
 
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    /* - the semaphore must be initialized */
+    Q_REQUIRE_NOCRIT_(400, me->max_count > 0U);
 
     bool signaled = true; /* assume that the semaphore will be signaled */
     if (me->count < me->max_count) {
@@ -236,7 +271,7 @@ bool QXSemaphore_signal(QXSemaphore * const me) {
             * - must be extended; and
             * - must be blocked on this semaphore;
             */
-            Q_ASSERT_ID(410, (thr != (QXThread *)0)
+            Q_ASSERT_NOCRIT_(410, (thr != (QXThread *)0)
                 && (thr->super.osObject != (struct QActive *)0)
                 && (thr->super.super.temp.obj
                     == QXK_PTR_CAST_(QMState*, me)));
@@ -246,6 +281,9 @@ bool QXSemaphore_signal(QXSemaphore * const me) {
 
             /* make the thread ready to run and remove from the wait-list */
             QPSet_insert(&QF_readySet_, p);
+    #ifndef Q_UNSAFE
+            QPSet_update(&QF_readySet_, &QF_readySet_inv_);
+    #endif
             QPSet_remove(&me->waitSet,  p);
 
             QS_BEGIN_NOCRIT_PRE_(QS_SEM_TAKE, thr->super.prio)

@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-27
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief "Experimental" QF/C port to Espressif ESP-IDF (version 4.x)
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* FreeRTOS-ESP32 event queue and thread types, see NOTE0 */
 #define QF_EQUEUE_TYPE        QueueHandle_t
@@ -66,9 +66,9 @@
 #define QF_INT_ENABLE()       portEXIT_CRITICAL(&QF_esp32mux)
 
 /* QF critical section for FreeRTOS-ESP32 (task level), see NOTE2 */
-/* #define QF_CRIT_STAT_TYPE not defined */
-#define QF_CRIT_ENTRY(dummy)  portENTER_CRITICAL(&QF_esp32mux)
-#define QF_CRIT_EXIT(dummy)   portEXIT_CRITICAL(&QF_esp32mux)
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()          portENTER_CRITICAL(&QF_esp32mux)
+#define QF_CRIT_X_()          portEXIT_CRITICAL(&QF_esp32mux)
 
 #include "freertos/FreeRTOS.h"  /* FreeRTOS master include file, see NOTE3 */
 #include "freertos/task.h"      /* FreeRTOS task management */
@@ -163,7 +163,7 @@ void IRAM_ATTR QTimeEvt_tickFromISR_(uint_fast8_t const tickRate,
         }                                                        \
      } while (false)
 
-#else
+#else /* no ::QEvt ctor */
 
     #define Q_NEW_FROM_ISR(evtT_, sig_)                         \
         ((evtT_ *)QF_newXFromISR_((uint_fast16_t)sizeof(evtT_), \
@@ -202,39 +202,24 @@ enum FreeRTOS_TaskAttrs {
     void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName);
 #endif
 #if (configSUPPORT_STATIC_ALLOCATION > 0)
-    void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
-                                        StackType_t **ppxIdleTaskStackBuffer,
-                                        uint32_t *pulIdleTaskStackSize );
+    void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
+                                       StackType_t **ppxIdleTaskStackBuffer,
+                                       uint32_t *pulIdleTaskStackSize);
 #endif
 
-/*****************************************************************************
-* interface used only inside QF, but not in applications
-*/
+/*==========================================================================*/
+/* interface used only inside QF, but not in applications */
+
 #ifdef QP_IMPL
     #define FREERTOS_TASK_PRIO(qp_prio_) \
         ((UBaseType_t)((qp_prio_) + tskIDLE_PRIORITY))
 
     /* FreeRTOS scheduler locking for QF_publish_() (task context only) */
-    #define QF_SCHED_STAT_      \
-        UBaseType_t curr_prio;  \
-        TaskHandle_t curr_task;
-    #define QF_SCHED_LOCK_(prio_) do {                              \
-         curr_task = xTaskGetCurrentTaskHandle();                   \
-         curr_prio = uxTaskPriorityGet(curr_task);                  \
-         if (FREERTOS_TASK_PRIO(prio_) > curr_prio) {               \
-             vTaskPrioritySet(curr_task, FREERTOS_TASK_PRIO(prio_));\
-         }                                                          \
-         else {                                                     \
-             curr_prio = tskIDLE_PRIORITY;                          \
-         }                                                          \
-    } while (0)
+    #define QF_SCHED_STAT_
+    #define QF_SCHED_LOCK_(prio_) (vTaskSuspendAll())
+    #define QF_SCHED_UNLOCK_()    ((void)xTaskResumeAll())
 
-    #define QF_SCHED_UNLOCK_()                                      \
-         if (curr_prio != tskIDLE_PRIORITY) {                       \
-             vTaskPrioritySet(curr_task, curr_prio);                \
-         } else ((void)0)
-
-    /* native QF event pool operations */
+    /* native QF event pool customization */
     #define QF_EPOOL_TYPE_            QMPool
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
         (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
@@ -244,10 +229,10 @@ enum FreeRTOS_TaskAttrs {
     #define QF_EPOOL_PUT_(p_, e_, qs_id_) \
         (QMPool_put(&(p_), (e_), (qs_id_)))
 
-#endif /* ifdef QP_IMPL */
+#endif /* QP_IMPL */
 
-/*****************************************************************************
-* NOTE0:
+/*==========================================================================*/
+/* NOTE0:
 * This is the "experimental" port to the [Espressif ESP-IDF][1]
 * IoT Framework, which is loosely based on the [FreeRTOS kernel][2].
 *
@@ -294,4 +279,5 @@ enum FreeRTOS_TaskAttrs {
 * However, the QF port uses its own "mutex" object QF_esp32mux.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
+

@@ -1,4 +1,5 @@
 /*============================================================================
+* QF/C port to ARM Cortex-R, QK, GNU-ARM
 * Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 *
 * SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
@@ -22,20 +23,20 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-07-30
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Cortex-R, preemptive QK kernel, GNU-ARM toolset
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* The maximum number of active objects in the application, see NOTE1 */
-#define QF_MAX_ACTIVE          32U
+#define QF_MAX_ACTIVE           32U
 
 /* The maximum number of system clock tick rates */
-#define QF_MAX_TICK_RATE       2U
+#define QF_MAX_TICK_RATE        2U
 
 /* QF interrupt disable/enable, see NOTE2 */
 #ifdef __thumb__  /* THUMB mode? */
@@ -60,13 +61,15 @@
 #define QF_LOG2(n_) ((uint8_t)(32U - __builtin_clz(n_)))
 
 /* QF critical section entry/exit, see NOTE3 */
-#define QF_CRIT_STAT_TYPE      uint32_t
-#define QF_CRIT_ENTRY(stat_)   do { \
-    __asm volatile ("MRS %0,cpsr" : "=r" (stat_) :: "cc"); \
+#define QF_CRIT_STAT_           uint32_t cpsr_;
+#define QF_CRIT_E_() do { \
+    __asm volatile ("MRS %0,cpsr" : "=r" (cpsr_) :: "cc"); \
     QF_INT_DISABLE(); \
 } while (false)
-#define QF_CRIT_EXIT(stat_) \
-    __asm volatile ("MSR cpsr_c,%0" :: "r" (stat_) : "cc")
+
+#define QF_CRIT_X_() \
+    __asm volatile ("MSR cpsr_c,%0" :: "r" (cpsr_) : "cc")
+
 #define QF_CRIT_EXIT_NOP()     __asm volatile ("ISB")
 
 #include "qep_port.h"   /* QEP port */
@@ -76,7 +79,7 @@
 /*****************************************************************************
 * NOTE1:
 * The maximum number of active objects QF_MAX_ACTIVE can be increased
-* up to 63, if necessary. Here it is set to a lower level to save some RAM.
+* up to 63U, if necessary. Here it is set to a lower level to save some RAM.
 *
 * NOTE2:
 * The FIQ-type interrupts are NEVER disabled in this port, so the FIQ is
@@ -91,4 +94,5 @@
 * interrupts that run with interrupts (IRQ) disabled.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
+

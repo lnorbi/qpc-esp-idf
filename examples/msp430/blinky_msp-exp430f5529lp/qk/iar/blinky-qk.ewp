@@ -3473,9 +3473,12 @@
         <file>
             <name>$PROJ_DIR$\..\..\main.c</name>
         </file>
+<<<<<<< HEAD
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
         </file>
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     </group>
     <group>
         <name>QP</name>
@@ -3554,6 +3557,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qs_rx.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
         </file>
     </group>
 </project>

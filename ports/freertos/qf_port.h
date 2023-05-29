@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-27
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to FreeRTOS 10.x
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* FreeRTOS event queue and thread types */
 #define QF_EQUEUE_TYPE        QueueHandle_t
@@ -45,9 +45,9 @@
 #define QF_INT_ENABLE()       taskENABLE_INTERRUPTS()
 
 /* QF critical section for FreeRTOS (task level), see NOTE2 */
-/* #define QF_CRIT_STAT_TYPE not defined */
-#define QF_CRIT_ENTRY(stat_)  taskENTER_CRITICAL()
-#define QF_CRIT_EXIT(stat_)   taskEXIT_CRITICAL()
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()          taskENTER_CRITICAL()
+#define QF_CRIT_X_()          taskEXIT_CRITICAL()
 
 #include "FreeRTOS.h"  /* FreeRTOS master include file, see NOTE3 */
 #include "task.h"      /* FreeRTOS task management */
@@ -182,26 +182,11 @@ enum FreeRTOS_TaskAttrs {
         ((UBaseType_t)((qp_prio_) + tskIDLE_PRIORITY))
 
     /* FreeRTOS scheduler locking for QF_publish_() (task context only) */
-    #define QF_SCHED_STAT_      \
-        UBaseType_t curr_prio;  \
-        TaskHandle_t curr_task;
-    #define QF_SCHED_LOCK_(prio_) do {                              \
-         curr_task = xTaskGetCurrentTaskHandle();                   \
-         curr_prio = uxTaskPriorityGet(curr_task);                  \
-         if (FREERTOS_TASK_PRIO(prio_) > curr_prio) {               \
-             vTaskPrioritySet(curr_task, FREERTOS_TASK_PRIO(prio_));\
-         }                                                          \
-         else {                                                     \
-             curr_prio = tskIDLE_PRIORITY;                          \
-         }                                                          \
-    } while (0)
+    #define QF_SCHED_STAT_
+    #define QF_SCHED_LOCK_(prio_) (vTaskSuspendAll())
+    #define QF_SCHED_UNLOCK_()    ((void)xTaskResumeAll())
 
-    #define QF_SCHED_UNLOCK_()                                      \
-         if (curr_prio != tskIDLE_PRIORITY) {                       \
-             vTaskPrioritySet(curr_task, curr_prio);                \
-         } else ((void)0)
-
-    /* native QF event pool operations */
+    /* native QF event pool customization */
     #define QF_EPOOL_TYPE_            QMPool
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
         (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
@@ -211,7 +196,7 @@ enum FreeRTOS_TaskAttrs {
     #define QF_EPOOL_PUT_(p_, e_, qs_id_) \
         (QMPool_put(&(p_), (e_), (qs_id_)))
 
-#endif /* ifdef QP_IMPL */
+#endif /* QP_IMPL */
 
 /*==========================================================================*/
 /* NOTE1:
@@ -232,5 +217,5 @@ enum FreeRTOS_TaskAttrs {
 * ARE ALLOWED INSIDE ISRs AND CALLING THE TASK-LEVEL APIs IS AN ERROR.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 

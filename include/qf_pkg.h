@@ -38,6 +38,9 @@
 /*$endhead${include::qf_pkg.h} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief Internal (package scope) QF/C interface.
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QF_PKG_H_
 #define QF_PKG_H_
@@ -61,6 +64,14 @@ extern uint_fast8_t QF_maxPool_;
 */
 extern QPSet QF_readySet_;
 
+/*${QF::QF-pkg::readySet_inv_} .............................................*/
+#ifndef Q_UNSAFE
+/*! Inverted copy of QF_readySet_ (duplicate storage, part of Self-Monitoring)
+* @static @private @memberof QF
+*/
+extern QPSet QF_readySet_inv_;
+#endif /* ndef Q_UNSAFE */
+
 /*${QF::QF-pkg::bzero} .....................................................*/
 /*! Clear a specified region of memory to zero.
 * @static @public @memberof QF
@@ -76,6 +87,9 @@ extern QPSet QF_readySet_;
 * startup code provided with some compilers and toolsets (e.g., TI DSPs or
 * Microchip MPLAB), which does not zero the uninitialized variables, as
 * required by the ANSI C standard.
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
 */
 void QF_bzero(
     void * const start,
@@ -83,79 +97,6 @@ void QF_bzero(
 /*$enddecl${QF::QF-pkg} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /*==========================================================================*/
-/* QF-specific critical section */
-#ifndef QF_CRIT_STAT_TYPE
-    /*! This is an internal macro for defining the critical section
-    * status type. */
-    /**
-    * @details
-    * The purpose of this macro is to enable writing the same code for the
-    * case when critical section status type is defined and when it is not.
-    * If the macro #QF_CRIT_STAT_TYPE is defined, this internal macro
-    * provides the definition of the critical section status variable.
-    * Otherwise this macro is empty.
-    * @sa #QF_CRIT_STAT_TYPE
-    */
-    #define QF_CRIT_STAT_
-
-    /*! This is an internal macro for entering a critical section. */
-    /**
-    * @details
-    * The purpose of this macro is to enable writing the same code for the
-    * case when critical section status type is defined and when it is not.
-    * If the macro #QF_CRIT_STAT_TYPE is defined, this internal macro
-    * invokes QF_CRIT_ENTRY() passing the key variable as the parameter.
-    * Otherwise QF_CRIT_ENTRY() is invoked with a dummy parameter.
-    * @sa QF_CRIT_ENTRY()
-    */
-    #define QF_CRIT_E_()     QF_CRIT_ENTRY(dummy)
-
-    /*! This is an internal macro for exiting a critical section. */
-    /**
-    * @details
-    * The purpose of this macro is to enable writing the same code for the
-    * case when critical section status type is defined and when it is not.
-    * If the macro #QF_CRIT_STAT_TYPE is defined, this internal macro
-    * invokes #QF_CRIT_EXIT passing the key variable as the parameter.
-    * Otherwise #QF_CRIT_EXIT is invoked with a dummy parameter.
-    * @sa #QF_CRIT_EXIT
-    */
-    #define QF_CRIT_X_()     QF_CRIT_EXIT(dummy)
-
-#elif (!defined QF_CRIT_STAT_)
-    #define QF_CRIT_STAT_    QF_CRIT_STAT_TYPE critStat_;
-    #define QF_CRIT_E_()     QF_CRIT_ENTRY(critStat_)
-    #define QF_CRIT_X_()     QF_CRIT_EXIT(critStat_)
-#endif
-
-/*==========================================================================*/
-/* Assertions inside the critical section */
-#ifdef Q_NASSERT /* Q_NASSERT defined--assertion checking disabled */
-
-    #define Q_ASSERT_CRIT_(id_, test_)  ((void)0)
-    #define Q_REQUIRE_CRIT_(id_, test_) ((void)0)
-    #define Q_ERROR_CRIT_(id_)          ((void)0)
-
-#else  /* Q_NASSERT not defined--assertion checking enabled */
-
-    #define Q_ASSERT_CRIT_(id_, test_) do {               \
-        if ((test_)) {} else {                            \
-            QF_CRIT_X_();                                 \
-            Q_onAssert(&Q_this_module_[0], (int_t)(id_)); \
-        }                                                 \
-    } while (false)
-
-    #define Q_REQUIRE_CRIT_(id_, test_) Q_ASSERT_CRIT_((id_), (test_))
-
-    #define Q_ERROR_CRIT_(id_) do {                       \
-        QF_CRIT_X_();                                     \
-        Q_onAssert(&Q_this_module_[0], (int_t)(id_));     \
-    } while (false)
-
-#endif /* Q_NASSERT */
-
-/*==========================================================================*/
-
 /* The following bitmasks are for the fields of the @c refCtr_ attribute
 * of the QTimeEvt struct (inherited from QEvt). This attribute is NOT used
 * for reference counting in time events, because the @c poolId_ attribute
@@ -176,7 +117,11 @@ typedef struct QFreeBlock {
 * @private @memberof QEvt
 *
 * @trace
+<<<<<<< HEAD
 * @tr{PQP11_8}
+=======
+* - @tr{DVR-QP-MC3-R11_08}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 static inline void QEvt_refCtr_inc_(QEvt const *me) {
     ++((QEvt *)me)->refCtr_;
@@ -186,7 +131,11 @@ static inline void QEvt_refCtr_inc_(QEvt const *me) {
 * @private @memberof QEvt
 *
 * @trace
+<<<<<<< HEAD
 * @tr{PQP11_8}
+=======
+* - @tr{DVR-QP-MC3-R11_08}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 static inline void QEvt_refCtr_dec_(QEvt const *me) {
     --((QEvt *)me)->refCtr_;

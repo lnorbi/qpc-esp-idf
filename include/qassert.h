@@ -37,6 +37,7 @@
 */
 /*$endhead${include::qassert.h} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
+<<<<<<< HEAD
 * @brief Customizable and memory-efficient Design by Contract (DbC)
 * for embedded systems
 *
@@ -48,14 +49,18 @@
 * However, it is generally **not** advisable to disable assertions,
 * **especially** in the production code. Instead, the assertion
 * handler Q_onAssert() should be very carefully designed and tested.
+=======
+* @brief Deprecated file for backwards compatibility.
+*
+* @deprecated Please use "qsafety.h" instead.
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 #ifndef QASSERT_H_
 #define QASSERT_H_
 
-#ifdef __cplusplus
-    extern "C" {
-#endif
+#include "qsafety.h" /* QP Functional Safety (FuSa) System */
 
+<<<<<<< HEAD
 #ifndef Q_NASSERT
 /*$declare${DbC::active} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
 
@@ -392,4 +397,6 @@ Q_NORETURN Q_onAssert(
     }
 #endif
 
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 #endif /* QASSERT_H_ */

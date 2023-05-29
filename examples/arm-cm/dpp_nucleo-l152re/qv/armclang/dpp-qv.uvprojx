@@ -389,6 +389,11 @@
               <FilePath>..\..\bsp.h</FilePath>
             </File>
             <File>
+              <FileName>bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsp.c</FilePath>
+            </File>
+            <File>
               <FileName>dpp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\dpp.h</FilePath>
@@ -404,6 +409,7 @@
               <FilePath>..\..\table.c</FilePath>
             </File>
             <File>
+<<<<<<< HEAD
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -414,6 +420,8 @@
               <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
@@ -636,6 +644,11 @@
               <FileName>qs_rx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
+            </File>
+            <File>
+              <FileName>qstamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1024,6 +1037,11 @@
               <FilePath>..\..\bsp.h</FilePath>
             </File>
             <File>
+              <FileName>bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsp.c</FilePath>
+            </File>
+            <File>
               <FileName>dpp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\dpp.h</FilePath>
@@ -1039,6 +1057,7 @@
               <FilePath>..\..\table.c</FilePath>
             </File>
             <File>
+<<<<<<< HEAD
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1049,6 +1068,8 @@
               <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
@@ -1272,6 +1293,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
             </File>
+            <File>
+              <FileName>qstamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1280,7 +1306,7 @@
       <TargetName>dpp-spy</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6130001::V6.13.1::.\ARMCLANG</pCCUsed>
+      <pCCUsed>6160000::V6.16::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -1659,6 +1685,11 @@
               <FilePath>..\..\bsp.h</FilePath>
             </File>
             <File>
+              <FileName>bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsp.c</FilePath>
+            </File>
+            <File>
               <FileName>dpp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\dpp.h</FilePath>
@@ -1674,6 +1705,7 @@
               <FilePath>..\..\table.c</FilePath>
             </File>
             <File>
+<<<<<<< HEAD
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1684,6 +1716,8 @@
               <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
             </File>
             <File>
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
@@ -1838,6 +1872,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
             </File>
+            <File>
+              <FileName>qstamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1849,5 +1888,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>dpp-qv</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

@@ -95,8 +95,8 @@ void QF_onClockTick(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const file, int_t const line) {
-    FPRINTF_S(stderr, "Assertion failed in %s, line %d", file, line);
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    FPRINTF_S(stderr, "ERROR in %s, line %d", module, id);
     QF_onCleanup();
     exit(-1);
 }

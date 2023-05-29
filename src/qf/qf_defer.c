@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -68,8 +68,8 @@ bool QActive_defer(QActive const * const me,
     QEvt const * const e)
 {
     bool const status = QEQueue_post(eq, e, 0U, me->prio);
-    QS_CRIT_STAT_
 
+    QS_CRIT_STAT_
     QS_BEGIN_PRE_(QS_QF_ACTIVE_DEFER, me->prio)
         QS_TIME_PRE_();      /* time stamp */
         QS_OBJ_PRE_(me);     /* this active object */
@@ -90,11 +90,10 @@ bool QActive_recall(QActive * const me,
 {
     QEvt const * const e = QEQueue_get(eq, me->prio);
     bool recalled;
+    QF_CRIT_STAT_
 
     /* event available? */
     if (e != (QEvt *)0) {
-        QF_CRIT_STAT_
-
         QACTIVE_POST_LIFO(me, e); /* post it to the front of the AO's queue */
 
         QF_CRIT_E_();
@@ -107,7 +106,7 @@ bool QActive_recall(QActive * const me,
             * did NOT decrement the reference counter) and once in the
             * AO's event queue.
             */
-            Q_ASSERT_CRIT_(210, e->refCtr_ >= 2U);
+            Q_ASSERT_NOCRIT_(210, e->refCtr_ >= 2U);
 
             /* we need to decrement the reference counter once, to account
             * for removing the event from the deferred event queue.
@@ -127,13 +126,13 @@ bool QActive_recall(QActive * const me,
         recalled = true;
     }
     else {
-        QS_CRIT_STAT_
-
-        QS_BEGIN_PRE_(QS_QF_ACTIVE_RECALL_ATTEMPT, me->prio)
+        QF_CRIT_E_();
+        QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_RECALL_ATTEMPT, me->prio)
             QS_TIME_PRE_();      /* time stamp */
             QS_OBJ_PRE_(me);     /* this active object */
             QS_OBJ_PRE_(eq);     /* the deferred queue */
-        QS_END_PRE_()
+        QS_END_NOCRIT_PRE_()
+        QF_CRIT_X_();
 
         recalled = false;
     }

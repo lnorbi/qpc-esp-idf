@@ -1,7 +1,12 @@
-/*****************************************************************************
+/*============================================================================
 * Product: DPP example, NUCLEO-L053R8 board, uC/OS-II RTOS
+<<<<<<< HEAD
 * Last updated for version 7.2.1
 * Last updated on  2023-01-26
+=======
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -30,7 +35,7 @@
 * Contact information:
 * <www.state-machine.com/licensing>
 * <info@state-machine.com>
-*****************************************************************************/
+============================================================================*/
 #include "qpc.h"
 #include "dpp.h"
 #include "bsp.h"
@@ -63,7 +68,6 @@ static uint32_t l_rnd;  /* random seed */
 
 #endif
 
-/* ISRs used in the application ==========================================*/
 /* uCOS-II application hooks ===============================================*/
 void App_TaskCreateHook (OS_TCB *ptcb) { (void)ptcb; }
 void App_TaskDelHook    (OS_TCB *ptcb) { (void)ptcb; }
@@ -245,13 +249,14 @@ void QF_onStartup(void) {
 void QF_onCleanup(void) {
 }
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
 
 #ifndef NDEBUG
     /* wait until button B1 is pressed... */
@@ -262,6 +267,11 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
 #endif
 
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/

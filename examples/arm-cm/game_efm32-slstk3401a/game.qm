@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="5.2.4" links="1">
+<model version="5.2.5" links="1">
  <documentation>&quot;Fly 'n' Shoot&quot; game model from Chapters 1 &amp; 9 of PSiCC2</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -1364,7 +1364,7 @@ enum GameBitmapIds {
 };
 
 /* declare shared facilities */
-$declare${Shared}
+$declare ${Shared}
 
 #endif  /* GAME_H */
 </text>
@@ -1378,14 +1378,14 @@ $declare${Shared}
 /* Q_DEFINE_THIS_FILE */
 
 /* local objects -----------------------------------------------------------*/
-$declare${AOs::Missile}
+$declare ${AOs::Missile}
 
 /* Public-scope objects ----------------------------------------------------*/
-$define${Shared::AO_Missile}
+$define ${Shared::AO_Missile}
 
 /* Active object definition ------------------------------------------------*/
-$define${Shared::Missile_ctor_call}
-$define${AOs::Missile}</text>
+$define ${Shared::Missile_ctor_call}
+$define ${AOs::Missile}</text>
   </file>
   <!--${.::ship.c}-->
   <file name="ship.c">
@@ -1399,14 +1399,14 @@ $define${AOs::Missile}</text>
 #define SHIP_HEIGHT 3
 
 /* encapsulated delcaration of the Ship active object ----------------------*/
-$declare${AOs::Ship}
+$declare ${AOs::Ship}
 
 /* Public-scope objects ----------------------------------------------------*/
-$define${Shared::AO_Ship}
+$define ${Shared::AO_Ship}
 
 /* Active object definition ------------------------------------------------*/
-$define${Shared::Ship_ctor_call}
-$define${AOs::Ship}</text>
+$define ${Shared::Ship_ctor_call}
+$define ${AOs::Ship}</text>
   </file>
   <!--${.::tunnel.c}-->
   <file name="tunnel.c">
@@ -1417,14 +1417,14 @@ $define${AOs::Ship}</text>
 Q_DEFINE_THIS_FILE
 
 /* local objects -----------------------------------------------------------*/
-$declare${AOs::Tunnel}
+$declare ${AOs::Tunnel}
 
 /* Public-scope objects ----------------------------------------------------*/
-$define${Shared::AO_Tunnel}
+$define ${Shared::AO_Tunnel}
 
 /* Active object definition ================================================*/
-$define${Shared::Tunnel_ctor_call}
-$define${AOs::Tunnel}</text>
+$define ${Shared::Tunnel_ctor_call}
+$define ${AOs::Tunnel}</text>
   </file>
   <!--${.::mine1.c}-->
   <file name="mine1.c">
@@ -1435,14 +1435,14 @@ $define${AOs::Tunnel}</text>
 Q_DEFINE_THIS_FILE
 
 /* encapsulated delcaration of the Mine1 HSM -------------------------------*/
-$declare(AOs::Mine1)
+$declare ${AOs::Mine1}
 
 /* helper macro to provide the ID of this mine */
 #define MINE_ID(me_)    ((uint8_t)((me_) - &amp;Mine1_inst[0]))
 
 /* Mine1 class definition --------------------------------------------------*/
-$define(Shared::Mine1_ctor_call)
-$define(AOs::Mine1)</text>
+$define ${Shared::Mine1_ctor_call}
+$define ${AOs::Mine1}</text>
   </file>
   <!--${.::mine2.c}-->
   <file name="mine2.c">
@@ -1453,14 +1453,14 @@ $define(AOs::Mine1)</text>
 Q_DEFINE_THIS_FILE
 
 /* encapsulated delcaration of the Mine2 HSM -------------------------------*/
-$declare(AOs::Mine2)
+$declare ${AOs::Mine2}
 
 /* helper macro to provide the ID of this mine */
 #define MINE_ID(me_)    ((uint8_t)((me_) - &amp;Mine2_inst[0]))
 
 /* Mine2 class definition --------------------------------------------------*/
-$define(Shared::Mine2_ctor_call)
-$define(AOs::Mine2)</text>
+$define ${Shared::Mine2_ctor_call}
+$define ${AOs::Mine2}</text>
   </file>
  </directory>
 </model>

@@ -1,5 +1,5 @@
 /*============================================================================
-* QP/C Real-Time Embedded Framework (RTEF)
+* QF/C port to ARM Cortex-M, QXK, GNU-ARM
 * Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 *
 * SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
@@ -23,20 +23,20 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-06-30
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Cortex-M, dual-mode QXK kernel, GNU-ARM toolset
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* The maximum number of system clock tick rates */
 #define QF_MAX_TICK_RATE        2U
 
 /* QF interrupt disable/enable and log2()... */
-#if (__ARM_ARCH == 6) /* Cortex-M0/M0+/M1(v6-M, v6S-M)? */
+#if (__ARM_ARCH == 6) /* ARMv6-M? */
 
     /* The maximum number of active objects in the application, see NOTE1 */
     #define QF_MAX_ACTIVE       16U
@@ -46,10 +46,10 @@
     #define QF_INT_ENABLE()     __asm volatile ("cpsie i")
 
     /* QF critical section (save and restore interrupt status), see NOTE2 */
-    #define QF_CRIT_STAT_TYPE   uint32_t
-    #define QF_CRIT_ENTRY(primask_) \
+    #define QF_CRIT_STAT_       uint32_t primask_;
+    #define QF_CRIT_E_() \
         __asm volatile ("mrs %0,PRIMASK\n" "cpsid i" : "=r" (primask_) ::)
-    #define QF_CRIT_EXIT(primask_) \
+    #define QF_CRIT_X_() \
         __asm volatile ("msr PRIMASK,%0" :: "r" (primask_) : )
 
     /* CMSIS threshold for "QF-aware" interrupts, see NOTE2 and NOTE4 */
@@ -74,13 +74,13 @@
         "msr BASEPRI,%0" :: "r" (0) : )
 
     /* QF critical section (save and restore interrupt status), see NOTE5 */
-    #define QF_CRIT_STAT_TYPE   uint32_t
-    #define QF_CRIT_ENTRY(basepri_) do { \
+    #define QF_CRIT_STAT_       uint32_t basepri_;
+    #define QF_CRIT_E_() do { \
         __asm volatile ("mrs %0,BASEPRI" : "=r" (basepri_) :: ); \
         __asm volatile ("cpsid i\n msr BASEPRI,%0\n cpsie i" \
                         :: "r" (QF_BASEPRI) : ); \
     } while (false)
-    #define QF_CRIT_EXIT(basepri_) \
+    #define QF_CRIT_X_() \
         __asm volatile ("msr BASEPRI,%0" :: "r" (basepri_) : )
 
     /* BASEPRI threshold for "QF-aware" interrupts, see NOTE3 */
@@ -98,12 +98,12 @@
 
 #include "qep_port.h"   /* QEP port */
 
-#if (__ARM_ARCH == 6) /* Cortex-M0/M0+/M1(v6-M, v6S-M)? */
+#if (__ARM_ARCH == 6) /* ARMv6-M? */
     /* hand-optimized quick LOG2 in assembly */
     uint_fast8_t QF_qlog2(uint32_t x);
-#endif /* Cortex-M0/M0+/M1(v6-M, v6S-M) */
+#endif /* ARMv7-M or higher */
 
-#include "qxk_port.h"   /* QXK dual-mode kernel port */
+#include "qxk_port.h"  /* QXK dual-mode kernel port */
 
 /*****************************************************************************
 * NOTE1:
@@ -149,5 +149,5 @@
 * macro. This workaround works also for Cortex-M3/M4 cores.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 

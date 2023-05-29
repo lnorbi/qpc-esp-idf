@@ -70,13 +70,13 @@ enum QSpyRxRecords {
 
 /*==========================================================================*/
 /*! Frame character of the QS output protocol */
-#define QS_FRAME    (0x7EU)
+#define QS_FRAME       0x7EU
 
 /*! Escape character of the QS output protocol */
-#define QS_ESC      (0x7DU)
+#define QS_ESC         0x7DU
 
 /*! The expected checksum value over a correct QS record */
-#define QS_GOOD_CHKSUM (0xFFU)
+#define QS_GOOD_CHKSUM 0xFFU
 
 /*! Escape modifier of the QS output protocol */
 /**
@@ -84,7 +84,7 @@ enum QSpyRxRecords {
 * The escaped byte is XOR-ed with the escape modifier before it is inserted
 * into the QS buffer.
 */
-#define QS_ESC_XOR  (0x20U)
+#define QS_ESC_XOR     0x20U
 
 /*==========================================================================*/
 /*! Internal QS macro to begin a predefined QS record with
@@ -93,6 +93,12 @@ enum QSpyRxRecords {
 * @note This macro is intended to use only inside QP components and NOT
 * at the application level.
 * @sa QS_BEGIN_ID()
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QS-PCLP-506}
+* - @tr{DVP-QS-PCLP-572}
+* - @tr{DVP-QS-PCLP-845}
 */
 #define QS_BEGIN_PRE_(rec_, qs_id_)                     \
     if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
@@ -105,6 +111,9 @@ enum QSpyRxRecords {
 * @note This macro is intended to use only inside QP components and NOT
 * at the application level.
 * @sa QS_END()
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_END_PRE_() \
         QS_endRec_(); \
@@ -117,6 +126,12 @@ enum QSpyRxRecords {
 * @note This macro is intended to use only inside QP components and NOT
 * at the application level.
 * @sa QS_BEGIN_NOCRIT()
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVP-QS-PCLP-506}
+* - @tr{DVP-QS-PCLP-572}
+* - @tr{DVP-QS-PCLP-845}
 */
 #define QS_BEGIN_NOCRIT_PRE_(rec_, qs_id_)              \
     if (QS_GLB_CHECK_(rec_) && QS_LOC_CHECK_(qs_id_)) { \
@@ -127,29 +142,55 @@ enum QSpyRxRecords {
 *
 * @note This macro is intended to use only inside QP components and NOT
 * at the application level. @sa #QS_END_NOCRIT
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
 */
 #define QS_END_NOCRIT_PRE_()    QS_endRec_(); }
 
-/*! Internal QS macro to output a predefined uint8_t data element */
+/*! Internal QS macro to output a predefined uint8_t data element
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_U8_PRE_(data_)       (QS_u8_raw_((uint8_t)(data_)))
 
-/*! Internal QS macro to output 2 predefined uint8_t data elements */
+/*! Internal QS macro to output 2 predefined uint8_t data elements
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_2U8_PRE_(data1_, data2_) \
     (QS_2u8_raw_((uint8_t)(data1_), (uint8_t)(data2_)))
 
-/*! Internal QS macro to output an predefined uint16_t data element */
+/*! Internal QS macro to output an predefined uint16_t data element
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_U16_PRE_(data_)      (QS_u16_raw_((uint16_t)(data_)))
 
-/*! Internal QS macro to output a predefined uint32_t data element */
+/*! Internal QS macro to output a predefined uint32_t data element
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_U32_PRE_(data_)      (QS_u32_raw_((uint32_t)(data_)))
 
-/*! Internal QS macro to output a predefined zero-terminated string element */
+/*! Internal QS macro to output a predefined zero-terminated string element
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_STR_PRE_(msg_)       (QS_str_raw_((msg_)))
 
 #if (!defined Q_SIGNAL_SIZE || (Q_SIGNAL_SIZE == 1U))
-    /*! Internal macro to output an unformatted event signal data element */
-    /**
+    /*! Internal macro to output an unformatted event signal data element
+    *
     * @note the size of the pointer depends on the macro #Q_SIGNAL_SIZE.
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
     #define QS_SIG_PRE_(sig_)   (QS_u8_raw_((uint8_t)sig_))
 #elif (Q_SIGNAL_SIZE == 2U)
@@ -158,6 +199,13 @@ enum QSpyRxRecords {
     #define QS_SIG_PRE_(sig_)   (QS_u32_raw_((uint32_t)sig_))
 #endif
 
+/*! Internal QS macro to output a predefined object pointer
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+* - @tr{DVR-QS-MC3-R11_04}
+* - @tr{DVR-QS-MC3-R11_06}
+*/
 #define QS_OBJ_PRE_(obj_)       (QS_obj_raw_(obj_))
 
 #if (!defined QS_FUN_PTR_SIZE || (QS_FUN_PTR_SIZE == 1U))
@@ -172,6 +220,11 @@ enum QSpyRxRecords {
     /*! Internal macro to output an unformatted function pointer */
     /** @note the size of the pointer depends on the macro #QS_FUN_PTR_SIZE.
     * If the size is not defined the size of pointer is assumed 4-bytes.
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
+    * - @tr{DVP-QS-MC3-R11_01}
+    * - @tr{DVR-QS-MC3-R11_06}
     */
     #define QS_FUN_PRE_(fun_)   (QS_u32_raw_((uint32_t)(fun_)))
 #endif
@@ -180,9 +233,12 @@ enum QSpyRxRecords {
 #if (!defined QF_EQUEUE_CTR_SIZE || (QF_EQUEUE_CTR_SIZE == 1U))
 
     /*! Internal QS macro to output an unformatted event queue counter
-    * data element. */
-    /**
+    * data element.
+    *
     * @note the counter size depends on the macro #QF_EQUEUE_CTR_SIZE.
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
     #define QS_EQC_PRE_(ctr_)       QS_u8_raw_((uint8_t)(ctr_))
 #elif (QF_EQUEUE_CTR_SIZE == 2U)
@@ -194,9 +250,12 @@ enum QSpyRxRecords {
 #if (!defined QF_EVENT_SIZ_SIZE || (QF_EVENT_SIZ_SIZE == 1U))
 
     /*! Internal QS macro to output an unformatted event size
-    * data element. */
-    /**
+    * data element.
+    *
     * @note the event size depends on the macro #QF_EVENT_SIZ_SIZE.
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
     #define QS_EVS_PRE_(size_)      QS_u8_raw_((uint8_t)(size_))
 #elif (QF_EVENT_SIZ_SIZE == 2U)
@@ -208,9 +267,12 @@ enum QSpyRxRecords {
 #if (!defined QF_MPOOL_SIZ_SIZE || (QF_MPOOL_SIZ_SIZE == 1U))
 
     /*! Internal QS macro to output an unformatted memory pool
-    * block-size data element */
-    /**
+    * block-size data element
+    *
     * @note the block-size depends on the macro #QF_MPOOL_SIZ_SIZE.
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
     #define QS_MPS_PRE_(size_)      QS_u8_raw_((uint8_t)(size_))
 #elif (QF_MPOOL_SIZ_SIZE == 2U)
@@ -222,9 +284,12 @@ enum QSpyRxRecords {
 #if (!defined QF_MPOOL_CTR_SIZE || (QF_MPOOL_CTR_SIZE == 1U))
 
     /*! Internal QS macro to output an unformatted memory pool
-    * block-counter data element. */
-    /**
+    * block-counter data element.
+    *
     * @note the counter size depends on the macro #QF_MPOOL_CTR_SIZE.
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
     #define QS_MPC_PRE_(ctr_)       QS_u8_raw_((uint8_t)(ctr_))
 #elif (QF_MPOOL_CTR_SIZE == 2U)
@@ -236,9 +301,12 @@ enum QSpyRxRecords {
 #if (!defined QF_TIMEEVT_CTR_SIZE || (QF_TIMEEVT_CTR_SIZE == 1U))
 
     /*! Internal QS macro to output an unformatted time event
-    * tick-counter data element */
-    /**
+    * tick-counter data element
+    *
     * @note the counter size depends on the macro #QF_TIMEEVT_CTR_SIZE.
+    *
+    * @trace
+    * - @tr{DVP-QS-MC3-D04_09A}
     */
     #define QS_TEC_PRE_(ctr_)       QS_u8_raw_((uint8_t)(ctr_))
 #elif (QF_TIMEEVT_CTR_SIZE == 2U)
@@ -248,7 +316,11 @@ enum QSpyRxRecords {
 #endif
 
 /*==========================================================================*/
-/*! Internal QS macro to insert an un-escaped byte into the QS buffer */
+/*! Internal QS macro to insert an un-escaped byte into the QS buffer
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_INSERT_BYTE_(b_) \
     buf[head] = (b_);       \
     ++head;                 \
@@ -256,7 +328,11 @@ enum QSpyRxRecords {
         head = 0U;          \
     }
 
-/*! Internal QS macro to insert an escaped byte into the QS buffer */
+/*! Internal QS macro to insert an escaped byte into the QS buffer
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_INSERT_ESC_BYTE_(b_)                      \
     chksum = (uint8_t)(chksum + (b_));               \
     if (((b_) != QS_FRAME) && ((b_) != QS_ESC)) {    \

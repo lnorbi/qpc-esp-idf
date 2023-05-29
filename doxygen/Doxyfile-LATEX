@@ -7,6 +7,7 @@
 #---------------------------------------------------------------------------
 INPUT                  = main.dox \
                          gs.dox \
+<<<<<<< HEAD
                          api.dox \
                          ../../cert-pack/cert-pack.dox \
                          ../../cert-pack/srs.dox \
@@ -15,7 +16,17 @@ INPUT                  = main.dox \
                          ../../cert-pack/sds_sm-c.dox \
                          ../../cert-pack/misra.dox \
                          ../../cert-pack/metrics.dox \
+=======
+                         ../../cert/cert-kit.dox \
+                         ../../cert/srs.dox \
+                         ../../cert/sas.dox \
+                         ../../cert/sds.dox \
+                         ../../cert/sds_sm-c.dox \
+                         ../../cert/misra.dox \
+                         ../../cert/metrics.dox \
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
                          history.dox \
+                         api.dox \
                          exa.dox \
                          exa_native.dox \
                          exa_rtos.dox \

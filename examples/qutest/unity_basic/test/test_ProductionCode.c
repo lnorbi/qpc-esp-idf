@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Purpose: example QUTEST fixture for the basic example from Unity
-* Last Updated for Version: 7.2.0
-* Date of the Last Update:  2022-11-30
+* Last Updated for Version: 7.3.0
+* Date of the Last Update:  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -48,7 +48,9 @@ int main(int argc, char *argv[]) {
     QF_init();  /* initialize the framework */
 
     /* initialize the QS software tracing */
-    Q_ALLEGE(QS_INIT(argc > 1 ? argv[1] : (void *)0));
+    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+        Q_ERROR();
+    }
 
     /* dictionaries... */
     QS_FUN_DICTIONARY(&FindFunction_WhichIsBroken);

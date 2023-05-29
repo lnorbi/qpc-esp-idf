@@ -57,7 +57,7 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=../../../../../src/qf/qep_hsm.c ../../../../../src/qf/qep_msm.c ../../../../../src/qf/qf_act.c ../../../../../src/qf/qf_actq.c ../../../../../src/qf/qf_defer.c ../../../../../src/qf/qf_dyn.c ../../../../../src/qf/qf_mem.c ../../../../../src/qf/qf_ps.c ../../../../../src/qf/qf_qact.c ../../../../../src/qf/qf_qeq.c ../../../../../src/qf/qf_qmact.c ../../../../../src/qf/qf_time.c ../../../../../src/qk/qk.c ../../../../../ports/pic32/qk/xc32/qk_port.c bsp.c ../../blinky.c ../../main.c ../../../../../include/qstamp.c
+SOURCEFILES_QUOTED_IF_SPACED=../../../../../src/qf/qep_hsm.c ../../../../../src/qf/qep_msm.c ../../../../../src/qf/qf_act.c ../../../../../src/qf/qf_actq.c ../../../../../src/qf/qf_defer.c ../../../../../src/qf/qf_dyn.c ../../../../../src/qf/qf_mem.c ../../../../../src/qf/qf_ps.c ../../../../../src/qf/qf_qact.c ../../../../../src/qf/qf_qeq.c ../../../../../src/qf/qf_qmact.c ../../../../../src/qf/qf_time.c ../../../../../src/qk/qk.c ../../../../../ports/pic32/qk/xc32/qk_port.c bsp.c ../../blinky.c ../../main.c ../../../../../src/qs/qstamp.c
 
 # Object Files Quoted if spaced
 OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/820665871/qep_hsm.o ${OBJECTDIR}/_ext/820665871/qep_msm.o ${OBJECTDIR}/_ext/820665871/qf_act.o ${OBJECTDIR}/_ext/820665871/qf_actq.o ${OBJECTDIR}/_ext/820665871/qf_defer.o ${OBJECTDIR}/_ext/820665871/qf_dyn.o ${OBJECTDIR}/_ext/820665871/qf_mem.o ${OBJECTDIR}/_ext/820665871/qf_ps.o ${OBJECTDIR}/_ext/820665871/qf_qact.o ${OBJECTDIR}/_ext/820665871/qf_qeq.o ${OBJECTDIR}/_ext/820665871/qf_qmact.o ${OBJECTDIR}/_ext/820665871/qf_time.o ${OBJECTDIR}/_ext/820665876/qk.o ${OBJECTDIR}/_ext/1627782163/qk_port.o ${OBJECTDIR}/bsp.o ${OBJECTDIR}/_ext/43898991/blinky.o ${OBJECTDIR}/_ext/43898991/main.o ${OBJECTDIR}/_ext/726959463/qstamp.o
@@ -67,7 +67,7 @@ POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/820665871/qep_hsm.o.d ${OBJECTDIR}/_ext/8206
 OBJECTFILES=${OBJECTDIR}/_ext/820665871/qep_hsm.o ${OBJECTDIR}/_ext/820665871/qep_msm.o ${OBJECTDIR}/_ext/820665871/qf_act.o ${OBJECTDIR}/_ext/820665871/qf_actq.o ${OBJECTDIR}/_ext/820665871/qf_defer.o ${OBJECTDIR}/_ext/820665871/qf_dyn.o ${OBJECTDIR}/_ext/820665871/qf_mem.o ${OBJECTDIR}/_ext/820665871/qf_ps.o ${OBJECTDIR}/_ext/820665871/qf_qact.o ${OBJECTDIR}/_ext/820665871/qf_qeq.o ${OBJECTDIR}/_ext/820665871/qf_qmact.o ${OBJECTDIR}/_ext/820665871/qf_time.o ${OBJECTDIR}/_ext/820665876/qk.o ${OBJECTDIR}/_ext/1627782163/qk_port.o ${OBJECTDIR}/bsp.o ${OBJECTDIR}/_ext/43898991/blinky.o ${OBJECTDIR}/_ext/43898991/main.o ${OBJECTDIR}/_ext/726959463/qstamp.o
 
 # Source Files
-SOURCEFILES=../../../../../src/qf/qep_hsm.c ../../../../../src/qf/qep_msm.c ../../../../../src/qf/qf_act.c ../../../../../src/qf/qf_actq.c ../../../../../src/qf/qf_defer.c ../../../../../src/qf/qf_dyn.c ../../../../../src/qf/qf_mem.c ../../../../../src/qf/qf_ps.c ../../../../../src/qf/qf_qact.c ../../../../../src/qf/qf_qeq.c ../../../../../src/qf/qf_qmact.c ../../../../../src/qf/qf_time.c ../../../../../src/qk/qk.c ../../../../../ports/pic32/qk/xc32/qk_port.c bsp.c ../../blinky.c ../../main.c ../../../../../include/qstamp.c
+SOURCEFILES=../../../../../src/qf/qep_hsm.c ../../../../../src/qf/qep_msm.c ../../../../../src/qf/qf_act.c ../../../../../src/qf/qf_actq.c ../../../../../src/qf/qf_defer.c ../../../../../src/qf/qf_dyn.c ../../../../../src/qf/qf_mem.c ../../../../../src/qf/qf_ps.c ../../../../../src/qf/qf_qact.c ../../../../../src/qf/qf_qeq.c ../../../../../src/qf/qf_qmact.c ../../../../../src/qf/qf_time.c ../../../../../src/qk/qk.c ../../../../../ports/pic32/qk/xc32/qk_port.c bsp.c ../../blinky.c ../../main.c ../../../../../src/qs/qstamp.c
 
 
 CFLAGS=
@@ -208,11 +208,11 @@ ${OBJECTDIR}/_ext/43898991/main.o: ../../main.c  nbproject/Makefile-${CND_CONF}.
 	@${RM} ${OBJECTDIR}/_ext/43898991/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/43898991/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -O3 -DNDEBUG -I"../.." -I"../../../../../include" -I"../../../../../src" -I"../../../../../ports/pic32/qk/xc32" -MMD -MF "${OBJECTDIR}/_ext/43898991/main.o.d" -o ${OBJECTDIR}/_ext/43898991/main.o ../../main.c    -DXPRJ_rel=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -std=c99
 	
-${OBJECTDIR}/_ext/726959463/qstamp.o: ../../../../../include/qstamp.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/_ext/726959463/qstamp.o: ../../../../../src/qs/qstamp.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/726959463" 
 	@${RM} ${OBJECTDIR}/_ext/726959463/qstamp.o.d 
 	@${RM} ${OBJECTDIR}/_ext/726959463/qstamp.o 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/726959463/qstamp.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -O3 -DNDEBUG -I"../.." -I"../../../../../include" -I"../../../../../src" -I"../../../../../ports/pic32/qk/xc32" -MMD -MF "${OBJECTDIR}/_ext/726959463/qstamp.o.d" -o ${OBJECTDIR}/_ext/726959463/qstamp.o ../../../../../include/qstamp.c    -DXPRJ_rel=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -std=c99
+	@${FIXDEPS} "${OBJECTDIR}/_ext/726959463/qstamp.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -O3 -DNDEBUG -I"../.." -I"../../../../../include" -I"../../../../../src" -I"../../../../../ports/pic32/qk/xc32" -MMD -MF "${OBJECTDIR}/_ext/726959463/qstamp.o.d" -o ${OBJECTDIR}/_ext/726959463/qstamp.o ../../../../../src/qs/qstamp.c    -DXPRJ_rel=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -std=c99
 	
 else
 ${OBJECTDIR}/_ext/820665871/qep_hsm.o: ../../../../../src/qf/qep_hsm.c  nbproject/Makefile-${CND_CONF}.mk
@@ -317,11 +317,11 @@ ${OBJECTDIR}/_ext/43898991/main.o: ../../main.c  nbproject/Makefile-${CND_CONF}.
 	@${RM} ${OBJECTDIR}/_ext/43898991/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/43898991/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -O3 -DNDEBUG -I"../.." -I"../../../../../include" -I"../../../../../src" -I"../../../../../ports/pic32/qk/xc32" -MMD -MF "${OBJECTDIR}/_ext/43898991/main.o.d" -o ${OBJECTDIR}/_ext/43898991/main.o ../../main.c    -DXPRJ_rel=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -std=c99
 	
-${OBJECTDIR}/_ext/726959463/qstamp.o: ../../../../../include/qstamp.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/_ext/726959463/qstamp.o: ../../../../../src/qs/qstamp.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/726959463" 
 	@${RM} ${OBJECTDIR}/_ext/726959463/qstamp.o.d 
 	@${RM} ${OBJECTDIR}/_ext/726959463/qstamp.o 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/726959463/qstamp.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -O3 -DNDEBUG -I"../.." -I"../../../../../include" -I"../../../../../src" -I"../../../../../ports/pic32/qk/xc32" -MMD -MF "${OBJECTDIR}/_ext/726959463/qstamp.o.d" -o ${OBJECTDIR}/_ext/726959463/qstamp.o ../../../../../include/qstamp.c    -DXPRJ_rel=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -std=c99
+	@${FIXDEPS} "${OBJECTDIR}/_ext/726959463/qstamp.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -O3 -DNDEBUG -I"../.." -I"../../../../../include" -I"../../../../../src" -I"../../../../../ports/pic32/qk/xc32" -MMD -MF "${OBJECTDIR}/_ext/726959463/qstamp.o.d" -o ${OBJECTDIR}/_ext/726959463/qstamp.o ../../../../../src/qs/qstamp.c    -DXPRJ_rel=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -std=c99
 	
 endif
 

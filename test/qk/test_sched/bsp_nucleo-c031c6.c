@@ -1,7 +1,12 @@
 /*============================================================================
 * Product: BSP for system-testing of QK kernel, NUCLEO-C031C6 board
+<<<<<<< HEAD
 * Last updated for version 7.2.2
 * Last updated on  2023-02-02
+=======
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -200,6 +205,7 @@ void BSP_init(void) {
     /* setup the MPU... */
     STM32C031C6_MPU_setup();
 
+<<<<<<< HEAD
 
     /* enable GPIOA clock port for the LD4 User LED */
     RCC->IOPENR |= (1U << 0U);
@@ -221,6 +227,10 @@ void BSP_init(void) {
 
     /* initialize the QS software tracing... */
     if (QS_INIT((void *)0) == 0) { /* initialize the QS software tracing */
+=======
+    /* initialize the QS software tracing... */
+    if (QS_INIT((void *)0) == 0U) {
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
         Q_ERROR();
     }
 
@@ -341,8 +351,13 @@ void QK_onIdle(void) {
 }
 
 /* fault handler called from the exception handlers in the startup code */
+<<<<<<< HEAD
 void assert_failed(char const * const module, int const loc) {
     Q_onAssert(module, loc);
+=======
+void assert_failed(char const * const module, int const id) {
+    Q_onError(module, id);
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 }
 
 /* QS callbacks ============================================================*/

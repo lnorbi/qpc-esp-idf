@@ -40,6 +40,9 @@ typedef unsigned int  uint_fast16_t; /*!< fast at-least 16-bit unsigned int */
 typedef signed   long int_fast32_t;  /*!< fast at-least 32-bit signed   int */
 typedef unsigned long uint_fast32_t; /*!< fast at-least 32-bit unsigned int */
 
+/* unsigned integer type capable of holding a pointer to void. */
+typedef unsigned uintptr_t;      /*!< unsigned int capable of holding void* */
+
 /*lint -restore */
 
 #endif /* STDINT_H */

@@ -29,7 +29,11 @@
 */
 /*$endhead${.::qmsmtst.c} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 #include "qep_port.h"     /* QEP event processor */
+<<<<<<< HEAD
 #include "qassert.h"      /* embedded systems assertions */
+=======
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 #ifdef Q_SPY
     #include "qs_port.h"  /* QS software tracing */
 #else
@@ -723,4 +727,3 @@ static QState QMsmTst_s211(QMsmTst * const me, QEvt const * const e) {
     return status_;
 }
 /*$enddef${SMs::QMsmTst} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-

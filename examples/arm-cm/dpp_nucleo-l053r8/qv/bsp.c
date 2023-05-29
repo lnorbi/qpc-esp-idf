@@ -1,7 +1,12 @@
 /*============================================================================
 * Product: DPP example, NUCLEO-L053R8 board, cooperative QV kernel
+<<<<<<< HEAD
 * Last updated for version 7.2.1
 * Last updated on  2023-01-26
+=======
+* Last updated for version 7.3.0
+* Last updated on  2023-05-26
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -63,19 +68,13 @@ static uint32_t l_rnd;  /* random seed */
 
 #endif
 
-/* ISRs used in the application ==========================================*/
+/* ISRs used in the application ============================================*/
 void SysTick_Handler(void);
 void EXTI0_1_IRQHandler(void);
 void USART2_IRQHandler(void);
 
 /*..........................................................................*/
 void SysTick_Handler(void) {   /* system clock tick ISR */
-    /* state of the button debouncing, see below */
-    static struct ButtonsDebouncing {
-        uint32_t depressed;
-        uint32_t previous;
-    } buttons = { 0U, 0U };
-    uint32_t current;
     uint32_t tmp;
 
 #ifdef Q_SPY
@@ -93,7 +92,11 @@ void SysTick_Handler(void) {   /* system clock tick ISR */
     * adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
     * and Michael Barr, page 71.
     */
-    current = ~GPIOC->IDR; /* read Port C with the state of Button B1 */
+    static struct ButtonsDebouncing {
+        uint32_t depressed;
+        uint32_t previous;
+    } buttons = { 0U, 0U };
+    uint32_t current = ~GPIOC->IDR; /* read Port C with state of Button B1 */
     tmp = buttons.depressed; /* save the debounced depressed buttons */
     buttons.depressed |= (buttons.previous & current); /* set depressed */
     buttons.depressed &= (buttons.previous | current); /* clear released */
@@ -132,126 +135,21 @@ void USART2_IRQHandler(void) { /* used in QS-RX (kernel UNAWARE interrutp) */
 
 /* BSP functions ===========================================================*/
 /*..........................................................................*/
-/* MPU setup for STM32L053R8 MCU */
-static void STM32L053R8_MPU_setup(void) {
-    /* The following MPU configuration contains the general STM32 memory model
-    * as described in the ST AppNote AN4838 "Managing memory protection unit
-    * in STM32 MCUs", Figure 2. Cortex-M0+/M3/M4/M7 processor memory map.
-    *
-    * Please note that the actual STM32 MCUs provide much less Flash and SRAM
-    * than the maximums configured here. This means that actual MCUs have
-    * unmapped memory regions (e.g., beyond the actual SRAM). Attempts to
-    * access these regions causes the HardFault exception, which is the
-    * desired behavior.
+void BSP_init(void) {
+    /* Configure the MPU to prevent NULL-pointer dereferencing
+    * see: state-machine.com/null-pointer-protection-with-arm-cortex-m-mpu
     */
-    static struct {
-        uint32_t rbar;
-        uint32_t rasr;
-    } const mpu_setup[] = {
+    MPU->RBAR = 0x0U                          /* base address (NULL) */
+                | MPU_RBAR_VALID_Msk          /* valid region */
+                | (MPU_RBAR_REGION_Msk & 7U); /* region #7 */
+    MPU->RASR = (7U << MPU_RASR_SIZE_Pos)     /* 2^(7+1) region */
+                | (0x0U << MPU_RASR_AP_Pos)   /* no-access region */
+                | MPU_RASR_ENABLE_Msk;        /* region enable */
 
-        { /* region #0: Flash: base=0x0000'0000, size=512M=2^(28+1) */
-          0x00000000U                       /* base address */
-              | MPU_RBAR_VALID_Msk          /* valid region */
-              | (MPU_RBAR_REGION_Msk & 0U), /* region #0 */
-          (28U << MPU_RASR_SIZE_Pos)        /* 2^(18+1) region */
-              | (0x6U << MPU_RASR_AP_Pos)   /* PA:ro/UA:ro */
-              | (1U << MPU_RASR_C_Pos)      /* C=1 */
-              | MPU_RASR_ENABLE_Msk         /* region enable */
-        },
-
-        { /* region #1: SRAM: base=0x2000'0000, size=512M=2^(28+1) */
-          0x20000000U                       /* base address */
-              | MPU_RBAR_VALID_Msk          /* valid region */
-              | (MPU_RBAR_REGION_Msk & 1U), /* region #1 */
-          (28U << MPU_RASR_SIZE_Pos)        /* 2^(28+1) region */
-              | (0x3U << MPU_RASR_AP_Pos)   /* PA:rw/UA:rw */
-              | (1U << MPU_RASR_XN_Pos)     /* XN=1 */
-              | (1U << MPU_RASR_S_Pos)      /* S=1 */
-              | (1U << MPU_RASR_C_Pos)      /* C=1 */
-              | MPU_RASR_ENABLE_Msk         /* region enable */
-        },
-
-        /* region #3: (not configured) */
-        { MPU_RBAR_VALID_Msk | (MPU_RBAR_REGION_Msk & 2U), 0U },
-
-        { /* region #3: Peripherals: base=0x4000'0000, size=512M=2^(28+1) */
-          0x40000000U                       /* base address */
-              | MPU_RBAR_VALID_Msk          /* valid region */
-              | (MPU_RBAR_REGION_Msk & 3U), /* region #3 */
-          (28U << MPU_RASR_SIZE_Pos)        /* 2^(28+1) region */
-              | (0x3U << MPU_RASR_AP_Pos)   /* PA:rw/UA:rw */
-              | (1U << MPU_RASR_XN_Pos)     /* XN=1 */
-              | (1U << MPU_RASR_S_Pos)      /* S=1 */
-              | (1U << MPU_RASR_B_Pos)      /* B=1 */
-              | MPU_RASR_ENABLE_Msk         /* region enable */
-        },
-
-        { /* region #4: Priv. Periph: base=0xE000'0000, size=512M=2^(28+1) */
-          0xE0000000U                       /* base address */
-              | MPU_RBAR_VALID_Msk          /* valid region */
-              | (MPU_RBAR_REGION_Msk & 4U), /* region #4 */
-          (28U << MPU_RASR_SIZE_Pos)        /* 2^(28+1) region */
-              | (0x3U << MPU_RASR_AP_Pos)   /* PA:rw/UA:rw */
-              | (1U << MPU_RASR_XN_Pos)     /* XN=1 */
-              | (1U << MPU_RASR_S_Pos)      /* S=1 */
-              | (1U << MPU_RASR_B_Pos)      /* B=1 */
-              | MPU_RASR_ENABLE_Msk         /* region enable */
-        },
-
-        { /* region #5: Ext RAM: base=0x6000'0000, size=1G=2^(29+1) */
-          0x60000000U                       /* base address */
-              | MPU_RBAR_VALID_Msk          /* valid region */
-              | (MPU_RBAR_REGION_Msk & 5U), /* region #5 */
-          (29U << MPU_RASR_SIZE_Pos)        /* 2^(28+1) region */
-              | (0x3U << MPU_RASR_AP_Pos)   /* PA:rw/UA:rw */
-              | (1U << MPU_RASR_XN_Pos)     /* XN=1 */
-              | (1U << MPU_RASR_S_Pos)      /* S=1 */
-              | (1U << MPU_RASR_B_Pos)      /* B=1 */
-              | MPU_RASR_ENABLE_Msk         /* region enable */
-        },
-
-        { /* region #6: Ext Dev: base=0xA000'0000, size=1G=2^(29+1) */
-          0xA0000000U                       /* base address */
-              | MPU_RBAR_VALID_Msk          /* valid region */
-              | (MPU_RBAR_REGION_Msk & 6U), /* region #6 */
-          (29U << MPU_RASR_SIZE_Pos)        /* 2^(28+1) region */
-              | (0x3U << MPU_RASR_AP_Pos)   /* PA:rw/UA:rw */
-              | (1U << MPU_RASR_XN_Pos)     /* XN=1 */
-              | (1U << MPU_RASR_S_Pos)      /* S=1 */
-              | (1U << MPU_RASR_B_Pos)      /* B=1 */
-              | MPU_RASR_ENABLE_Msk         /* region enable */
-        },
-
-        { /* region #7: NULL-pointer: base=0x000'0000, size=128M=2^(26+1) */
-          /* NOTE: this region extends to  0x080'0000, which is where
-          * the ROM is re-mapped by STM32
-          */
-          0x00000000U                       /* base address */
-              | MPU_RBAR_VALID_Msk          /* valid region */
-              | (MPU_RBAR_REGION_Msk & 7U), /* region #7 */
-          (26U << MPU_RASR_SIZE_Pos)        /* 2^(26+1)=128M region */
-              | (0x0U << MPU_RASR_AP_Pos)   /* PA:na/UA:na */
-              | (1U << MPU_RASR_XN_Pos)     /* XN=1 */
-              | MPU_RASR_ENABLE_Msk         /* region enable */
-        },
-
-    };
-
-    __DSB();
-    MPU->CTRL = 0U; /* disable the MPU */
-    for (uint_fast8_t n = 0U; n < Q_DIM(mpu_setup); ++n) {
-        MPU->RBAR = mpu_setup[n].rbar;
-        MPU->RASR = mpu_setup[n].rasr;
-    }
-    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk     /* enable background region */
-                | MPU_CTRL_ENABLE_Msk;      /* enable the MPU */
+    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk       /* enable background region */
+                | MPU_CTRL_ENABLE_Msk;        /* enable the MPU */
     __ISB();
     __DSB();
-}
-/*..........................................................................*/
-void BSP_init(void) {
-    /* setup the MPU... */
-    STM32L053R8_MPU_setup();
 
     /* NOTE: SystemInit() has been already called from the startup code
     *  but SystemCoreClock needs to be updated
@@ -261,6 +159,7 @@ void BSP_init(void) {
     /* enable GPIOA clock port for the LED LD2 */
     RCC->IOPENR |= (1U << 0U);
 
+<<<<<<< HEAD
     /* configure LED (PA.5) pin as push-pull output, no pull-up, pull-down */
     GPIOA->MODER   &= ~((3U << 2U*LD2_PIN));
     GPIOA->MODER   |=  ((1U << 2U*LD2_PIN));
@@ -268,6 +167,15 @@ void BSP_init(void) {
     GPIOA->OSPEEDR &= ~((3U << 2U*LD2_PIN));
     GPIOA->OSPEEDR |=  ((1U << 2U*LD2_PIN));
     GPIOA->PUPDR   &= ~((3U << 2U*LD2_PIN));
+=======
+    /* set all used GPIOA pins as push-pull output, no pull-up, pull-down */
+    GPIOA->MODER   &= ~(3U << 2U*LD2_PIN);
+    GPIOA->MODER   |=  (1U << 2U*LD2_PIN);
+    GPIOA->OTYPER  &= ~(1U <<    LD2_PIN);
+    GPIOA->OSPEEDR &= ~(3U << 2U*LD2_PIN);
+    GPIOA->OSPEEDR |=  (1U << 2U*LD2_PIN);
+    GPIOA->PUPDR   &= ~(3U << 2U*LD2_PIN);
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     /* enable GPIOC clock port for the Button B1 */
     RCC->IOPENR |=  (1U << 2U);
@@ -394,8 +302,8 @@ void QV_onIdle(void) {  /* called with interrupts disabled, see NOTE01 */
         uint16_t b = QS_getByte();
         QF_INT_ENABLE();
 
-        if (b != QS_EOD) {  /* not End-Of-Data? */
-            USART2->TDR = (b & 0xFFU);  /* put into the DR register */
+        if (b != QS_EOD) {   /* not End-Of-Data? */
+            USART2->TDR = b; /* put into the DR register */
         }
     }
 #elif defined NDEBUG
@@ -422,18 +330,24 @@ void QV_onIdle(void) {  /* called with interrupts disabled, see NOTE01 */
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
 
 #ifndef NDEBUG
     BSP_wait4SW1();
 #endif
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/
@@ -462,6 +376,7 @@ uint8_t QS_onStartup(void const *arg) {
     QS_rxInitBuf(qsRxBuf, sizeof(qsRxBuf));
 
     /* enable peripheral clock for USART2 */
+<<<<<<< HEAD
     RCC->IOPENR  |= ( 1U <<  0U);  /* Enable GPIOA clock   */
     RCC->APB1ENR |= ( 1U << 17U);  /* Enable USART#2 clock */
 
@@ -481,6 +396,27 @@ uint8_t QS_onStartup(void const *arg) {
                     (0U << 12U) | /* 8 data bits     */
                     (0U << 28U) | /* 8 data bits     */
                     (1U <<  0U) );/* enable USART    */
+=======
+    RCC->IOPENR  |= ( 1U <<  0U);  /* Enable GPIOA clock for USART pins */
+    RCC->APB1ENR |= ( 1U << 17U);  /* Enable USART#2 clock */
+
+    /* Configure PA3 to USART2_RX, PA2 to USART2_TX */
+    GPIOA->AFR[0] &= ~((15U << 4U*USART2_RX_PIN) | (15U << 4U*USART2_TX_PIN));
+    GPIOA->AFR[0] |=  (( 4U << 4U*USART2_RX_PIN) | ( 4U << 4U*USART2_TX_PIN));
+    GPIOA->MODER  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->MODER  |=  (( 2U << 2U*USART2_RX_PIN) | ( 2U << 2U*USART2_TX_PIN));
+
+    USART2->BRR  = __USART_BRR(SystemCoreClock, 115200U);  /* baud rate */
+    USART2->CR3  = 0x0000U |      /* no flow control     */
+                   (1U << 12U);   /* disable overrun detection (OVRDIS) */
+    USART2->CR2  = 0x0000U;       /* 1 stop bit          */
+    USART2->CR1  = ((1U <<  2U) | /* enable RX           */
+                    (1U <<  3U) | /* enable TX           */
+                    (1U <<  5U) | /* enable RX interrupt */
+                    (0U << 12U) | /* 8 data bits         */
+                    (0U << 28U) | /* 8 data bits         */
+                    (1U <<  0U)); /* enable USART        */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     QS_tickPeriod_ = SystemCoreClock / BSP_TICKS_PER_SEC;
     QS_tickTime_ = QS_tickPeriod_; /* to start the timestamp at zero */
@@ -506,9 +442,9 @@ void QS_onFlush(void) {
     QF_INT_DISABLE();
     while ((b = QS_getByte()) != QS_EOD) {    /* while not End-Of-Data... */
         QF_INT_ENABLE();
-        while ((USART2->ISR & (1U << 7)) == 0U) { /* while TXE not empty */
+        while ((USART2->ISR & (1U << 7U)) == 0U) { /* while TXE not empty */
         }
-        USART2->TDR = (b & 0xFFU);  /* put into the DR register */
+        USART2->TDR = b; /* put into the DR register */
         QF_INT_DISABLE();
     }
     QF_INT_ENABLE();

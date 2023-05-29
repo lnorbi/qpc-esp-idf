@@ -38,11 +38,14 @@
 /*$endhead${src::qs::qs_rx.c} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief QS/C receive channel services
+*
+* @trace
+* - @tr{DVR-QS-MC3-R11_05}
 */
 #define QP_IMPL           /* this is QP implementation */
 #include "qs_port.h"      /* QS port */
 #include "qs_pkg.h"       /* QS package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 
 Q_DEFINE_THIS_MODULE("qs_rx")
 
@@ -111,7 +114,11 @@ typedef struct {
     uint8_t  idx;
 } EvtVar;
 
-/* extended-state variables for the current state */
+/*! extended-state variables for the current state
+*
+* @trace
+* - @tr{DVP-QS-MC3-R19_02}
+*/
 static struct {
     union Variant {
         CmdVar   cmd;
@@ -182,14 +189,17 @@ enum {
 
 /* static helper functions... */
 static void QS_rxParseData_(uint8_t const b);
-//static void QS_rxHandleGoodFrame_(uint8_t const state);
 static void QS_rxHandleBadFrame_(uint8_t const state);
 static void QS_rxReportAck_(int8_t const recId);
 static void QS_rxReportError_(int8_t const code);
 static void QS_rxReportDone_(int8_t const recId);
 static void QS_rxPoke_(void);
 
-/*! Internal QS-RX macro to encapsulate transition in the QS-RX FSM */
+/*! Internal QS-RX macro to encapsulate transition in the QS-RX FSM
+*
+* @trace
+* - @tr{DVP-QS-MC3-D04_09A}
+*/
 #define QS_RX_TRAN_(target_) (l_rx.state = (uint8_t)(target_))
 
 /*! @endcond */
@@ -263,7 +273,10 @@ void QS_setCurrObj(
     uint8_t const obj_kind,
     void * const obj_ptr)
 {
-    Q_REQUIRE_ID(100, obj_kind < Q_DIM(QS_rxPriv_.currObj));
+    QS_CRIT_STAT_
+    QS_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(100, obj_kind < Q_DIM(QS_rxPriv_.currObj));
+    QS_CRIT_X_();
     QS_rxPriv_.currObj[obj_kind] = obj_ptr;
 }
 
@@ -583,8 +596,8 @@ void QS_rxHandleGoodFrame_(uint8_t const state) {
                     */
                     ++l_rx.var.evt.e->refCtr_;
 
-                    QHSM_DISPATCH((QHsm *)QS_rxPriv_.currObj[SM_OBJ],
-                                  l_rx.var.evt.e, 0U);
+                    QHsm * const hsm = (QHsm *)QS_rxPriv_.currObj[SM_OBJ];
+                    (*hsm->vptr->dispatch)(hsm, l_rx.var.evt.e, 0U);
                     i = 0x01U;  /* success status, recycle needed */
                 }
                 else {
@@ -600,8 +613,8 @@ void QS_rxHandleGoodFrame_(uint8_t const state) {
                     */
                     ++l_rx.var.evt.e->refCtr_;
 
-                    QHSM_INIT((QHsm *)QS_rxPriv_.currObj[SM_OBJ],
-                              l_rx.var.evt.e, 0U);
+                    QHsm * const hsm = (QHsm *)QS_rxPriv_.currObj[SM_OBJ];
+                    (*hsm->vptr->init)(hsm, l_rx.var.evt.e, 0U);
                     i = 0x01U;  /* success status, recycle needed */
                 }
                 else {
@@ -672,8 +685,10 @@ void QS_rxHandleGoodFrame_(uint8_t const state) {
         }
         case WAIT4_TEST_PROBE_FRAME: {
             QS_rxReportAck_((int8_t)QS_RX_TEST_PROBE);
-            Q_ASSERT_ID(815, QS_testData.tpNum
+            QS_CRIT_E_();
+            Q_ASSERT_NOCRIT_(815, QS_testData.tpNum
                 < (sizeof(QS_testData.tpBuf) / sizeof(QS_testData.tpBuf[0])));
+            QS_CRIT_X_();
             QS_testData.tpBuf[QS_testData.tpNum] = l_rx.var.tp;
             ++QS_testData.tpNum;
             /* no need to report Done */
@@ -1155,7 +1170,10 @@ static void QS_rxHandleBadFrame_(uint8_t const state) {
     QS_rxReportError_(0x50); /* report error for all bad frames */
     switch (state) {
         case WAIT4_EVT_FRAME: {
-            Q_ASSERT_ID(910, l_rx.var.evt.e != (QEvt *)0);
+            QS_CRIT_STAT_
+            QS_CRIT_E_();
+            Q_ASSERT_NOCRIT_(910, l_rx.var.evt.e != (QEvt *)0);
+            QS_CRIT_X_();
 #if (QF_MAX_EPOOL > 0U)
             QF_gc(l_rx.var.evt.e); /* don't leak an allocated event */
 #endif
@@ -1206,6 +1224,10 @@ static void QS_rxReportDone_(int8_t const recId) {
 }
 
 /*..........................................................................*/
+/*!
+* @trace
+* - @tr{DVP-QS-PCLP-2445}
+*/
 static void QS_rxPoke_(void) {
     uint8_t *ptr = (uint8_t *)QS_rxPriv_.currObj[AP_OBJ];
     ptr = &ptr[l_rx.var.poke.offs];
@@ -1219,9 +1241,10 @@ static void QS_rxPoke_(void) {
         case 4:
             *(uint32_t *)ptr = l_rx.var.poke.data;
             break;
-        default:
-            Q_ERROR_ID(900);
+        default: {
+            Q_ERROR_NOCRIT_(900);
             break;
+        }
     }
 
     l_rx.var.poke.data = 0U;

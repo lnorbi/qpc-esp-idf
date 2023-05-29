@@ -23,8 +23,13 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
+<<<<<<< HEAD
 * @date Last updated on: 2023-04-12
 * @version Last updated for: @ref qpc_7_2_2
+=======
+* @date Last updated on: 2023-05-18
+* @version Last updated for: @ref qpc_7_3_0
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @file
 * @brief QF/C port to embOS
@@ -32,7 +37,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"
-#include "qassert.h"
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS package-scope internal interface */
@@ -63,16 +68,19 @@ void QF_init(void) {
 }
 /*..........................................................................*/
 int_t QF_run(void) {
-    QS_CRIT_STAT_
-
     QF_onStartup();  /* QF callback to configure and start interrupts */
 
     /* produce the QS_QF_RUN trace record */
-    QS_BEGIN_PRE_(QS_QF_RUN, 0U)
-    QS_END_PRE_()
+#ifdef Q_SPY
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    QS_beginRec_((uint_fast8_t)QS_QF_RUN);
+    QS_endRec_();
+    QF_CRIT_X_();
+#endif
 
-    OS_Start();      /* start embOS multitasking */
-    Q_ERROR_ID(100); /* OS_Start() should never return */
+    OS_Start(); /* start embOS multitasking */
+
     return 0; /* dummy return to make the compiler happy */
 }
 /*..........................................................................*/
@@ -94,7 +102,8 @@ static void thread_function(void *pVoid) { /* embOS signature */
     /* event-loop */
     for (;;) {  /* for-ever */
         QEvt const *e = QActive_get_(act);
-        QHSM_DISPATCH(&act->super, e, act->prio);
+        /* dispatch event (virtual call) */
+        (*act->super.vptr->dispatch)(&act->super, e, act->prio);
         QF_gc(e); /* check if the event is garbage, and collect it if so */
     }
 }
@@ -114,7 +123,8 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
     QActive_register_(me); /* register this AO */
 
-    QHSM_INIT(&me->super, par, me->prio); /* the top-most initial tran. */
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 
     /* create an embOS task for the AO */
@@ -133,13 +143,16 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
 }
 /*..........................................................................*/
 void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
     switch (attr1) {
-        case TASK_NAME_ATTR:
+        case TASK_NAME_ATTR: {
 #if (OS_TRACKNAME != 0)
-           Q_ASSERT_ID(300, me->thread.Name == (char *)0);
-           me->thread.Name = (char const *)attr2;
+            Q_ASSERT_NOCRIT_(300, me->thread.Name == (char *)0);
+            me->thread.Name = (char const *)attr2;
 #endif
             break;
+        }
         case TASK_USES_FPU:
             me->osObject = attr1;
             break;
@@ -147,25 +160,25 @@ void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
         default:
             break;
     }
+    QF_CRIT_X_();
 }
 /*..........................................................................*/
 bool QActive_post_(QActive * const me, QEvt const * const e,
                    uint_fast16_t const margin, void const * const sender)
 {
-    uint_fast16_t nFree;
-    bool status;
     QF_CRIT_STAT_
-
     QF_CRIT_E_();
-    nFree = (uint_fast16_t)(me->eQueue.maxMsg - me->eQueue.nofMsg);
+    uint_fast16_t nFree =
+        (uint_fast16_t)(me->eQueue.maxMsg - me->eQueue.nofMsg);
 
+    bool status;
     if (margin == QF_NO_MARGIN) {
         if (nFree > (QEQueueCtr)0) {
             status = true; /* can post */
         }
         else {
             status = false; /* cannot post */
-            Q_ERROR_ID(510); /* must be able to post the event */
+            Q_ERROR_NOCRIT_(510); /* must be able to post the event */
         }
     }
     else if (nFree > (QEQueueCtr)margin) {
@@ -190,13 +203,13 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
         if (e->poolId_ != 0U) { /* is it a pool event? */
             QEvt_refCtr_inc_(e); /* increment the reference counter */
         }
-
         QF_CRIT_X_();
 
+        char err = OS_PutMailCond(&me->eQueue, (OS_CONST_PTR void *)&e);
+
+        QF_CRIT_E_();
         /* posting to the embOS mailbox must succeed, see NOTE3 */
-        Q_ALLEGE_ID(520,
-            OS_PutMailCond(&me->eQueue, (OS_CONST_PTR void *)&e)
-            == (char)0);
+        Q_ASSERT_NOCRIT_(520, err == (char)0);
     }
     else {
 
@@ -210,8 +223,8 @@ bool QActive_post_(QActive * const me, QEvt const * const e,
             QS_EQC_PRE_(margin); /* margin requested */
         QS_END_NOCRIT_PRE_()
 
-        QF_CRIT_X_();
-   }
+    }
+    QF_CRIT_X_();
 
     return status;
 }
@@ -232,28 +245,30 @@ void QActive_postLIFO_(QActive * const me, QEvt const * const e) {
     if (e->poolId_ != 0U) { /* is it a pool event? */
         QEvt_refCtr_inc_(e); /* increment the reference counter */
     }
-
     QF_CRIT_X_();
 
+    char err = OS_PutMailFrontCond(&me->eQueue, (OS_CONST_PTR void *)&e);
+
+    QF_CRIT_E_();
     /* posting to the embOS mailbox must succeed, see NOTE3 */
-    Q_ALLEGE_ID(810,
-        OS_PutMailFrontCond(&me->eQueue, (OS_CONST_PTR void *)&e)
-        == (char)0);
+    Q_ASSERT_NOCRIT_(810, err == (char)0);
+    QF_CRIT_X_();
 }
 /*..........................................................................*/
 QEvt const *QActive_get_(QActive * const me) {
     QEvt const *e;
-    QS_CRIT_STAT_
-
     OS_GetMail(&me->eQueue, (void *)&e);
 
-    QS_BEGIN_PRE_(QS_QF_ACTIVE_GET, me->prio)
+    QS_CRIT_STAT_
+    QS_CRIT_E_();
+    QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_GET, me->prio)
         QS_TIME_PRE_();          /* timestamp */
         QS_SIG_PRE_(e->sig);     /* the signal of this event */
         QS_OBJ_PRE_(me);         /* this active object */
         QS_2U8_PRE_(e->poolId_, e->refCtr_); /* pool Id & ref Count */
         QS_EQC_PRE_(me->eQueue.maxMsg - me->eQueue.nofMsg);/* # free */
-    QS_END_PRE_()
+    QS_END_NOCRIT_PRE_()
+    QS_CRIT_X_();
 
     return e;
 }

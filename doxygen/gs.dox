@@ -13,9 +13,9 @@ The YouTube Video <a class="extern" target="_blank" href="https://youtu.be/O7ER6
 
 @note
 @htmlonly
-<a href="cert.html" title="QP Cert-Pack"><img src="img/cert-pack.png" style="float:right; margin:0 20px 20px 0;"></img></a>
+<a href="cert.html" title="QP Cert-Kit"><img src="img/cert-kit.png" style="float:right; margin:0 20px 20px 0;"></img></a>
 @endhtmlonly
-Information about the QP/C functionality, architecture, design, and other aspects is provided in the [Certification Package](modules.html):
+Information about the QP/C functionality, architecture, design, and other aspects is provided in the @ref cert "QP Certification Kit":
 - @ref srs &mdash; QP/C functionality
 - @ref sas &mdash; QP/C architecture
 - @ref sds &mdash; QP/C design
@@ -227,7 +227,11 @@ The "Fly 'n' Shoot" game example is described in the @webref{doc/AN_Fly-n-Shoot.
 /*##########################################################################*/
 /*! @page tut_low Low-Power Example
 @ifnot LATEX
+<<<<<<< HEAD
 @nav{tut_game,api}
+=======
+@nav{tut_game,cert}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 @endif
 
 The main principle of low-power design for software is to keep the hardware in the most appropriate low-power sleep mode for as long as possible. Most commonly, the software enters a low-power sleep mode from the **idle callback** (a.k.a. "idle hook"), which is called when the software has nothing left to do and is waiting for an interrupt to deliver more work. The QP/C and QP/C++ Real-Time Embedded Frameworks (RTEFs) support the *idle callback* in all of the built-in real-time kernels, such as the cooperative @ref srs_qv "QV kernel", the preemptive non-blocking @ref srs_qk "QK kernel" and the preemptive blocking @ref srs_qxk "QXK kernel". Also, such an *idle callback* is provided in all 3rd-party traditional RTOS kernels that QP/C/C++ have been @ref ports_rtos "ported to".
@@ -533,6 +537,10 @@ The QF_noTimeEvtsActiveX() function is designed to be called from a critical sec
 `[3]` The QV_CPU_SLEEP() macro enters **low-power sleep mode** with interrupts still disabled. This port-specific macro is designed to re-anable interrupts **atomically** with entering the sleep mode.
 
 @ifnot LATEX
+<<<<<<< HEAD
 @nav{tut_game,api}
+=======
+@nav{tut_game,cert}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 @endif
 */

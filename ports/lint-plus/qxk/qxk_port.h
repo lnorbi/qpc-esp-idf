@@ -23,8 +23,8 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-12-13
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QXK/C port example for a generic C99 compiler.
@@ -32,8 +32,8 @@
 * This is an example of a QP/C port with the documentation for the
 * configuration macros and includes.
 */
-#ifndef QXK_PORT_H
-#define QXK_PORT_H
+#ifndef QXK_PORT_H_
+#define QXK_PORT_H_
 
 /*==========================================================================*/
 
@@ -80,5 +80,5 @@ void trigPendSV(void);
 
 #include "qxk.h" /* QXK platform-independent public interface */
 
-#endif /* QXK_PORT_H */
+#endif /* QXK_PORT_H_ */
 

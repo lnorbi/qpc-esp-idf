@@ -7,8 +7,8 @@
 @remark
 <a target="_blank" href="https://github.com/QuantumLeaps/qpc" title="QP/C on GitHub"><img class="right" src="img/logo_github.png"></a>
 @endif
-@image{inline} latex logo_github.png width=1in
-To check what's new in QP&trade;/C, please see @ref history "Design History File". You can also get the latest **QP&trade;/C code**, with the recent enhancements and bug fixes, from the <a class="extern" target="_blank" href="https://github.com/QuantumLeaps/qpc"><strong>GitHub QP&trade;/C repository</strong></a>.
+@image{inline} latex logo_github.png width=0.5in
+To check what's new in QP&trade;/C, please see @ref history "QP/C Revision History". You can also get the latest **QP&trade;/C code**, with the recent enhancements and bug fixes, from the <a class="extern" target="_blank" href="https://github.com/QuantumLeaps/qpc"><strong>GitHub QP&trade;/C repository</strong></a>.
 <div style="clear:both"></div>
 
 
@@ -77,11 +77,33 @@ QP&trade;/C offers unprecedented, bidirectional @ref cert_tr "traceability" amon
 
 
 @subsection over_popular Popularity &amp; Maturity
-With 20 years of continuous development, over @webref{customers#Customers, 350 commercial licensees}, and many times more open source users worldwide, the QP&trade; frameworks are the most popular such offering on the market. They power countless electronic products ranging from implantable medical devices to complex weapon systems.
+With 20 years of continuous development, over @webref{customers#Customers, 350 commercial licensees}, and many times more open source users worldwide, the QP&trade; frameworks are the most popular such offering on the market. They power countless electronic products across a @webref{customers#Markets, wide variety of markets}, such as medical, consumer, IoT, defense, robotics, industrial, communication, transportation, semiconductor IP, and many others.
 
 
-@subsection over_use Widespread Use
-The QP&trade; real-time embedded frameworks address high-reliability applications across a @webref{customers#Markets, wide variety of markets}, such as medical, consumer, IoT, defense, robotics, industrial, communication, transportation, semiconductor IP, and many others. In each of these application areas, the elegant software architecture and modern design philosophy of QP&trade; have distinct advantages.
+@subsection over_safe Safety-Related Support
+The QP&trade;/C real-time embedded framework is frequently used in **safety-related** systems because it supports many techniques recommended by functional safety standards (such as **IEC 61508**):
+
+@ifnot LATEX
+![](IEC-61508_TA4-QP.png)
+@endif
+@image latex IEC-61508_TA4-QP.png width=5.5in
+@caption{Recommended specific techniques supported by QP/C (IEC 61508-3, Annex A, Table A.4)}
+
+
+@subsection over_cert Certification Kit
+Safety-related systems must undergo a stringent certification process according to various functional safety standards, such as IEC 61508 for electrical systems, and related IEC 62304/FDA510(k) for medical devices, IEC 60335 for household appliances, DO-178B/C for airborne systems, etc.
+
+For the certification purposes, the QP&trade;/C framework is typically treated as **commercial off-the-shelf (COTS)** software, which must be included in the certification process, as any of the in-house developed components. To help companies in that effort, the QP/C manual contains @ref cert "Certification Kit" that comprises the following documents:
+
+- @ref srs "Software Requirements Specification (SRS)"
+- @ref sas "Software Architecture Specification (SAS)"
+- @ref sds "Software Design Specification (SDS a.k.a. SDD)"
+- @ref misra "MISRA-C:2012 Compliance and Guideline Enforcement Plan"
+
+@ifnot LATEX
+[![](cert-kit.png)](cert.html)
+@endif
+@image latex cert-kit.png width=1.5in
 
 
 @subsection over_psicc2 Books
@@ -97,7 +119,7 @@ The two editions of the book, @webref{psicc2, <strong>Practical Statecharts in C
 [![](psicc1.jpg)](https://www.state-machine.com/psicc)
 @endif
 @image latex psicc1.jpg width=4.5in
-@caption{Practical Statecharts in C/C++, 1nd Edition}
+@caption{Practical Statecharts in C/C++, 1st Edition}
 
 
 @section over_licensing How is it licensed?

@@ -23,14 +23,24 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
+<<<<<<< HEAD
 * @date Last updated on: 2023-01-07
 * @version Last updated for: @ref qpc_7_2_0
+=======
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @file
 * @brief QF/C "port" for QUIT unit internal test, Win32 with GNU or VisualC++
 */
+<<<<<<< HEAD
 #ifndef QF_PORT_H
 #define QF_PORT_H
+=======
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 /* QUIT event queue and thread types */
 #define QF_EQUEUE_TYPE QEQueue
@@ -51,9 +61,15 @@
 #define QF_INT_ENABLE()      (--QF_intLock_)
 
 /* QUIT critical section */
+<<<<<<< HEAD
 /* QF_CRIT_STAT_TYPE not defined */
 #define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
 #define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+=======
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()         QF_INT_DISABLE()
+#define QF_CRIT_X_()         QF_INT_ENABLE()
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 /* QF_LOG2 not defined -- use the internal LOG2() implementation */
 
@@ -62,7 +78,11 @@
 #include "qmpool.h"    /* QUIT port uses QMPool memory-pool */
 #include "qf.h"        /* QF platform-independent public interface */
 
+<<<<<<< HEAD
 /****************************************************************************/
+=======
+/*==========================================================================*/
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 /* interface used only inside QP implementation, but not in applications */
 #ifdef QP_IMPL
 
@@ -73,9 +93,21 @@
 
     /* native event queue operations */
     #define QACTIVE_EQUEUE_WAIT_(me_) \
+<<<<<<< HEAD
         Q_ASSERT_ID(110, (me_)->eQueue.frontEvt != (QEvt *)0)
     #define QACTIVE_EQUEUE_SIGNAL_(me_) \
         QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio)
+=======
+        Q_ASSERT_NOCRIT_(302, (me_)->eQueue.frontEvt != (QEvt *)0)
+#ifndef Q_UNSAFE
+    #define QACTIVE_EQUEUE_SIGNAL_(me_) \
+        QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio); \
+        QPSet_update(&QF_readySet_, &QF_readySet_inv_)
+#else
+    #define QACTIVE_EQUEUE_SIGNAL_(me_) \
+        QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio)
+#endif
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     /* native QF event pool operations */
     #define QF_EPOOL_TYPE_            QMPool
@@ -91,4 +123,8 @@
 
 #endif /* QP_IMPL */
 
+<<<<<<< HEAD
 #endif /* QF_PORT_H */
+=======
+#endif /* QF_PORT_H_ */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3

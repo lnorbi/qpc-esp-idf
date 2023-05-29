@@ -32,7 +32,12 @@ void QF_onStartup(void)
     /* Note: Additional hook stuff can be placed here */
 }
 
-IRAM_ATTR void Q_onAssert(char_t const * const module, int_t location)
+IRAM_ATTR void Q_onError(char const * const module, int_t const id)
 {
-    ESP_LOGE(TAG, "Q_onAssert: module:%s loc:%d\n", module, location);
+    ESP_LOGE(TAG, "ERROR in %s:%d\n", module, id);
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }

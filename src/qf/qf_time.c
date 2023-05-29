@@ -42,7 +42,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -58,6 +58,9 @@ Q_DEFINE_THIS_MODULE("qf_time")
 * This internal macro encapsulates the violation of MISRA-C 2012
 * Rule 11.5(A) "A conversion should not be performed from pointer to void
 * into pointer to object".
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
 */
 #define QACTIVE_CAST_(ptr_) ((QActive *)(ptr_))
 #endif
@@ -81,8 +84,15 @@ void QTimeEvt_ctorX(QTimeEvt * const me,
     enum_t const sig,
     uint_fast8_t const tickRate)
 {
+<<<<<<< HEAD
     Q_REQUIRE_ID(300, (sig != 0)
+=======
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(300, (sig != 0)
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
         && (tickRate < QF_MAX_TICK_RATE));
+    QF_CRIT_X_();
 
     me->next      = (QTimeEvt *)0;
     me->ctr       = 0U;
@@ -121,17 +131,21 @@ void QTimeEvt_armX(QTimeEvt * const me,
     uint_fast8_t const qs_id = ((QActive *)(me->act))->prio;
     #endif
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(400, (me->act != (void *)0)
+=======
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(400, (me->act != (void *)0)
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
                  && (ctr == 0U)
                  && (nTicks != 0U)
                  && (tickRate < (uint_fast8_t)QF_MAX_TICK_RATE)
                  && (me->super.sig >= (QSignal)Q_USER_SIG));
-    #ifdef Q_NASSERT
+    #ifdef QP_NDBC
     Q_UNUSED_PAR(ctr);
     #endif
 
-    QF_CRIT_STAT_
-    QF_CRIT_E_();
     me->ctr = nTicks;
     me->interval = interval;
 
@@ -222,13 +236,16 @@ bool QTimeEvt_rearm(QTimeEvt * const me,
     uint_fast8_t const qs_id = ((QActive *)(me->act))->prio;
     #endif
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(600, (me->act != (void *)0)
+=======
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(600, (me->act != (void *)0)
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
                       && (tickRate < QF_MAX_TICK_RATE)
                       && (nTicks != 0U)
                       && (me->super.sig >= (QSignal)Q_USER_SIG));
-
-    QF_CRIT_STAT_
-    QF_CRIT_E_();
 
     /* is the time evt not running? */
     bool wasArmed;
@@ -326,7 +343,7 @@ void QTimeEvt_tick_(
             if (QTimeEvt_timeEvtHead_[tickRate].act != (void *)0) {
 
                 /* sanity check */
-                Q_ASSERT_CRIT_(110, prev != (QTimeEvt *)0);
+                Q_ASSERT_NOCRIT_(110, prev != (QTimeEvt *)0);
                 prev->next = (QTimeEvt *)QTimeEvt_timeEvtHead_[tickRate].act;
                 QTimeEvt_timeEvtHead_[tickRate].act = (void *)0;
                 t = prev->next;  /* switch to the new list */
@@ -411,7 +428,14 @@ void QTimeEvt_tick_(
 /*${QF::QTimeEvt::noActive} ................................................*/
 /*! @static @public @memberof QTimeEvt */
 bool QTimeEvt_noActive(uint_fast8_t const tickRate) {
+<<<<<<< HEAD
     Q_REQUIRE_ID(800, tickRate < QF_MAX_TICK_RATE);
+=======
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(800, tickRate < QF_MAX_TICK_RATE);
+    QF_CRIT_X_();
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     bool inactive;
     if (QTimeEvt_timeEvtHead_[tickRate].next != (QTimeEvt *)0) {

@@ -23,15 +23,27 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
+<<<<<<< HEAD
 * @date Last updated on: 2023-01-07
 * @version Last updated for: @ref qpc_7_2_0
+=======
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @file
 * @brief QS/C port to Win32 with GNU or Visual C++ compilers
 */
+<<<<<<< HEAD
 #ifndef QS_PORT_H
 #define QS_PORT_H
 
+=======
+#ifndef QS_PORT_H_
+#define QS_PORT_H_
+
+#define QS_CTR_SIZE         4U
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 #define QS_TIME_SIZE        4U
 
 #ifdef _WIN64 /* 64-bit architecture? */
@@ -45,6 +57,7 @@
 void QS_output(void);    /* handle the QS output */
 void QS_rx_input(void);  /* handle the QS-RX input */
 
+<<<<<<< HEAD
 /*****************************************************************************
 * NOTE: QS might be used with or without other QP components, in which
 * case the separate definitions of the macros QF_CRIT_STAT_TYPE,
@@ -53,10 +66,24 @@ void QS_rx_input(void);  /* handle the QS-RX input */
 * *before* "qs.h".
 */
 #ifndef QF_PORT_H
+=======
+/*==========================================================================*/
+/* NOTE: QS might be used with or without other QP components, in which
+* case the separate definitions of the macros QF_CRIT_STAT_, QF_CRIT_E_(),
+* and QF_CRIT_X_() are needed. In this port QS is configured to be used
+* with the other QP component, by simply including "qf_port.h"
+* *before* "qs.h".
+*/
+#ifndef QF_PORT_H_
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 #include "qf_port.h" /* use QS with QF */
 #endif
 
 #include "qs.h"      /* QS platform-independent public interface */
 
+<<<<<<< HEAD
 #endif /* QS_PORT_H  */
+=======
+#endif /* QS_PORT_H_ */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 

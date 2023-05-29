@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-07-30
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QEP/C port to Win32 with GNU or Visual Studio C/C++ compilers
 */
-#ifndef QEP_PORT_H
-#define QEP_PORT_H
+#ifndef QEP_PORT_H_
+#define QEP_PORT_H_
 
 #include <stdint.h>  /* Exact-width types. WG14/N843 C99 Standard */
 #include <stdbool.h> /* Boolean type.      WG14/N843 C99 Standard */
@@ -40,10 +40,14 @@
     /*! no-return function specifier (GCC-ARM compiler) */
     #define Q_NORETURN   __attribute__ ((noreturn)) void
 
-#elif (defined _MSC_VER) && (defined __cplusplus)
-
-    /* no-return function specifier (Microsoft Visual Studio C++ compiler) */
-    #define Q_NORETURN   [[ noreturn ]] void
+#elif (defined _MSC_VER)
+    #ifdef __cplusplus
+        /* no-return function specifier (Microsoft Visual Studio C++ compiler) */
+        #define Q_NORETURN   [[ noreturn ]] void
+    #else
+        /* no-return function specifier C11 */
+        #define Q_NORETURN   _Noreturn void
+    #endif
 
     /*
     * This is the case where QP/C is compiled by the Microsoft Visual C++
@@ -65,8 +69,9 @@
 
 #include "qep.h"     /* QEP platform-independent public interface */
 
-#if (defined __cplusplus) && (defined _MSC_VER)
+#ifdef _MSC_VER
     #pragma warning (default: 4510 4512 4610)
 #endif
 
-#endif /* QEP_PORT_H */
+#endif /* QEP_PORT_H_ */
+

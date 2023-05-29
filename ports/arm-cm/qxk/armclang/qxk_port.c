@@ -33,9 +33,9 @@
 #define QP_IMPL 1U
 #include "qf_port.h"
 #include "qf_pkg.h"
-#include "qassert.h"
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 
-#include <stddef.h> /* for offsetof() */
+#include <stddef.h>       /* for offsetof() */
 
 /* prototypes --------------------------------------------------------------*/
 void PendSV_Handler(void);

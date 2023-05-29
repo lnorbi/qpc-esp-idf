@@ -23,8 +23,13 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
+<<<<<<< HEAD
 * @date Last updated on: 2023-04-20
 * @version Last updated for: @ref qpc_7_2_2
+=======
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @file
 * @brief QF/C port to POSIX/P-threads
@@ -36,7 +41,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"
-#include "qassert.h"
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS package-scope internal interface */
@@ -206,7 +211,7 @@ int QF_consoleWaitForKey(void) {
     return getchar();
 }
 
-/****************************************************************************/
+/*==========================================================================*/
 static void *thread_routine(void *arg) { /* the expected POSIX signature */
     QActive *act = (QActive *)arg;
 
@@ -252,8 +257,8 @@ void QActive_start_(QActive * const me, QPrioSpec const prioSpec,
     me->pthre = (uint8_t)(prioSpec >> 8U);   /* preemption-threshold */
     QActive_register_(me); /* register this AO */
 
-    /* the top-most initial tran. (virtual) */
-    QHSM_INIT(&me->super, par, me->prio);
+    /* top-most initial tran. (virtual call) */
+    (*me->super.vptr->init)(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 
     pthread_attr_init(&attr);
@@ -302,15 +307,15 @@ void QActive_stop(QActive * const me) {
 #endif
 /*..........................................................................*/
 void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
-    (void)me;    /* unused parameter */
-    (void)attr1; /* unused parameter */
-    (void)attr2; /* unused parameter */
-    Q_ERROR_ID(900); /* this function should not be called in this QP port */
+    Q_UNUSED_PAR(me);
+    Q_UNUSED_PAR(attr1);
+    Q_UNUSED_PAR(attr2);
+    Q_ERROR_NOCRIT_(900); /* should not be called in this QP port */
 }
 
-/****************************************************************************/
+/*==========================================================================*/
 static void sigIntHandler(int dummy) {
-    (void)dummy; /* unused parameter */
+    Q_UNUSED_PAR(dummy);
     QF_onCleanup();
     exit(-1);
 }

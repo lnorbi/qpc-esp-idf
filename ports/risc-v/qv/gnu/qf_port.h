@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-09-30
-* @version Last updated for: @ref qpc_7_1_2
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to RISC-V, cooperative QV kernel, GNU compiler
 */
-#ifndef RISCV_QF_PORT_H_
-#define RISCV_QF_PORT_H_
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* The maximum number of active objects in the application, see NOTE1 */
 #define QF_MAX_ACTIVE          32U
@@ -40,13 +40,13 @@
 #define QF_INT_ENABLE()        __asm__ volatile("csrs mstatus,8")
 
 /* QF critical section entry/exit, see NOTE3 */
-#define QF_CRIT_STAT_TYPE      unsigned int
-#define QF_CRIT_ENTRY(status_) do { \
-    __asm__ volatile("csrr %0, mstatus" : "=r"(status_)); \
+#define QF_CRIT_STAT_          unsigned int mstatus_;
+#define QF_CRIT_E_()  do { \
+    __asm__ volatile("csrr %0, mstatus" : "=r"(mstatus_)); \
     QF_INT_DISABLE(); \
 } while (false)
-#define QF_CRIT_EXIT(status_)  \
-    __asm__ volatile ("csrw mstatus, %0" :: "rK"(status_))
+#define QF_CRIT_X_()  \
+    __asm__ volatile ("csrw mstatus, %0" :: "rK"(mstatus_))
 
 /* support for fast LOG2, see NOTE4 */
 #define QF_LOG2(n_) ((uint_fast8_t)(32U - __builtin_clz((n_))))
@@ -54,9 +54,9 @@
 /* NOP instruction for RISC-V, NOTE5 */
 #define QF_CRIT_EXIT_NOP()     __asm__ volatile ("nop")
 
-#include "qep_port.h" /* QEP port */
-#include "qv_port.h"  /* QV cooperative kernel port */
-#include "qf.h"       /* QF platform-independent public interface */
+#include "qep_port.h"   /* QEP port */
+#include "qv_port.h"    /* QV cooperative kernel port */
+#include "qf.h"         /* QF platform-independent public interface */
 
 /*==========================================================================*/
 /* NOTE1:
@@ -83,4 +83,5 @@
 * sections.
 */
 
-#endif /* RISCV_QF_PORT_H_ */
+#endif /* QF_PORT_H_ */
+

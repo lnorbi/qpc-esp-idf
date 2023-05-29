@@ -1,10 +1,13 @@
-/*! @page history Design History File (DHF)
+/*! @page history Revision History
 
 @image html  qcp_banner.jpg
 @image latex qcp_banner.jpg width=6.5in
 
 @remark
-This document is part of the @webref{products/qp#CERT,QP Certification Pack}, which has been specifically designed to aid companies in **safety certification** of their software based on the QP real-time embedded frameworks.
+This document is part of the @webref{products/qp#CERT,QP Certification Kit}, which has been specifically designed to aid companies in **safety certification** of their software based on the QP real-time embedded frameworks.
+
+@section qpc_7_3_0 Version 7.3.0, 2023-??-??
+
 
 @section qpc_7_2_1 Version 7.2.1, 2023-01-15
 __QP/C Source Code:__
@@ -213,7 +216,7 @@ The Doxygen documentation has been re-structured and improved. Also the more att
 
 
 @section qpc_7_0_0 Version 7.0.0, 2022-04-30
-This QP/C release changes the QP/C implementation from C89 to C99 and also improves compliance of the QP/C source code with MISRA:C-2012 (a.k.a. MISRA3). Also, major focus of this release is the adaptation of the code and documentation to better support safety certification (see [QP Certification Pack](modules.html))
+This QP/C release changes the QP/C implementation from C89 to C99 and also improves compliance of the QP/C source code with MISRA:C-2012 (a.k.a. MISRA3). Also, major focus of this release is the adaptation of the code and documentation to better support safety certification (see [QP Certification Kit](modules.html))
 
 __Modified QP/C source code:__
 - updated QP/C source code for C99
@@ -247,10 +250,10 @@ __Added/Modified examples:__
 __Modified QP/C documentation:__
 - restructured the Doxygen documentation for traceability
 - added the @ref gs_tut "QP/C Tutorial"
-- added the @ref srs "QP Certification Pack"
+- added the @ref srs "QP Certification Kit"
 
 @remark
-The [QP Certification Pack](https://www.state-machine.com/products/qp#CERT) is still work in progress in this release, but the remaining work is limited to documentation only and no code restructuring is anticipated for that.
+The [QP Certification Kit](https://www.state-machine.com/products/qp#CERT) is still work in progress in this release, but the remaining work is limited to documentation only and no code restructuring is anticipated for that.
 
 
 @section qpc_6_9_3 Version 6.9.3, 2021-04-12

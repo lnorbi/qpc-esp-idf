@@ -2,11 +2,19 @@
 
 /* includes for the CUT... */
 #include "qf_port.h"
+<<<<<<< HEAD
 #include "qassert.h"  /* QP embedded systems-friendly assertions */
 #ifdef Q_SPY /* software tracing enabled? */
 #include "qs_port.h"   /* QS/C port from the port directory */
 #else
 #include "qs_dummy.h"  /* QS/C dummy (inactive) interface */
+=======
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
+#ifdef Q_SPY /* software tracing enabled? */
+#include "qs_port.h"      /* QS/C port from the port directory */
+#else
+#include "qs_dummy.h"     /* QS/C dummy (inactive) interface */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 #endif
 
 enum { RX_SIZE = 8 };
@@ -61,7 +69,11 @@ TEST("QS-RX putting 3 more") {
 /* =========================================================================*/
 /* dependencies for the CUT ... */
 
+<<<<<<< HEAD
 uint_fast8_t QF_intLock_;
+=======
+uint_fast8_t volatile QF_intLock_;
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 /*..........................................................................*/
 void QF_poolInit(void * const poolSto, uint_fast32_t const poolSize,
@@ -108,10 +120,16 @@ void QF_gc(QEvt const * const e) {
 QActive *QActive_registry_[QF_MAX_ACTIVE + 1U];
 
 /*..........................................................................*/
+<<<<<<< HEAD
 Q_NORETURN Q_onAssert(char const * const module, int_t const location) {
     ET_fail_("Q_onAssert", module, location);
     for (;;) { /* explicitly make it "noreturn" */
     }
+=======
+Q_NORETURN Q_onError(char const * const module, int_t const location) {
+    ET_fail("Q_onError", module, location);
+    for (;;) {} /* explicitly no-return */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 }
 
 /*--------------------------------------------------------------------------*/

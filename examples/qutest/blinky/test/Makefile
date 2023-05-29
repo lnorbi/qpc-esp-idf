@@ -57,11 +57,11 @@ PROJECT := test_blinky
 
 # list of all source directories used by this project
 VPATH := . \
-../src
+	../src
 
 # list of all include directories needed by this project
 INCLUDES := -I. \
--I../src
+	-I../src
 
 # location of the QP/C framework (if not provided in an env. variable)
 ifeq ($(QPC),)
@@ -96,8 +96,13 @@ DEFINES  :=
 # add QP/C framework:
 #
 C_SRCS += \
+<<<<<<< HEAD
 qep_hsm.c \
 qep_msm.c \
+=======
+	qep_hsm.c \
+	qep_msm.c \
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 	qf_actq.c \
 	qf_defer.c \
 	qf_dyn.c \

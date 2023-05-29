@@ -49,7 +49,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 
 Q_DEFINE_THIS_MODULE("qf_qact")
 
@@ -64,6 +64,11 @@ Q_DEFINE_THIS_MODULE("qf_qact")
 /*$define${QF::QActive::registry_[QF_MAX_ACTIVE + 1U]} vvvvvvvvvvvvvvvvvvvvv*/
 QActive * QActive_registry_[QF_MAX_ACTIVE + 1U];
 /*$enddef${QF::QActive::registry_[QF_MAX_ACTIVE + 1U]} ^^^^^^^^^^^^^^^^^^^^^*/
+/*$define${QF::QF-pkg::readySet_} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
+
+/*${QF::QF-pkg::readySet_} .................................................*/
+QPSet QF_readySet_;
+/*$enddef${QF::QF-pkg::readySet_} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*$define${QF::QF-base::intLock_} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
 
 /*${QF::QF-base::intLock_} .................................................*/
@@ -74,11 +79,15 @@ uint_fast8_t volatile QF_intLock_;
 /*${QF::QF-base::intNest_} .................................................*/
 uint_fast8_t volatile QF_intNest_;
 /*$enddef${QF::QF-base::intNest_} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-/*$define${QF::QF-pkg::readySet_} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
+/*$define${QF::QF-pkg::readySet_inv_} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
 
-/*${QF::QF-pkg::readySet_} .................................................*/
-QPSet QF_readySet_;
-/*$enddef${QF::QF-pkg::readySet_} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+/*${QF::QF-pkg::readySet_inv_} .............................................*/
+#ifndef Q_UNSAFE
+QPSet QF_readySet_inv_;
+#endif /* ndef Q_UNSAFE */
+/*$enddef${QF::QF-pkg::readySet_inv_} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+
+//============================================================================
 /*$define${QF::QF-pkg::bzero} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
 
 /*${QF::QF-pkg::bzero} .....................................................*/
@@ -133,11 +142,19 @@ void QActive_register_(QActive * const me) {
         me->pthre = me->prio; /* apply the default */
     }
 
-    #ifndef Q_NASSERT
+    QF_CRIT_STAT_
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(100, (0U < me->prio) && (me->prio <= QF_MAX_ACTIVE)
+=======
+    #ifndef QP_NDBC
+
+    QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(100, (0U < me->prio) && (me->prio <= QF_MAX_ACTIVE)
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
                       && (QActive_registry_[me->prio] == (QActive *)0)
                       && (me->prio <= me->pthre));
+    QF_CRIT_X_();
 
     uint8_t prev_thre = me->pthre;
     uint8_t next_thre = me->pthre;
@@ -156,11 +173,17 @@ void QActive_register_(QActive * const me) {
         }
     }
 
+<<<<<<< HEAD
     Q_ENSURE_ID(190, (prev_thre <= me->pthre) && (me->pthre <= next_thre));
+=======
+    QF_CRIT_E_();
+    Q_ASSERT_NOCRIT_(190, (prev_thre <= me->pthre)
+                          && (me->pthre <= next_thre));
+    QF_CRIT_X_();
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
-    #endif // Q_NASSERT
+    #endif /* QP_NDBC */
 
-    QF_CRIT_STAT_
     QF_CRIT_E_();
     /* register the AO at the "QF-priority" */
     QActive_registry_[me->prio] = me;
@@ -174,10 +197,16 @@ void QActive_register_(QActive * const me) {
 void QActive_unregister_(QActive * const me) {
     uint_fast8_t const p = (uint_fast8_t)me->prio;
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(200, (0U < p) && (p <= QF_MAX_ACTIVE)
                        && (QActive_registry_[p] == me));
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     QF_CRIT_STAT_
     QF_CRIT_E_();
+
+    Q_REQUIRE_NOCRIT_(200, (0U < p) && (p <= QF_MAX_ACTIVE)
+                      && (QActive_registry_[p] == me));
     QActive_registry_[p] = (QActive *)0; /* free-up the priority level */
     me->super.state.fun = Q_STATE_CAST(0); /* invalidate the state */
     QF_CRIT_X_();
@@ -221,3 +250,10 @@ uint_fast8_t QF_LOG2(QPSetBits x) {
 }
 #endif /* ndef QF_LOG2 */
 /*$enddef${QF-types::QF_LOG2} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+
+//============================================================================
+/* Deprecated assertion handler, use Q_onError() directly */
+Q_NORETURN Q_onAssert(char const * module, int_t label); /* prototype */
+Q_NORETURN Q_onAssert(char const * module, int_t label) {
+    Q_onError(module, label);
+}

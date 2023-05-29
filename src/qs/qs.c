@@ -43,7 +43,7 @@
 #include "qs_port.h"      /* QS port */
 #include "qs_pkg.h"       /* QS package-scope interface */
 #include "qstamp.h"       /* QP time-stamp */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 
 Q_DEFINE_THIS_MODULE("qs")
 
@@ -71,9 +71,6 @@ void QS_initBuf(
     uint8_t * const sto,
     uint_fast32_t const stoSize)
 {
-    /* the provided buffer must be at least 8 bytes long */
-    Q_REQUIRE_ID(100, stoSize > 8U);
-
     QS_priv_.buf      = &sto[0];
     QS_priv_.end      = (QSCtr)stoSize;
     QS_priv_.head     = 0U;
@@ -341,9 +338,12 @@ void QS_glbFilter_(int_fast16_t const filter) {
                 QS_priv_.glbFilter[15] |= 0x1FU;
             }
             break;
-        default:
-            /* QS rec number can't exceed 0x7D, so no need for escaping */
-            Q_ASSERT_ID(210, rec < 0x7DU);
+        default: {
+            QS_CRIT_STAT_
+            QS_CRIT_E_();
+            /* QS rec number must be below 0x7D, so no need for escaping */
+            Q_ASSERT_NOCRIT_(210, rec < 0x7DU);
+            QS_CRIT_X_();
 
             if (isRemove) {
                 QS_priv_.glbFilter[rec >> 3U]
@@ -356,6 +356,7 @@ void QS_glbFilter_(int_fast16_t const filter) {
                 QS_priv_.glbFilter[15] &= 0x1FU;
             }
             break;
+        }
     }
 }
 
@@ -396,21 +397,22 @@ void QS_locFilter_(int_fast16_t const filter) {
             QS_priv_.locFilter[i + 2U] = tmp;
             QS_priv_.locFilter[i + 3U] = tmp;
             break;
-        default:
-            if (qs_id < 0x7FU) {
-                if (isRemove) {
-                    QS_priv_.locFilter[qs_id >> 3U]
-                        &= (uint8_t)(~(1U << (qs_id & 7U)) & 0xFFU);
-                }
-                else {
-                    QS_priv_.locFilter[qs_id >> 3U]
-                        |= (1U << (qs_id & 7U));
-                }
+        default: {
+            QS_CRIT_STAT_
+            QS_CRIT_E_();
+            /* qs_id must be in range */
+            Q_ASSERT_NOCRIT_(310, qs_id < 0x7FU);
+            QS_CRIT_X_();
+            if (isRemove) {
+                QS_priv_.locFilter[qs_id >> 3U]
+                    &= (uint8_t)(~(1U << (qs_id & 7U)) & 0xFFU);
             }
             else {
-                Q_ERROR_ID(310); /* incorrect qs_id */
+                QS_priv_.locFilter[qs_id >> 3U]
+                    |= (1U << (qs_id & 7U));
             }
             break;
+        }
     }
     QS_priv_.locFilter[0] |= 0x01U; /* leave QS_ID == 0 always on */
 }
@@ -701,7 +703,7 @@ void QS_mem_fmt_(
 /*${QS::QS-tx::sig_dict_pre_} ..............................................*/
 /*! @static @private @memberof QS_tx */
 void QS_sig_dict_pre_(
-    enum_t const sig,
+    QSignal const sig,
     void const * const obj,
     char const * const name)
 {
@@ -741,7 +743,10 @@ void QS_obj_arr_dict_pre_(
     uint_fast16_t const idx,
     char const * const name)
 {
-    Q_REQUIRE_ID(400, idx < 1000U);
+    QS_CRIT_STAT_
+    QS_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(400, idx < 1000U);
+    QS_CRIT_X_();
 
     /* format idx into a char buffer as "xxx\0" */
     uint8_t idx_str[4];
@@ -765,7 +770,6 @@ void QS_obj_arr_dict_pre_(
         }
     }
 
-    QS_CRIT_STAT_
     uint8_t j = ((*name == '&') ? 1U : 0U);
 
     QS_CRIT_E_();

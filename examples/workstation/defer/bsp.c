@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: Console-based BSP
-* Last Updated for Version: 6.9.1
-* Date of the Last Update:  2020-09-21
+* Last Updated for Version: 7.3.0
+* Date of the Last Update:  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -47,8 +47,10 @@ static uint8_t const l_QF_onClockTick = 0;
 void BSP_init(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
-    Q_ALLEGE(QS_INIT(argc > 1 ? argv[1] : (void *)0));
 
+    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+        Q_ERROR();
+    }
     QS_OBJ_DICTIONARY(&l_QF_onClockTick);
 
     // setup the QS filters...
@@ -104,9 +106,14 @@ void QS_onCommand(uint8_t cmdId,
 /*--------------------------------------------------------------------------*/
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const file, int_t const line) {
-    FPRINTF_S(stderr, "Assertion failed in %s, line %d", file, line);
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    FPRINTF_S(stderr, "ERROR in %s, line %d", module, id);
     QF_onCleanup();
     exit(-1);
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 

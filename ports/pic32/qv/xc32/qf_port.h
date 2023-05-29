@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port, cooperative QV kernel, MPLAB-X XC32 compiler
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* The maximum number of system clock tick rates */
 #define QF_MAX_TICK_RATE        2U
@@ -43,9 +43,9 @@
 #define QF_INT_ENABLE()         __builtin_enable_interrupts()
 
 /* QF critical section entry/exit, see NOTE02 */
-/* QF_CRIT_STAT_TYPE not defined: unconditional interrupt disabling policy */
-#define QF_CRIT_ENTRY(dummy)    QF_INT_DISABLE()
-#define QF_CRIT_EXIT(dummy)     QF_INT_ENABLE()
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()            QF_INT_DISABLE()
+#define QF_CRIT_X_()            QF_INT_ENABLE()
 
 /* fast log-base-2 with CLZ instruction */
 #define QF_LOG2(n_) ((uint8_t)(32U - _clz(n_)))
@@ -56,7 +56,7 @@
 #include "qv_port.h"    /* QV cooperative kernel port */
 #include "qf.h"         /* QF platform-independent public interface */
 
-/*****************************************************************************
+/*============================================================================
 * NOTE1:
 * The maximum number of active objects QF_MAX_ACTIVE can be increased
 * up to 64, if necessary. Here it is set to a lower level to save some RAM.
@@ -74,5 +74,5 @@
 * interrupt will not occur.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 

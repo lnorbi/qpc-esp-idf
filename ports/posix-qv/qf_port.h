@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-07-30
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to POSIX API (single-threaded, like the QV kernel)
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* POSIX-QV event queue and thread types */
 #define QF_EQUEUE_TYPE  QEQueue
@@ -54,9 +54,9 @@
 #define QF_TIMEEVT_CTR_SIZE  4U
 
 /* QF critical section entry/exit for POSIX-QV, see NOTE1 */
-/* QF_CRIT_STAT_TYPE not defined */
-#define QF_CRIT_ENTRY(dummy) QF_enterCriticalSection_()
-#define QF_CRIT_EXIT(dummy)  QF_leaveCriticalSection_()
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()         QF_enterCriticalSection_()
+#define QF_CRIT_X_()         QF_leaveCriticalSection_()
 
 /* QF_LOG2 not defined -- use the internal LOG2() implementation */
 
@@ -82,7 +82,7 @@ void QF_consoleCleanup(void);
 int QF_consoleGetKey(void);
 int QF_consoleWaitForKey(void);
 
-/****************************************************************************/
+/*==========================================================================*/
 /* interface used only inside QF implementation, but not in applications */
 #ifdef QP_IMPL
 
@@ -93,12 +93,17 @@ int QF_consoleWaitForKey(void);
 
     /* POSIX-QV active object event queue customization... */
     #define QACTIVE_EQUEUE_WAIT_(me_) \
-        Q_ASSERT((me_)->eQueue.frontEvt != (QEvt *)0)
-
-    #define QACTIVE_EQUEUE_SIGNAL_(me_) do { \
+        Q_ASSERT_NOCRIT_(302, (me_)->eQueue.frontEvt != (QEvt *)0)
+#ifndef Q_UNSAFE
+    #define QACTIVE_EQUEUE_SIGNAL_(me_) \
         QPSet_insert(&QF_readySet_, (me_)->prio); \
-        pthread_cond_signal(&QV_condVar_); \
-    } while (false)
+        QPSet_update(&QF_readySet_, &QF_readySet_inv_); \
+        pthread_cond_signal(&QV_condVar_)
+#else
+    #define QACTIVE_EQUEUE_SIGNAL_(me_) \
+        QPSet_insert(&QF_readySet_, (me_)->prio); \
+        pthread_cond_signal(&QV_condVar_)
+#endif
 
     /* native QF event pool operations */
     #define QF_EPOOL_TYPE_            QMPool
@@ -147,4 +152,5 @@ int QF_consoleWaitForKey(void);
 * inheritance protocol.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
+

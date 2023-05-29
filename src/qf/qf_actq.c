@@ -47,7 +47,7 @@
 #define QP_IMPL           /* this is QP implementation */
 #include "qf_port.h"      /* QF port */
 #include "qf_pkg.h"       /* QF package-scope interface */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 #ifdef Q_SPY              /* QS software tracing enabled? */
     #include "qs_port.h"  /* QS port */
     #include "qs_pkg.h"   /* QS facilities for pre-defined trace records */
@@ -78,10 +78,18 @@ bool QActive_post_(QActive * const me,
     Q_UNUSED_PAR(sender);
     #endif
 
+<<<<<<< HEAD
     Q_REQUIRE_ID(100, e != (QEvt *)0);
 
     QF_CRIT_STAT_
     QF_CRIT_E_();
+=======
+    QF_CRIT_STAT_
+    QF_CRIT_E_();
+
+    Q_REQUIRE_NOCRIT_(100, e != (QEvt *)0);
+
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
     QEQueueCtr nFree = me->eQueue.nFree; /* get volatile into temporary */
 
     /* test-probe#1 for faking queue overflow */
@@ -97,7 +105,11 @@ bool QActive_post_(QActive * const me,
         }
         else {
             status = false; /* cannot post */
+<<<<<<< HEAD
             Q_ERROR_CRIT_(190); /* must be able to post the event */
+=======
+            Q_ERROR_NOCRIT_(190); /* must be able to post the event */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
         }
     }
     else if (nFree > (QEQueueCtr)margin) {
@@ -208,7 +220,11 @@ void QActive_postLIFO_(QActive * const me,
         nFree = 0U;
     )
 
+<<<<<<< HEAD
     Q_REQUIRE_CRIT_(200, nFree != 0U);
+=======
+    Q_REQUIRE_NOCRIT_(200, nFree != 0U);
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
     /* is it a dynamic event? */
     if (e->poolId_ != 0U) {
@@ -296,7 +312,7 @@ QEvt const * QActive_get_(QActive * const me) {
         me->eQueue.frontEvt = (QEvt *)0; /* queue becomes empty */
 
         /* all entries in the queue must be free (+1 for fronEvt) */
-        Q_ASSERT_CRIT_(310, nFree == (me->eQueue.end + 1U));
+        Q_ASSERT_NOCRIT_(310, nFree == (me->eQueue.end + 1U));
 
         QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_GET_LAST, me->prio)
             QS_TIME_PRE_();      /* timestamp */
@@ -315,10 +331,10 @@ QEvt const * QActive_get_(QActive * const me) {
 /*${QF::QF-base::getQueueMin} ..............................................*/
 /*! @static @public @memberof QF */
 uint_fast16_t QF_getQueueMin(uint_fast8_t const prio) {
-    Q_REQUIRE_ID(400, (prio <= QF_MAX_ACTIVE)
-                      && (QActive_registry_[prio] != (QActive *)0));
     QF_CRIT_STAT_
     QF_CRIT_E_();
+    Q_REQUIRE_NOCRIT_(400, (prio <= QF_MAX_ACTIVE)
+                      && (QActive_registry_[prio] != (QActive *)0));
     uint_fast16_t const min =
          (uint_fast16_t)QActive_registry_[prio]->eQueue.nMin;
     QF_CRIT_X_();
@@ -335,6 +351,10 @@ uint_fast16_t QF_getQueueMin(uint_fast8_t const prio) {
 * QTicker_init_() and QTicker_dispatch_(). Such casts violate MISRA-C 2012
 * Rule 11.3(req) "cast from pointer to object type to pointer to different
 * object type".
+*
+* @trace
+* - @tr{DVP-QP-MC3-R11_03A}
+* - @tr{DVP-QP-PCLP-826}
 */
 #define QTICKER_CAST_(me_)  ((QActive *)(me_))
 
@@ -450,7 +470,6 @@ void QTicker_postLIFO_(
 {
     Q_UNUSED_PAR(me);
     Q_UNUSED_PAR(e);
-
-    Q_ERROR_ID(900);
+    Q_ERROR_NOCRIT_(900);
 }
 /*$enddef${QF::QTicker} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/

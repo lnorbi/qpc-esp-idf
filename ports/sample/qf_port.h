@@ -190,45 +190,41 @@
 */
 #define QF_INT_ENABLE()        intEnable()
 
-/*! Define the type of the critical section status.
+/*! Define the critical section status.
 *
 * @description
 * Defining this macro configures the "saving and restoring critical section
 * status" policy. Conversely, if this macro is not defined, the simple
 * "unconditional critical section exit" is used.
 */
-#define QF_CRIT_STAT_TYPE      crit_stat_t
+#define QF_CRIT_STAT_          crit_stat_t crit_stat_;
 
 /*! Define the critical section entry policy.
 *
 * @description
 * This macro enters a critical section (often by means of disabling
 * interrupts). When the "saving and restoring critical section status"
-* policy is used, the macro sets the @a status_ argument to the critical
-* section status just before the entry. When the policy of "unconditional
-* critical section exit" is used, the macro does not use the @a status_
+* policy is used, the macro sets the status of the critical established
+* with the macro #QF_CRIT_STAT_.
 * argument.
 *
-* @note the #QF_CRIT_ENTRY macro should always be used in pair with the
-* macro #QF_CRIT_EXIT.
+* @note the QF_CRIT_E_() macro should always be used in pair with the
+* macro QF_CRIT_X_().
 */
-#define QF_CRIT_ENTRY(stat_)   ((stat_) = critEntry())
+#define QF_CRIT_E_()           (crit_stat_ = critEntry())
 
 /*! Define the critical section exit policy.
 *
 * @description
 * This macro enters a critical section (often by means of disabling
 * interrupts). When the "saving and restoring critical section status"
-* policy is used, the macro restores the critical section status from the
-* @a status_ argument. When the policy of "unconditional critical section
-* exit" is used, the macro does not use the @a status argument and
-* exits the critical section unconditionally (often by means of enabling
-* interrupts).
+* policy is used, the macro restores the status of the critical
+* saved by the macro QF_CRIT_E_().
 *
-* @note the #QF_CRIT_ENTRY macro should always be used in pair with the
-* macro #QF_CRIT_EXIT.
+* @note the QF_CRIT_X_() macro should always be used in pair with the
+* macro QF_CRIT_E_().
 */
-#define QF_CRIT_EXIT(stat_)    critExit(stat_)
+#define QF_CRIT_X_()           critExit(crit_stat_)
 
 /*! Define No-Operation (NOP) implementation to prevent joining
 * adjacent critical sections.
@@ -252,4 +248,4 @@
 #include "qk_port.h"  /* underlying real-time kernel port */
 #include "qf.h"       /* QF platform-independent public interface */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */

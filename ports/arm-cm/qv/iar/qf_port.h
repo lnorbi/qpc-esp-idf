@@ -1,5 +1,5 @@
 /*============================================================================
-* QP/C Real-Time Embedded Framework (RTEF)
+* QF/C port to ARM Cortex-M, QV, IAR
 * Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 *
 * SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
@@ -23,20 +23,20 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-06-12
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Cortex-M, cooperative QV kernel, IAR-ARM toolset
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* The maximum number of system clock tick rates */
 #define QF_MAX_TICK_RATE        2U
 
 /* QF interrupt disable/enable and log2()... */
-#if (__ARM_ARCH == 6) /* Cortex-M0/M0+/M1(v6-M, v6S-M)? */
+#if (__ARM_ARCH == 6) /* ARMv6-M? */
 
     /* The maximum number of active objects in the application, see NOTE1 */
     #define QF_MAX_ACTIVE       16U
@@ -46,9 +46,9 @@
     #define QF_INT_ENABLE()     __enable_interrupt()
 
     /* QF critical section entry/exit (unconditional interrupt disabling) */
-    /*#define QF_CRIT_STAT_TYPE not defined */
-    #define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
-    #define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+    #define QF_CRIT_STAT_
+    #define QF_CRIT_E_()        QF_INT_DISABLE()
+    #define QF_CRIT_X_()        QF_INT_ENABLE()
 
     /* CMSIS threshold for "QF-aware" interrupts, see NOTE2 and NOTE4 */
     #define QF_AWARE_ISR_CMSIS_PRI 0
@@ -74,9 +74,9 @@
     #define QF_INT_ENABLE()      __set_BASEPRI(0U)
 
     /* QF critical section entry/exit (unconditional interrupt disabling) */
-    /*#define QF_CRIT_STAT_TYPE not defined */
-    #define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
-    #define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+    #define QF_CRIT_STAT_
+    #define QF_CRIT_E_()        QF_INT_DISABLE()
+    #define QF_CRIT_X_()        QF_INT_ENABLE()
 
     /* BASEPRI threshold for "QF-aware" interrupts, see NOTE3 */
     #define QF_BASEPRI           0x3F
@@ -94,10 +94,10 @@
 #include <intrinsics.h> /* IAR intrinsic functions */
 #include "qep_port.h"   /* QEP port */
 
-#if (__ARM_ARCH == 6) /* Cortex-M0/M0+/M1(v6-M, v6S-M)? */
+#if (__ARM_ARCH == 6) /* ARMv6-M? */
     /* hand-optimized quick LOG2 in assembly */
     uint_fast8_t QF_qlog2(uint32_t x);
-#endif /* Cortex-M0/M0+/M1(v6-M, v6S-M) */
+#endif /* ARMv7-M or higher */
 
 #include "qv_port.h"  /* QV cooperative kernel port */
 #include "qf.h"       /* QF platform-independent public interface */
@@ -105,7 +105,7 @@
 /*****************************************************************************
 * NOTE1:
 * The maximum number of active objects QF_MAX_ACTIVE can be increased
-* up to 64, if necessary. Here it is set to a lower level to save some RAM.
+* up to 64U, if necessary. Here it is set to a lower level to save some RAM.
 *
 * NOTE2:
 * On Cortex-M0/M0+/M1 (architecture v6-M, v6S-M), the interrupt disabling
@@ -146,5 +146,5 @@
 * macro. This workaround works also for Cortex-M3/M4 cores.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 

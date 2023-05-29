@@ -3270,9 +3270,12 @@
             <name>$PROJ_DIR$\..\philo.c</name>
         </file>
         <file>
+<<<<<<< HEAD
             <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
         </file>
         <file>
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
             <name>$PROJ_DIR$\..\table.c</name>
         </file>
     </group>
@@ -3386,6 +3389,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qs_rx.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qstamp.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\src\qs\qutest.c</name>

@@ -39,6 +39,9 @@
 /*! @file
 * @brief QXK/C (preemptive dual-mode kernel) platform-independent
 * public interface.
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QXK_H_
 #define QXK_H_
@@ -57,7 +60,11 @@
 /* QXK thread type used to store the private Thread-Local Storage pointer */
 #define QF_THREAD_TYPE     void*
 
-/*! Access Thread-Local Storage (TLS) and cast it on the given `type_` */
+/*! Access Thread-Local Storage (TLS) and cast it on the given `type_`
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
+*/
 #define QXK_TLS(type_) ((type_)QXK_current()->thread)
 
 /*==========================================================================*/
@@ -104,6 +111,12 @@ extern QXK QXK_attr_;
 * the 1-based priority of the the thread (basic or extended) run next,
 * or zero if no eligible thread is found.
 *
+<<<<<<< HEAD
+=======
+* @precondition{qxk,402}
+* - check the integrity of QF_readySet_ (duplicate storage)
+*
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * @attention
 * QXK_sched_() must be always called with interrupts **disabled** and
 * returns with interrupts **disabled**.
@@ -119,7 +132,11 @@ uint_fast8_t QXK_sched_(void);
 * QXK_activate_() activates ready-to run AOs that are above the initial
 * active priority (QXK_attr_.actPrio).
 *
+<<<<<<< HEAD
 * @precondition{qxk,700}
+=======
+* @precondition{qxk,500}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * - QXK_attr_.next must be valid and the prio must be in range
 *
 * @attention
@@ -204,7 +221,11 @@ void QXK_onIdle(void);
 * the scheduler by restoring its previous lock status in
 * QXK_schedUnlock().
 *
+<<<<<<< HEAD
 * @precondition{qxk,400}
+=======
+* @precondition{qxk,100}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * - the QXK scheduler lock cannot be called from an ISR
 *
 * @note
@@ -237,7 +258,11 @@ QSchedStatus QXK_schedLock(uint_fast8_t const ceiling);
 * @param[in] stat   previous QXK Scheduler lock status returned from
 *                   QXK_schedLock()
 *
+<<<<<<< HEAD
 * @precondition{qxk,500}
+=======
+* @precondition{qxk,200}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * - the QXK scheduler cannot be unlocked from the ISR context
 * @precondition{qxk,501}
 * - the current lock ceiling must be greater than the previous
@@ -402,6 +427,13 @@ QEvt const * QXThread_queueGet(uint_fast16_t const nTicks);
 
 /*! Overrides QHsm_init_()
 * @private @memberof QXThread
+<<<<<<< HEAD
+=======
+*
+* @trace
+* - @tr{DVR-QP-MC3-R08_13}
+* - @tr{DVP-QP-PCLP-2707}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 void QXThread_init_(
     QHsm * const me,
@@ -410,6 +442,13 @@ void QXThread_init_(
 
 /*! Overrides QHsm_dispatch_()
 * @private @memberof QXThread
+<<<<<<< HEAD
+=======
+*
+* @trace
+* - @tr{DVR-QP-MC3-R08_13}
+* - @tr{DVP-QP-PCLP-2707}
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 */
 void QXThread_dispatch_(
     QHsm * const me,
@@ -424,17 +463,24 @@ void QXThread_dispatch_(
 * The extended thread becomes ready-to-run immediately and is scheduled
 * if the QXK is already running.
 *
-* @param[in,out] me      current instance pointer (see @ref oop)
-* @param[in]     prio    QF-priority of the thread, but no preemption-
-*                        threshold. See also ::QPrioSpec.
-* @param[in]     qSto    pointer to the storage for the ring buffer of the
-*                        event queue. This cold be NULL, if this extended
-*                        thread does not use the built-in event queue.
-* @param[in]     qLen    length of the event queue [in events],
-*                        or zero if queue not used
-* @param[in]     stkSto  pointer to the stack storage (must be provided)
-* @param[in]     stkSize stack size [in bytes] (must not be zero)
-* @param[in]     par     pointer to an extra parameter (might be NULL).
+* @param[in,out] me    current instance pointer (see @ref oop)
+* @param[in]  prioSpec priority specification for the AO (See ::QPrioSpec)
+*                      threshold. See also ::QPrioSpec.
+* @param[in]  qSto     pointer to the storage for the ring buffer of the
+*                      event queue. This cold be NULL, if this extended
+*                      thread does not use the built-in event queue.
+* @param[in]  qLen     length of the event queue [in events],
+*                      or zero if queue not used
+* @param[in]  stkSto   pointer to the stack storage (must be provided)
+* @param[in]  stkSize  stack size [in bytes] (must not be zero)
+* @param[in]  par      pointer to an extra parameter (might be NULL).
+*
+* @precondition{qxk_xthr,200}
+* - must NOT be called from an ISR;
+* - the stack storage must be provided;
+* - the thread must be instantiated (see QXThread_ctor())
+* - preemption-threshold is NOT provided (because QXK kernel
+*   does not support preemption-threshold scheduling)
 *
 * @precondition{qxk_xthr,200}
 * - must NOT be called from an ISR;
@@ -487,6 +533,9 @@ void QXThread_start_(
 * 'true' (success) if the posting succeeded (with the provided margin) and
 * 'false' (failure) when the posting fails.
 *
+* @precondition{qxk_xthr,300}
+* - event pointer must be valid
+*
 * @note
 * Should be called only via the macro QXTHREAD_POST_X().
 *
@@ -519,6 +568,10 @@ bool QXThread_post_(
 *
 * @sa
 * QActive_postLIFO_()
+*
+* @trace
+* - @tr{DVR-QP-MC3-R08_13}
+* - @tr{DVP-QP-PCLP-2707}
 */
 void QXThread_postLIFO_(
     QActive * const me,
@@ -535,7 +588,11 @@ void QXThread_postLIFO_(
 * @precondition{qxk_xthr,600}
 * - the thread holding the lock cannot block!
 *
+<<<<<<< HEAD
 * @note
+=======
+* @attention
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * Must be called from within a critical section
 */
 void QXThread_block_(QXThread const * const me);
@@ -546,8 +603,8 @@ void QXThread_block_(QXThread const * const me);
 * @details
 * Internal implementation of un-blocking the given extended thread.
 *
-* @note
-* must be called from within a critical section
+* @attention
+* Must be called from within a critical section
 */
 void QXThread_unblock_(QXThread const * const me);
 
@@ -561,7 +618,11 @@ void QXThread_unblock_(QXThread const * const me);
 * @precondition{qxk_xthr,700}
 * - the time event must be unused
 *
+<<<<<<< HEAD
 * @note
+=======
+* @attention
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * Must be called from within a critical section
 */
 void QXThread_teArm_(QXThread * const me,
@@ -574,7 +635,7 @@ void QXThread_teArm_(QXThread * const me,
 * @details
 * Internal implementation of disarming the private time event.
 *
-* @note
+* @attention
 * Must be called from within a critical section
 */
 bool QXThread_teDisarm_(QXThread * const me);
@@ -683,7 +744,10 @@ void QXSemaphore_init(QXSemaphore * const me,
 * - the semaphore must be initialized
 * - be called from an extended thread;
 * - the thread must NOT be already blocked on any object.
+<<<<<<< HEAD
 *
+=======
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * @precondition{qxk_sema,201}
 * - the thread must NOT be holding a scheduler lock.
 *
@@ -767,8 +831,8 @@ bool QXSemaphore_signal(QXSemaphore * const me);
 * threads contending for the mutex blocks while holding the mutex (between
 * the QXMutex_lock() and QXMutex_unlock() operations). If no blocking is
 * needed while holding the mutex, the more efficient non-blocking mechanism
-* of @ref srs_qxk_schedLock() "selective QXK scheduler locking" should be used
-* instead. @ref srs_qxk_schedLock() "Selective scheduler locking" is available
+* of @ref srs_qxk-lock "selective QXK scheduler locking" should be used
+* instead. @ref srs_qxk-lock "Selective scheduler locking" is available
 * for both @ref ::QActive "basic threads" and @ref ::QXThread "extended
 * threads", so it is applicable to situations where resources are shared
 * among all these threads.
@@ -834,10 +898,21 @@ void QXMutex_init(QXMutex * const me,
 * 'true' if the mutex has been acquired and 'false' if a timeout occurred.
 *
 * @precondition{qxk_mutex,200}
+<<<<<<< HEAD
+=======
+* the thread must:
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * - must NOT be called from an ISR;
 * - must be called from an extended thread;
 * - the mutex-priority must be in range;
 * - the thread must NOT be already blocked on any object.
+<<<<<<< HEAD
+=======
+* @precondition{qxk_mutex,201}
+* - the thread must NOT be holding a scheduler lock
+* @precondition{qxk_mutex,202}
+* - the newly locked mutex must have no holder yet
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @note
 * The mutex locks are allowed to nest, meaning that the same extended thread
@@ -863,9 +938,16 @@ bool QXMutex_lock(QXMutex * const me,
 * - must NOT be called from an ISR;
 * - the calling thread must be valid;
 * - the mutex-priority must be in range
+<<<<<<< HEAD
 *
 * @precondition{qxk_mutex,301}
 * - the thread must NOT be holding a scheduler lock.
+=======
+* @precondition{qxk_mutex,301}
+* - the thread must NOT be holding a scheduler lock.
+* @precondition{qxk_mutex,302}
+* - the newly locked mutex must have no holder yet
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @note
 * This function **can** be called from both basic threads (active objects)
@@ -887,10 +969,15 @@ bool QXMutex_tryLock(QXMutex * const me);
 * @precondition{qxk_mutex,400}
 * - must NOT be called from an ISR;
 * - the calling thread must be valid;
+<<<<<<< HEAD
 *
 * @precondition{qxk_mutex,401}
 * - the mutex must be already locked at least once.
 *
+=======
+* @precondition{qxk_mutex,401}
+* - the mutex must be already locked at least once.
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * @precondition{qxk_mutex,402}
 * - the mutex must be held by this thread.
 *
@@ -928,6 +1015,10 @@ void QXMutex_unlock(QXMutex * const me);
 * @param[in] stkSize_  stack size (in bytes)
 * @param[in] par_      pointer to the additional port-specific parameter(s)
 *                      (might be NULL).
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
+*
 * @usage
 * @include qxk_start.c
 */
@@ -973,6 +1064,9 @@ do { \
 * or other context, you can create a unique object just to unambiguously
 * identify the sender of the event.
 *
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
+*
 * @usage
 * @include qf_postx.c
 */
@@ -992,6 +1086,9 @@ do { \
 *
 * @returns true if the code executes in the ISR context and false
 * otherwise
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_09A}
 */
 #define QXK_ISR_CONTEXT_() (QF_intNest_ != 0U)
 #endif /* ndef QXK_ISR_CONTEXT_ */
@@ -1021,10 +1118,11 @@ do { \
 /*${QXK-impl::QACTIVE_EQUEUE_WAIT_} ........................................*/
 /*! QXK native event queue waiting */
 #define QACTIVE_EQUEUE_WAIT_(me_) \
-    (Q_ASSERT_ID(110, (me_)->eQueue.frontEvt != (QEvt *)0))
+    Q_ASSERT_NOCRIT_(302, (me_)->eQueue.frontEvt != (QEvt *)0)
 
 /*${QXK-impl::QACTIVE_EQUEUE_SIGNAL_} ......................................*/
-/*! QXK native event queue signaling */
+#ifdef Q_UNSAFE
+/*! QXK native event queue signaling (no QP Functional Safety System) */
 #define QACTIVE_EQUEUE_SIGNAL_(me_) do { \
     QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio); \
     if (!QXK_ISR_CONTEXT_()) { \
@@ -1033,6 +1131,21 @@ do { \
         } \
     } \
 } while (false)
+#endif /* def Q_UNSAFE */
+
+/*${QXK-impl::QACTIVE_EQUEUE_SIGNAL_} ......................................*/
+#ifndef Q_UNSAFE
+/*! QXK native event queue signaling (with QP Functional Safety System) */
+#define QACTIVE_EQUEUE_SIGNAL_(me_) do { \
+    QPSet_insert(&QF_readySet_, (uint_fast8_t)(me_)->prio); \
+    QPSet_update(&QF_readySet_, &QF_readySet_inv_); \
+    if (!QXK_ISR_CONTEXT_()) { \
+        if (QXK_sched_() != 0U) { \
+            QXK_activate_(); \
+        } \
+    } \
+} while (false)
+#endif /* ndef Q_UNSAFE */
 
 /*${QXK-impl::QXK_PTR_CAST_} ...............................................*/
 /*! internal macro to encapsulate casting of pointers for MISRA deviations
@@ -1045,6 +1158,11 @@ do { \
 * as well as other messages (e.g., PC-Lint-Plus warning 826).
 * Defining this specific macro for this purpose allows to selectively
 * disable the warnings for this particular case.
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
+* - @tr{DVP-QP-PCLP-826}
+* - @tr{DVP-QP-PCLP-2445}
 */
 #define QXK_PTR_CAST_(type_, ptr_) ((type_)(ptr_))
 
@@ -1058,6 +1176,10 @@ do { \
 * compliant with MISRA-2012-Rule 11.3(req) as well as other messages (e.g.,
 * PC-Lint-Plus warning 826). Defining this specific macro for this purpose
 * allows to selectively disable the warnings for this particular case.
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_03C}
+* - @tr{DVP-QP-PCLP-826}
 */
 #define QXTHREAD_CAST_(ptr_) ((QXThread *)(ptr_))
 
@@ -1094,9 +1216,19 @@ void QXK_threadExit_(void);
     (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
 
 /*${QF-QMPool-impl::QF_EPOOL_EVENT_SIZE_} ..................................*/
+/*! Native QF event pool event-size getter
+*
+* @trace
+* - @tr{DVR-QP-MC3-R18_01}
+*/
 #define QF_EPOOL_EVENT_SIZE_(p_) ((uint_fast16_t)(p_).blockSize)
 
 /*${QF-QMPool-impl::QF_EPOOL_GET_} .........................................*/
+/*! Native QF event pool get-event
+*
+* @trace
+* - @tr{DVR-QP-MC3-R11_05}
+*/
 #define QF_EPOOL_GET_(p_, e_, m_, qs_id_) \
     ((e_) = (QEvt *)QMPool_get(&(p_), (m_), (qs_id_)))
 

@@ -1,7 +1,7 @@
-/*****************************************************************************
+/*============================================================================
 * Product: DPP example, EK-TM4C123GXL board, FreeRTOS kernel
-* Last updated for version 7.2.0
-* Last updated on  2022-12-17
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -9,28 +9,26 @@
 *
 * Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 *
-* This program is open source software: you can redistribute it and/or
-* modify it under the terms of the GNU General Public License as published
-* by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
+* SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 *
-* Alternatively, this program may be distributed and modified under the
-* terms of Quantum Leaps commercial licenses, which expressly supersede
-* the GNU General Public License and are specifically designed for
-* licensees interested in retaining the proprietary status of their code.
+* This software is dual-licensed under the terms of the open source GNU
+* General Public License version 3 (or any later version), or alternatively,
+* under the terms of one of the closed source Quantum Leaps commercial
+* licenses.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
+* The terms of the open source GNU General Public License version 3
+* can be found at: <www.gnu.org/licenses/gpl-3.0>
 *
-* You should have received a copy of the GNU General Public License
-* along with this program. If not, see <www.gnu.org/licenses/>.
+* The terms of the closed source Quantum Leaps commercial licenses
+* can be found at: <www.state-machine.com/licensing>
+*
+* Redistributions in source code must retain this top-level comment block.
+* Plagiarizing this software to sidestep the license obligations is illegal.
 *
 * Contact information:
-* <www.state-machine.com/licensing>
+* <www.state-machine.com>
 * <info@state-machine.com>
-*****************************************************************************/
+============================================================================*/
 #include "qpc.h"
 #include "dpp.h"
 #include "bsp.h"
@@ -55,8 +53,8 @@ Q_DEFINE_THIS_FILE  /* define the name of this file for assertions */
 #define RTOS_AWARE_ISR_CMSIS_PRI \
     (configMAX_SYSCALL_INTERRUPT_PRIORITY >> (8-__NVIC_PRIO_BITS))
 
-/* Local-scope objects ------------------------------------------------------*/
-static uint32_t l_rnd; // random seed
+/* Local-scope objects -----------------------------------------------------*/
+static uint32_t l_rnd; /* random seed */
 
 #ifdef Q_SPY
 
@@ -129,7 +127,7 @@ void UART0_IRQHandler(void) {
 #endif
 
 /* Application hooks used in this project ==================================*/
-/* NOTE: only the "FromISR" API variants are allowed in vApplicationTickHook */
+/* NOTE: only "FromISR" API variants are allowed in vApplicationTickHook */
 void vApplicationTickHook(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -145,7 +143,7 @@ void vApplicationTickHook(void) {
         uint32_t depressed;
         uint32_t previous;
     } buttons = { 0U, 0U };
-    uint32_t current = ~GPIOF_AHB->DATA_Bits[BTN_SW1 | BTN_SW2]; /* read SW1&SW2 */
+    uint32_t current = ~GPIOF_AHB->DATA_Bits[BTN_SW1 | BTN_SW2]; /* SW1&SW2 */
     uint32_t tmp = buttons.depressed; /* save debounced depressed buttons */
     buttons.depressed |= (buttons.previous & current); /* set depressed */
     buttons.depressed &= (buttons.previous | current); /* clear released */
@@ -244,7 +242,7 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
     *pulIdleTaskStackSize = Q_DIM(uxIdleTaskStack);
 }
 
-//* BSP functions ===========================================================*/
+//* BSP functions ==========================================================*/
 /* MPU setup for TM4C123GXL MCU */
 static void TM4C123GXL_MPU_setup(void) {
     /* The following MPU configuration contains the general TM4C memory map.
@@ -367,7 +365,7 @@ void BSP_init(void) {
     */
     SystemCoreClockUpdate();
 
-    /* NOTE: The VFP (hardware Floating Point) unit is configured by FreeRTOS */
+    /* NOTE: VFP (hardware Floating Point) unit is configured by FreeRTOS */
 
     /* enable clock for to the peripherals used by this application... */
     SYSCTL->RCGCGPIO  |= (1U << 5); /* enable Run mode for GPIOF */
@@ -429,7 +427,7 @@ void BSP_displayPaused(uint8_t paused) {
 }
 /*..........................................................................*/
 uint32_t BSP_random(void) { /* a very cheap pseudo-random-number generator */
-    /* Some flating point code is to exercise the VFP... */
+    /* Some floating point code is to exercise the VFP... */
     float volatile x = 3.1415926F;
     x = x + 2.7182818F;
 
@@ -459,12 +457,7 @@ void QF_onStartup(void) {
     /* assing all priority bits for preemption-prio. and none to sub-prio. */
     NVIC_SetPriorityGrouping(0U);
 
-    /* set priorities of ALL ISRs used in the system, see NOTE1
-    *
-    * !!!!!!!!!!!!!!!!!!!!!!!!!!!! CAUTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    * Assign a priority to EVERY ISR explicitly by calling NVIC_SetPriority().
-    * DO NOT LEAVE THE ISR PRIORITIES AT THE DEFAULT VALUE!
-    */
+    /* set priorities of ALL ISRs used in the system, see NOTE1 */
     NVIC_SetPriority(UART0_IRQn,   0U); /* kernel unaware interrupt */
     NVIC_SetPriority(GPIOA_IRQn,   RTOS_AWARE_ISR_CMSIS_PRI);
     NVIC_SetPriority(SysTick_IRQn, RTOS_AWARE_ISR_CMSIS_PRI + 1U);
@@ -482,13 +475,14 @@ void QF_onCleanup(void) {
 }
 
 /*..........................................................................*/
-Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
     /*
     * NOTE: add here your application-specific error handling
     */
-    (void)module;
-    (void)loc;
-    QS_ASSERTION(module, loc, 10000U); /* report assertion to QS */
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+
+    QS_ASSERTION(module, id, 10000U); /* report assertion to QS */
 
 #ifndef NDEBUG
     /* light up all LEDs */
@@ -499,6 +493,11 @@ Q_NORETURN Q_onAssert(char const * const module, int_t const loc) {
 #endif
 
     NVIC_SystemReset();
+}
+/*..........................................................................*/
+void assert_failed(char const * const module, int_t const id); /* prototype */
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
 }
 
 /* QS callbacks ============================================================*/
@@ -543,7 +542,7 @@ uint8_t QS_onStartup(void const *arg) {
     /* configure UART interrupts (for the RX channel) */
     UART0->IM   |= (1U << 4) | (1U << 6); /* enable RX and RX-TO interrupt */
     UART0->IFLS |= (0x2U << 2);    /* interrupt on RX FIFO half-full */
-    /* NOTE: do not enable the UART0 interrupt yet. Wait till QF_onStartup() */
+    /* NOTE: do not enable UART0 interrupt yet. Wait till QF_onStartup() */
 
     /* configure TIMER5 to produce QS time stamp */
     SYSCTL->RCGCTIMER |= (1U << 5);  /* enable run mode for Timer5 */
@@ -604,7 +603,7 @@ void QS_onCommand(uint8_t cmdId,
 #endif /* Q_SPY */
 /*--------------------------------------------------------------------------*/
 
-/*****************************************************************************
+/*============================================================================
 * NOTE1:
 * The configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY constant from the
 * FreeRTOS configuration file specifies the highest ISR priority that

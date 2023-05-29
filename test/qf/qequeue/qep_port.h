@@ -23,14 +23,24 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
+<<<<<<< HEAD
 * @date Last updated on: 2022-06-12
 * @version Last updated for: @ref qpc_7_0_1
+=======
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 *
 * @file
 * @brief QEP/C port to Win32 with GNU or Visual Studio C/C++ compilers
 */
+<<<<<<< HEAD
 #ifndef QEP_PORT_H
 #define QEP_PORT_H
+=======
+#ifndef QEP_PORT_H_
+#define QEP_PORT_H_
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 
 #include <stdint.h>  /* Exact-width types. WG14/N843 C99 Standard */
 #include <stdbool.h> /* Boolean type.      WG14/N843 C99 Standard */
@@ -68,4 +78,8 @@
     #pragma warning (default: 4510 4512 4610)
 #endif
 
+<<<<<<< HEAD
 #endif /* QEP_PORT_H */
+=======
+#endif /* QEP_PORT_H_ */
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3

@@ -261,10 +261,10 @@ The following listing shows the `qf_port.h` header file for ARM Cortex-M with th
  [4]     #define QF_INT_DISABLE()    __asm volatile ("cpsid i")
  [5]     #define QF_INT_ENABLE()     __asm volatile ("cpsie i")
 
-         /* QF critical section entry/exit (unconditional interrupt disabling) */
- [6]     /*#define QF_CRIT_STAT_TYPE not defined */
- [7]     #define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
- [8]     #define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+         /* QF critical section (unconditional interrupt disabling) */
+ [6]     #define QF_CRIT_STAT_
+ [7]     #define QF_CRIT_E_()        QF_INT_DISABLE()
+ [8]     #define QF_CRIT_X_()        QF_INT_ENABLE()
 
          /* CMSIS threshold for "QF-aware" interrupts, see NOTE2 and NOTE5 */
  [9]     #define QF_AWARE_ISR_CMSIS_PRI 0
@@ -284,10 +284,10 @@ The following listing shows the `qf_port.h` header file for ARM Cortex-M with th
 [15]     #define QF_INT_ENABLE()  __asm volatile (\
              "msr BASEPRI,%0" :: "r" (0) : )
 
-         /* QF critical section entry/exit (unconditional interrupt disabling) */
-[16]     /*#define QF_CRIT_STAT_TYPE not defined */
-[17]     #define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
-[18]     #define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+         /* QF critical section (unconditional interrupt disabling) */
+[16]     #define QF_CRIT_STAT
+[17]     #define QF_CRIT_E_()        QF_INT_DISABLE()
+[18]     #define QF_CRIT_X_()        QF_INT_ENABLE()
 
          /* BASEPRI threshold for "QF-aware" interrupts, see NOTE3 */
 [19]     #define QF_BASEPRI           0x3F
@@ -330,15 +330,15 @@ The `__ARM_ARCH` macro is specific to the GNU-ARM compiler. Other compilers for 
 
 `[4-5]` For the ARMv6-M architecture, the interrupt disabling policy uses the PRIMASK register to disable interrupts globally. The @c QF_INT_DISABLE() macro resolves in this case to the inline assembly instruction "CPSD i", which sets the PRIMASK. The @c QF_INT_ENABLE() macro resolves to the inline assembly instruction "CPSE i", which clears the PRIMASK.
 
-`[6]` The #QF_CRIT_STAT_TYPE is **NOT** defined, meaning that the critical section uses the simple policy of "unconditional interrupt disablin".
+`[6]` The #QF_CRIT_STAT_ is empty, meaning that the critical section uses the simple policy of "unconditional interrupt disabling".
 
 @note
 The "unconditional interrupt disabling" policy precludes nesting of critical sections, but this is not needed for ARM Cortex-M, because this CPU never disables interrupts, even when handling exceptions/interrupts.
 
 
-`[7]` The QF_CRIT_ENTRY() enters a critical section. Interrupts are disabled by setting the PRIMASK register.
+`[7]` The QF_CRIT_E_() enters a critical section. Interrupts are disabled by setting the PRIMASK register.
 
-`[8]` The QF_CRIT_EXIT() macro leaves the critical section. Interrupts are unconditionally re-enabled by clearing the PRIMASK register.
+`[8]` The QF_CRIT_X_() macro leaves the critical section. Interrupts are unconditionally re-enabled by clearing the PRIMASK register.
 
 `[9]` For the ARMv6-M architecture, the `QF_AWARE_ISR_CMSIS_PRI` priority level is defined as zero, meaning that all interrupts are "kernel-aware", because all interrupt priorities are disabled by the kernel.
 
@@ -366,15 +366,15 @@ The selective disabling of "QF-aware" interrupts with the BASEPRI register has a
 This method can never disable interrupt of priority 0 (highest).
 
 
-`[16]` The #QF_CRIT_STAT_TYPE is **NOT** defined, meaning that the critical section uses the simple policy of "unconditional interrupt disabling".
+`[16]` The #QF_CRIT_STAT_ is empty, meaning that the critical section uses the simple policy of "unconditional interrupt disabling".
 
 @note
 The "unconditional interrupt disabling" policy precludes nesting of critical sections, but this is not needed for ARM Cortex-M, because this CPU never disables interrupts, even when handling exceptions/interrupts.
 
 
-`[17]` The QF_CRIT_ENTRY() enters a critical section. Interrupts are disabled with the macro `QF_INT_DISABLE()` defined at label [12].
+`[17]` The QF_CRIT_E_() enters a critical section. Interrupts are disabled with the macro `QF_INT_DISABLE()` defined at label [12].
 
-`[18]` The QF_CRIT_EXIT() macro leaves the critical section. Interrupts are unconditionally re-enabled with the macro `QF_INT_ENABLE()` defined at label [13].
+`[18]` The QF_CRIT_X_() macro leaves the critical section. Interrupts are unconditionally re-enabled with the macro `QF_INT_ENABLE()` defined at label [13].
 
  @anchor QF_BASEPRI
 `[19]`
@@ -1229,12 +1229,12 @@ In yet another test you could post an event to Philosopher active object rather 
 /*##########################################################################*/
 /*! @page arm-cm_qxk Preemptive "Dual-Mode" QXK Kernel
 
-This section describes how to use QP on ARM Cortex-M with the @ref srs_qxk "preemptive, dual-mode QXK real-time kernel", which combines the lightweight non-blocking @ref srs_qxk_basic "basic threads" of QK with traditional blocking @ref srs_qxk_extended "extended threads" found in conventional RTOS kernels. QXK provides all typical services of a conventional blocking RTOS, such as blocking time-delays, semaphores, mutextes, and message queues.
+This section describes how to use QP on ARM Cortex-M with the @ref srs_qxk "preemptive, dual-mode QXK real-time kernel", which combines the lightweight non-blocking @ref srs_qxk-basic "basic threads" of QK with traditional blocking @ref srs_qxk-ext "extended threads" found in conventional RTOS kernels. QXK provides all typical services of a conventional blocking RTOS, such as blocking time-delays, semaphores, mutextes, and message queues.
 
 QXK has been designed specifically for mixing event-driven active objects with traditional blocking code, such as commercial middleware (TCP/IP stacks, UDP stacks, embedded file systems, etc.) or legacy software.
 
 @note
-If you are currently using QP on top of a conventional 3rd-party RTOS, consider moving your application to the QXK kernel. QXK is not only more efficient than running QP on top of a @ref ports_rtos "traditional 3rd-party RTOS" (because non-blocking @ref srs_qxk_basic "basic threads" take far less stack space and CPU cycles for context switch than the much heavier @ref srs_qxk_extended "extended threads"). But the biggest advantage of QXK is that it __protects__ the application-level code from inadvertent mixing of blocking calls inside the event-driven active objects. Specifically, QXK "knows" the type of the thread context (extended/basic) and asserts internally if a blocking call (e.g., semaphore-wait or a time-delay) is attempted in a basic thread (active object). This is something that a QP port to a @ref ports_rtos "conventional 3rd-party RTOS" cannot do, because such an RTOS runs all code (including active objects) in the context of heavyweight extended threads.
+If you are currently using QP on top of a conventional 3rd-party RTOS, consider moving your application to the QXK kernel. QXK is not only more efficient than running QP on top of a @ref ports_rtos "traditional 3rd-party RTOS" (because non-blocking @ref srs_qxk-basic "basic threads" take far less stack space and CPU cycles for context switch than the much heavier @ref srs_qxk-ext "extended threads"). But the biggest advantage of QXK is that it __protects__ the application-level code from inadvertent mixing of blocking calls inside the event-driven active objects. Specifically, QXK "knows" the type of the thread context (extended/basic) and asserts internally if a blocking call (e.g., semaphore-wait or a time-delay) is attempted in a basic thread (active object). This is something that a QP port to a @ref ports_rtos "conventional 3rd-party RTOS" cannot do, because such an RTOS runs all code (including active objects) in the context of heavyweight extended threads.
 
 
 @section arm-cm_qxk-synopsis Synopsis of the QXK Port on ARM Cortex-M
@@ -1242,9 +1242,9 @@ The preemptive, blocking QXK kernel works on ARM Cortex-M as follows:
 
 - The ARM Cortex-M processor executes application code in the Privileged Thread mode, which is exactly the mode entered out of reset. The exceptions (including all interrupts) are always processed in the Privileged Handler mode.
 
-- QXK uses the Main Stack Pointer (MSP) for @ref srs_qxk_basic "basic threads", interrupts and exceptions (such as the PendSV exception). The MSP is also used for the QXK idle thread (which is a non-blocking basic thread).
+- QXK uses the Main Stack Pointer (MSP) for @ref srs_qxk-basic "basic threads", interrupts and exceptions (such as the PendSV exception). The MSP is also used for the QXK idle thread (which is a non-blocking basic thread).
 
-- QXK uses the Process Stack Pointer (PSP) for handling @ref srs_qxk_extended "extended threads". Each extended thread must provide a private stack space to be associated with the PSP.
+- QXK uses the Process Stack Pointer (PSP) for handling @ref srs_qxk-ext "extended threads". Each extended thread must provide a private stack space to be associated with the PSP.
 
 - The QXK port uses the @c PendSV (exception number 14) and the NMI or the IRQ exception (number 2) to perform context switch. The application code (your code) must initialize the Interrupt Vector Table with the addresses of the `PendSV_Handler` and `NMI_Handler` exception handlers.
 

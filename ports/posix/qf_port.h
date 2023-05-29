@@ -23,14 +23,14 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-07-30
-* @version Last updated for: @ref qpc_7_0_1
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to POSIX API (multi-threaded)
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* POSIX event queue and thread types */
 #define QF_EQUEUE_TYPE       QEQueue
@@ -54,9 +54,9 @@
 #define QF_TIMEEVT_CTR_SIZE  4U
 
 /* QF critical section entry/exit for POSIX, see NOTE1 */
-/* QF_CRIT_STAT_TYPE not defined */
-#define QF_CRIT_ENTRY(dummy) QF_enterCriticalSection_()
-#define QF_CRIT_EXIT(dummy)  QF_leaveCriticalSection_()
+#define QF_CRIT_STAT_
+#define QF_CRIT_E_()         QF_enterCriticalSection_()
+#define QF_CRIT_X_()         QF_leaveCriticalSection_()
 
 #include <pthread.h>   /* POSIX-thread API */
 #include "qep_port.h"  /* QEP port */
@@ -79,7 +79,7 @@ void QF_consoleCleanup(void);
 int QF_consoleGetKey(void);
 int QF_consoleWaitForKey(void);
 
-/****************************************************************************/
+/*==========================================================================*/
 /* interface used only inside QF implementation, but not in applications */
 #ifdef QP_IMPL
 
@@ -90,10 +90,10 @@ int QF_consoleWaitForKey(void);
 
     /* POSIX active object event queue customization... */
     #define QACTIVE_EQUEUE_WAIT_(me_) \
-        while ((me_)->eQueue.frontEvt == (QEvt *)0) \
-            pthread_cond_wait(&(me_)->osObject, &QF_pThreadMutex_)
+        do { \
+            pthread_cond_wait(&(me_)->osObject, &QF_pThreadMutex_); \
+        } while ((me_)->eQueue.frontEvt == (QEvt *)0)
     #define QACTIVE_EQUEUE_SIGNAL_(me_) \
-        Q_ASSERT_ID(410, QActive_registry_[(me_)->prio] != (QActive *)0); \
         pthread_cond_signal(&(me_)->osObject)
 
     /* native QF event pool operations */
@@ -111,7 +111,7 @@ int QF_consoleWaitForKey(void);
 
 #endif /* QP_IMPL */
 
-/****************************************************************************/
+/*==========================================================================*/
 /*
 * NOTE1:
 * QF, like all real-time frameworks, needs to execute certain sections of
@@ -142,5 +142,5 @@ int QF_consoleWaitForKey(void);
 * inheritance protocol.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 

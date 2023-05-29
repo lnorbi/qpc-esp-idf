@@ -7,7 +7,11 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = QP/C
+<<<<<<< HEAD
 PROJECT_NUMBER         = 7.2.2
+=======
+PROJECT_NUMBER         = 7.3.0
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 PROJECT_BRIEF          = "Real-Time Embedded Framework"
 PROJECT_LOGO           = ../../ql-doxygen/images/logo_ql.png
 OUTPUT_DIRECTORY       =
@@ -124,6 +128,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = main.dox \
                          gs.dox \
+<<<<<<< HEAD
                          api.dox \
                          ../../cert-pack/cert-pack.dox \
                          ../../cert-pack/srs.dox \
@@ -132,7 +137,17 @@ INPUT                  = main.dox \
                          ../../cert-pack/sds_sm-c.dox \
                          ../../cert-pack/misra.dox \
                          ../../cert-pack/metrics.dox \
+=======
+                         ../../cert/cert-kit.dox \
+                         ../../cert/srs.dox \
+                         ../../cert/sas.dox \
+                         ../../cert/sds.dox \
+                         ../../cert/sds_sm-c.dox \
+                         ../../cert/misra.dox \
+                         ../../cert/metrics.dox \
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
                          history.dox \
+                         api.dox \
                          exa.dox \
                          exa_native.dox \
                          exa_rtos.dox \
@@ -181,7 +196,7 @@ EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = images \
                          ../../ql-doxygen/images \
-                         ../../cert-pack/images
+                         ../../cert/images
 INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO

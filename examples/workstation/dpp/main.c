@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Product: DPP example for Windows
-* Last updated for version 7.1.2
-* Last updated on  2022-10-06
+* Last updated for version 7.3.0
+* Last updated on  2023-05-25
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -42,21 +42,19 @@ enum { WIN_FUDGE_FACTOR = 10 };
 
 /*..........................................................................*/
 int main(int argc, char *argv[]) {
-    static QEvt const *tableQueueSto[N_PHILO*WIN_FUDGE_FACTOR];
-    static QEvt const *philoQueueSto[N_PHILO][N_PHILO*WIN_FUDGE_FACTOR];
-    static QSubscrList subscrSto[MAX_PUB_SIG];
-    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO*WIN_FUDGE_FACTOR];
-
     QF_init();    /* initialize the framework and the underlying RT kernel */
     BSP_init(argc, argv); /* initialize the Board Support Package */
 
     /* initialize publish-subscribe... */
+    static QSubscrList subscrSto[MAX_PUB_SIG];
     QF_psInit(subscrSto, Q_DIM(subscrSto));
 
     /* initialize event pools... */
+    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO*WIN_FUDGE_FACTOR];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     /* start the active objects... */
+    static QEvt const *philoQueueSto[N_PHILO][N_PHILO*WIN_FUDGE_FACTOR];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); /* instantiate all Philosopher active objects */
         QACTIVE_START(AO_Philo[n],           /* AO to start */
@@ -69,6 +67,7 @@ int main(int argc, char *argv[]) {
     }
 
     Table_ctor(); /* instantiate the Table active object */
+    static QEvt const *tableQueueSto[N_PHILO*WIN_FUDGE_FACTOR];
     QACTIVE_START(AO_Table,                  /* AO to start */
                   N_PHILO + 2U,              /* QF-priority */
                   tableQueueSto,             /* event queue storage */
@@ -80,12 +79,12 @@ int main(int argc, char *argv[]) {
     return QF_run(); /* run the QF application */
 }
 
-/*****************************************************************************
+/*============================================================================
 * NOTE1:
 * Windows is not a deterministic real-time system, which means that the
 * system can occasionally and unexpectedly "choke and freeze" for a number
 * of seconds. The designers of Windows have dealt with these sort of issues
-* by massively oversizing the resources available to the applications. For
+* by massively over-sizing the resources available to the applications. For
 * example, the default Windows GUI message queues size is 10,000 entries,
 * which can dynamically grow to an even larger number. Also the stacks of
 * Win32 threads can dynamically grow to several megabytes.

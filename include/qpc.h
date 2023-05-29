@@ -38,6 +38,7 @@
 /*$endhead${include::qpc.h} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief QP/C public interface including backwards-compatibility layer
+*
 * @details
 * This header file must be included directly or indirectly
 * in all application modules (*.c files) that use QP/C.
@@ -51,7 +52,7 @@ extern "C" {
 
 /*==========================================================================*/
 #include "qf_port.h"      /* QF/C port from the port directory */
-#include "qassert.h"      /* QP embedded systems-friendly assertions */
+#include "qsafety.h"      /* QP Functional Safety (FuSa) System */
 
 #ifdef Q_SPY /* software tracing enabled? */
     #include "qs_port.h"  /* QS/C port from the port directory */
@@ -86,6 +87,56 @@ extern "C" {
 /*! @deprecated plain 'char' is no longer forbidden in MISRA-C 2012 */
 typedef char char_t;
 
+<<<<<<< HEAD
+=======
+/*! @deprecated #Q_NASSERT preprocessor switch to disable QP assertions */
+#ifdef Q_NASSERT
+
+/*! Preprocessor switch to disable QP QP Functional Safety (FuSa) System
+*
+* @attention
+* Assertions are now a component of the QP Functional Safety (FuSa)
+* System. The QP FuSa System is active by default, but can be turned off
+* (**NOT RECOMMENDED**) by defining the preprocessor switch #Q_UNSAFE.
+*/
+#define Q_UNSAFE
+
+/*! @deprecated general purpose assertion with user-specified ID
+* number that **always** evaluates the `expr_` expression.
+*/
+#define Q_ALLEGE_ID(id_, expr_) ((void)(expr_))
+
+#else /* assertions enabled */
+
+/*! @deprecated general purpose assertion with user-specified ID
+* number that **always** evaluates the `expr_` expression.
+*
+* @note The use of this macro is no longer recommended.
+*/
+#define Q_ALLEGE_ID(id_, expr_) if (!(expr_)) { \
+    QF_CRIT_STAT_ \
+    QF_CRIT_E_(); \
+    Q_onError(&Q_this_module_[0], (id_)); \
+    QF_CRIT_X_(); \
+} else ((void)0)
+
+#endif
+
+/*! @deprecated general purpose assertion without ID number
+* that **always** evaluates the `expr_` expression.
+* Instead of ID number, this macro is based on the standard
+* `__LINE__` macro.
+*
+* @note The use of this macro is no longer recommended.
+*/
+#define Q_ALLEGE(expr_)         Q_ALLEGE_ID(__LINE__, (expr_))
+
+/*! @deprecated assertion handler. Please use Q_onError()
+* see also qf_act.c for Q_onAssert() implementation.
+*/
+Q_NORETURN Q_onAssert(char const * module, int_t label);
+
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 /*! Static (compile-time) assertion.
 *
 * @deprecated

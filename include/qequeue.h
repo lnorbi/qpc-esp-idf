@@ -38,14 +38,9 @@
 /*$endhead${include::qequeue.h} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /*! @file
 * @brief QP natvie, platform-independent, thread-safe event queue interface
-* @details
-* This header file must be included in all QF ports that use native QF
-* event queue for active objects. Also, this file needs to be included
-* in the QP/C library when the application uses QActive_defer()/
-* QActive_recall(). Finally, this file is also needed when the "raw"
-* thread-safe queues are used for communication between active objects
-* and non-framework entities, such as ISRs, device drivers, or legacy
-* code.
+*
+* @trace
+* - @tr{DVP-QP-MC3-D04_08}
 */
 #ifndef QEQUEUE_H_
 #define QEQUEUE_H_
@@ -219,6 +214,11 @@ void QEQueue_init(QEQueue * const me,
 * @param[in]     margin number of required free slots in the queue after
 *                       posting the event. The special value #QF_NO_MARGIN
 *                       means that this function will assert if posting
+<<<<<<< HEAD
+=======
+* @param[in]     qs_id QS-id of this state machine (for QS local filter)
+*
+>>>>>>> 503419cfc7b6785562856d24396f6bbe6d9cf4a3
 * @returns 'true' (success) when the posting succeeded with the provided
 * margin and 'false' (failure) when the posting fails.
 *
@@ -249,6 +249,7 @@ bool QEQueue_post(QEQueue * const me,
 *
 * @param[in,out] me  current instance pointer (see @ref oop)
 * @param[in]     e   pointer to the event to be posted to the queue
+* @param[in]     qs_id QS-id of this state machine (for QS local filter)
 *
 * @precondition{qf_qeq,300}
 * - the queue must be able to accept the event (cannot overflow)
@@ -278,6 +279,7 @@ void QEQueue_postLIFO(QEQueue * const me,
 * returns a pointer to this event to the caller.
 *
 * @param[in,out] me   current instance pointer (see @ref oop)
+* @param[in]     qs_id QS-id of this state machine (for QS local filter)
 *
 * @returns
 * pointer to event at the front of the queue, if the queue is
@@ -340,7 +342,7 @@ static inline QEQueueCtr QEQueue_getNMin(QEQueue const * const me) {
 * from a single thread (by a single AO), so no other entity can post
 * events to the queue.
 *
-* @param[in] me_  current instance pointer (see @ref oop)
+* @param[in,out] me   current instance pointer (see @ref oop)
 *
 * @returns 'true' if the queue is current empty and 'false' otherwise.
 */

@@ -42,7 +42,7 @@ if (!registered) {
 
 QActive_subscribe(&amp;me-&gt;super, EAT_SIG);
 QActive_subscribe(&amp;me-&gt;super, TEST_SIG);</action>
-     <initial_glyph conn="2,3,5,1,20,5,-3">
+     <initial_glyph conn="2,3,5,1,20,6,-2">
       <action box="0,-2,6,2"/>
      </initial_glyph>
     </initial>
@@ -52,19 +52,19 @@ QActive_subscribe(&amp;me-&gt;super, TEST_SIG);</action>
      <exit>QTimeEvt_disarm(&amp;me-&gt;timeEvt);</exit>
      <!--${AOs::Philo::SM::thinking::TIMEOUT}-->
      <tran trig="TIMEOUT" target="../../2">
-      <tran_glyph conn="2,13,3,1,20,12,-3">
-       <action box="0,-2,6,2"/>
+      <tran_glyph conn="2,14,3,1,20,15,-2">
+       <action box="0,-2,12,2"/>
       </tran_glyph>
      </tran>
      <!--${AOs::Philo::SM::thinking::EAT, DONE}-->
      <tran trig="EAT, DONE">
       <action>/* EAT or DONE must be for other Philos than this one */
 Q_ASSERT_ID(10, Q_EVT_CAST(TableEvt)-&gt;philoNum != PHILO_ID(me));</action>
-      <tran_glyph conn="2,17,3,-1,13">
+      <tran_glyph conn="2,18,3,-1,13">
        <action box="0,-2,14,2"/>
       </tran_glyph>
      </tran>
-     <state_glyph node="2,5,17,16">
+     <state_glyph node="2,6,18,16">
       <entry box="1,2,5,2"/>
       <exit box="1,4,6,2"/>
      </state_glyph>
@@ -79,11 +79,11 @@ QACTIVE_POST(AO_Table, &amp;pe-&gt;super, me);</entry>
       <!--${AOs::Philo::SM::hungry::EAT::[Q_EVT_CAST(TableEvt)->philoNum=~}-->
       <choice target="../../../3">
        <guard>Q_EVT_CAST(TableEvt)-&gt;philoNum == PHILO_ID(me)</guard>
-       <choice_glyph conn="15,30,5,1,7,13,-3">
+       <choice_glyph conn="15,34,5,1,7,16,-2">
         <action box="1,0,19,4"/>
        </choice_glyph>
       </choice>
-      <tran_glyph conn="2,30,3,-1,13">
+      <tran_glyph conn="2,34,3,-1,13">
        <action box="0,-2,14,2"/>
       </tran_glyph>
      </tran>
@@ -91,11 +91,11 @@ QACTIVE_POST(AO_Table, &amp;pe-&gt;super, me);</entry>
      <tran trig="DONE">
       <action>/* DONE must be for other Philos than this one */
 Q_ASSERT_ID(20, Q_EVT_CAST(TableEvt)-&gt;philoNum != PHILO_ID(me));</action>
-      <tran_glyph conn="2,36,3,-1,14">
+      <tran_glyph conn="2,40,3,-1,14">
        <action box="0,-2,14,2"/>
       </tran_glyph>
      </tran>
-     <state_glyph node="2,23,17,16">
+     <state_glyph node="2,26,18,18">
       <entry box="1,2,5,2"/>
      </state_glyph>
     </state>
@@ -108,24 +108,24 @@ QACTIVE_PUBLISH(&amp;pe-&gt;super, &amp;me-&gt;super);
 QTimeEvt_disarm(&amp;me-&gt;timeEvt);</exit>
      <!--${AOs::Philo::SM::eating::TIMEOUT}-->
      <tran trig="TIMEOUT" target="../../1">
-      <tran_glyph conn="2,51,3,1,22,-41,-5">
-       <action box="0,-2,6,2"/>
+      <tran_glyph conn="2,58,3,1,22,-47,-4">
+       <action box="0,-2,14,2"/>
       </tran_glyph>
      </tran>
      <!--${AOs::Philo::SM::eating::EAT, DONE}-->
      <tran trig="EAT, DONE">
       <action>/* EAT or DONE must be for other Philos than this one */
 Q_ASSERT_ID(30, Q_EVT_CAST(TableEvt)-&gt;philoNum != PHILO_ID(me));</action>
-      <tran_glyph conn="2,55,3,-1,13">
+      <tran_glyph conn="2,62,3,-1,13">
        <action box="0,-2,14,2"/>
       </tran_glyph>
      </tran>
-     <state_glyph node="2,41,17,18">
+     <state_glyph node="2,48,18,18">
       <entry box="1,2,5,2"/>
       <exit box="1,4,5,2"/>
      </state_glyph>
     </state>
-    <state_diagram size="37,61"/>
+    <state_diagram size="37,68"/>
    </statechart>
   </class>
   <!--${AOs::Table}-->
@@ -149,7 +149,6 @@ QS_OBJ_DICTIONARY(&amp;Table_inst);
 QActive_subscribe(&amp;me-&gt;super, DONE_SIG);
 QActive_subscribe(&amp;me-&gt;super, PAUSE_SIG);
 QActive_subscribe(&amp;me-&gt;super, SERVE_SIG);
-QActive_subscribe(&amp;me-&gt;super, EAT_SIG); //???
 QActive_subscribe(&amp;me-&gt;super, TEST_SIG);
 
 for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
@@ -165,8 +164,8 @@ for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
     <state name="active">
      <!--${AOs::Table::SM::active::EAT}-->
      <tran trig="EAT">
-      <action>//???Q_ERROR_ID(60);</action>
-      <tran_glyph conn="2,15,3,-1,14">
+      <action>Q_ERROR_ID(60);</action>
+      <tran_glyph conn="2,13,3,-1,20">
        <action box="0,-2,17,4"/>
       </tran_glyph>
      </tran>
@@ -222,7 +221,7 @@ BSP_displayPhilStat(n, &quot;eating  &quot;);</action>
         </choice_glyph>
        </choice>
        <tran_glyph conn="4,26,3,-1,15">
-        <action box="0,-2,8,2"/>
+        <action box="0,-2,12,2"/>
        </tran_glyph>
       </tran>
       <!--${AOs::Table::SM::active::serving::DONE}-->
@@ -264,13 +263,13 @@ if ((me-&gt;isHungry[m] != 0U) &amp;&amp; (me-&gt;fork[n] == FREE)) {
     BSP_displayPhilStat(m, &quot;eating  &quot;);
 }</action>
        <tran_glyph conn="4,34,3,-1,15">
-        <action box="0,-2,6,2"/>
+        <action box="0,-2,13,2"/>
        </tran_glyph>
       </tran>
       <!--${AOs::Table::SM::active::serving::PAUSE}-->
       <tran trig="PAUSE" target="../../2">
        <tran_glyph conn="4,40,3,1,37,7,-3">
-        <action box="0,-2,7,2"/>
+        <action box="0,-2,16,2"/>
        </tran_glyph>
       </tran>
       <state_glyph node="4,19,34,24">
@@ -295,7 +294,7 @@ Q_ASSERT_ID(60, (n &lt; N_PHILO) &amp;&amp; (me-&gt;isHungry[n] == 0U));
 me-&gt;isHungry[n] = 1U;
 BSP_displayPhilStat(n, &quot;hungry  &quot;);</action>
        <tran_glyph conn="4,60,3,-1,15">
-        <action box="0,-2,6,2"/>
+        <action box="0,-2,13,2"/>
        </tran_glyph>
       </tran>
       <!--${AOs::Table::SM::active::paused::DONE}-->
@@ -314,7 +313,7 @@ Q_ASSERT_ID(71, (me-&gt;fork[n] == USED) &amp;&amp; (me-&gt;fork[m] == USED));
 me-&gt;fork[m] = FREE;
 me-&gt;fork[n] = FREE;</action>
        <tran_glyph conn="4,63,3,-1,15">
-        <action box="0,-2,6,2"/>
+        <action box="0,-2,15,2"/>
        </tran_glyph>
       </tran>
       <state_glyph node="4,45,34,20">
@@ -421,8 +420,10 @@ $declare ${AOs::Philo}
 #define EAT_TIME    \
     (QTimeEvtCtr)((BSP_random() % BSP_TICKS_PER_SEC) + BSP_TICKS_PER_SEC)
 
-/* helper macro to provide the ID of Philo &quot;me_&quot; */
-#define PHILO_ID(me_)    ((uint8_t)((me_) - &amp;Philo_inst[0]))
+/* helper function to provide the ID of Philo me */
+static inline uint8_t PHILO_ID(Philo * const me) {
+    return (uint8_t)(me - &amp;Philo_inst[0]);
+}
 
 /* Global objects ----------------------------------------------------------*/
 $define${AOs::AO_Philo[N_PHILO]}

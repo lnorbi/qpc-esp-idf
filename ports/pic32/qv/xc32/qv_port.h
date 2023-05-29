@@ -23,15 +23,15 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2023-01-07
-* @version Last updated for: @ref qpc_7_2_0
+* @date Last updated on: 2023-05-24
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QV/C port, cooperative QV kernel, MPLAB-X XC32 compiler
 */
-#ifndef QV_PORT_H
-#define QV_PORT_H
+#ifndef QV_PORT_H_
+#define QV_PORT_H_
 
 #include "qv.h" /* QV platform-independent public interface */
 
-#endif /* QV_PORT_H */
+#endif /* QV_PORT_H_ */

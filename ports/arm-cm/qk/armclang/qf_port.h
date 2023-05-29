@@ -23,20 +23,20 @@
 * <info@state-machine.com>
 ============================================================================*/
 /*!
-* @date Last updated on: 2022-04-09
-* @version Last updated for: @ref qpc_7_0_0
+* @date Last updated on: 2023-05-23
+* @version Last updated for: @ref qpc_7_3_0
 *
 * @file
 * @brief QF/C port to Cortex-M, preemptive QK kernel, ARM-CLANG toolset
 */
-#ifndef QF_PORT_H
-#define QF_PORT_H
+#ifndef QF_PORT_H_
+#define QF_PORT_H_
 
 /* The maximum number of system clock tick rates */
 #define QF_MAX_TICK_RATE        2U
 
 /* QF interrupt disable/enable and log2()... */
-#if (__ARM_ARCH == 6) /* Cortex-M0/M0+/M1(v6-M, v6S-M)? */
+#if (__ARM_ARCH == 6) /* ARMv6-M? */
 
     /* The maximum number of active objects in the application, see NOTE1 */
     #define QF_MAX_ACTIVE       16U
@@ -46,9 +46,9 @@
     #define QF_INT_ENABLE()     __asm volatile ("cpsie i")
 
     /* QF critical section entry/exit (unconditional interrupt disabling) */
-    /*#define QF_CRIT_STAT_TYPE not defined */
-    #define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
-    #define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+    #define QF_CRIT_STAT_
+    #define QF_CRIT_E_()        QF_INT_DISABLE()
+    #define QF_CRIT_X_()        QF_INT_ENABLE()
 
     /* CMSIS threshold for "QF-aware" interrupts, see NOTE2 and NOTE4 */
     #define QF_AWARE_ISR_CMSIS_PRI 0
@@ -72,9 +72,9 @@
         "msr BASEPRI,%0" :: "r" (0) : )
 
     /* QF critical section entry/exit (unconditional interrupt disabling) */
-    /*#define QF_CRIT_STAT_TYPE not defined */
-    #define QF_CRIT_ENTRY(dummy) QF_INT_DISABLE()
-    #define QF_CRIT_EXIT(dummy)  QF_INT_ENABLE()
+    #define QF_CRIT_STAT_
+    #define QF_CRIT_E_()        QF_INT_DISABLE()
+    #define QF_CRIT_X_()        QF_INT_ENABLE()
 
     /* BASEPRI threshold for "QF-aware" interrupts, see NOTE3 */
     #define QF_BASEPRI           0x3F
@@ -83,7 +83,7 @@
     #define QF_AWARE_ISR_CMSIS_PRI (QF_BASEPRI >> (8 - __NVIC_PRIO_BITS))
 
     /* Cortex-M3/M4/M7 provide the CLZ instruction for fast LOG2 */
-    #define QF_LOG2(n_) (32 - (uint_fast8_t)__builtin_clz((unsigned)(n_)))
+    #define QF_LOG2(n_) ((uint_fast8_t)(32U - __builtin_clz((unsigned)(n_))))
 
 #endif
 
@@ -91,10 +91,10 @@
 
 #include "qep_port.h"   /* QEP port */
 
-#if (__ARM_ARCH == 6) /* Cortex-M0/M0+/M1(v6-M, v6S-M)? */
+#if (__ARM_ARCH == 6) /* ARMv6-M? */
     /* hand-optimized quick LOG2 in assembly */
     uint_fast8_t QF_qlog2(uint32_t x);
-#endif /* Cortex-M0/M0+/M1(v6-M, v6S-M) */
+#endif /* ARMv7-M or higher */
 
 #include "qk_port.h"  /* QK preemptive kernel port */
 #include "qf.h"       /* QF platform-independent public interface */
@@ -102,7 +102,7 @@
 /*****************************************************************************
 * NOTE1:
 * The maximum number of active objects QF_MAX_ACTIVE can be increased
-* up to 64, if necessary. Here it is set to a lower level to save some RAM.
+* up to 64U, if necessary. Here it is set to a lower level to save some RAM.
 *
 * NOTE2:
 * On Cortex-M0/M0+/M1 (architecture v6-M, v6S-M), the interrupt disabling
@@ -143,5 +143,5 @@
 * macro. This workaround works also for Cortex-M3/M4 cores.
 */
 
-#endif /* QF_PORT_H */
+#endif /* QF_PORT_H_ */
 
