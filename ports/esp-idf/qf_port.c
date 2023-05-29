@@ -78,12 +78,36 @@ static void task_function(void *pvParameters); /* FreeRTOS task signature */
 #define FREERTOS_QUEUE_GET_FREE(me_) \
     ((me_)->osObject.uxDummy4[1] - (me_)->osObject.uxDummy4[0])
 
+
+/*==========================================================================*/
+int_t qf_run_active = 0;
+
+static IRAM_ATTR void freertos_tick_hook(void)
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    if (qf_run_active != 0) {
+        /* process time events for rate 0 */
+        QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, &freertos_tick_hook);
+        /* notify FreeRTOS to perform context switch from ISR, if needed */
+        if (xHigherPriorityTaskWoken) {
+            portYIELD_FROM_ISR();
+        }
+    }
+}
+
+
 /*==========================================================================*/
 void QF_init(void) {
     /* empty for esp-idf */
 }
 /*..........................................................................*/
 int_t QF_run(void) {
+    /* Register tick hook */
+    esp_register_freertos_tick_hook_for_cpu(freertos_tick_hook, QPC_CPU_NUM);
+    
+    /* enable QF ticks from tick hook */
+    qf_run_active = 100;
+
     QF_onStartup(); /* the startup callback (configure/enable interrupts) */
 
     return 0; /* dummy return to make the compiler happy */

@@ -1,0 +1,176 @@
+menu "QP/C Real-Time Embedded Framework"
+    config QP_ENABLED
+        bool "QP/C Real-Time Embedded Framework"
+        default y
+        help
+          Select this option to enable QPC Framework
+    
+    menu "QP/C Configuration"
+        visible if QP_ENABLED
+        config QPC_MAX_ACTIVE
+            int "QP/C maximum number of active objects"
+            default 8
+            range 5 64
+            help
+                The maximum number of active objects QF_MAX_ACTIVE can be increased to 64,
+                inclusive, but it can be reduced to save some memory. Also, the number of
+                active objects cannot exceed the number of FreeRTOS task priorities,
+                because each QP active object requires a unique priority level.
+
+        choice QPC_TASKS_PINNED_TO_CORE_CHOICE
+            prompt "The cpu core which QP/C active object tasks shall run on"
+            depends on !FREERTOS_UNICORE
+            default QPC_PINNED_TO_CORE_1
+            help
+                Specify the cpu core to run QP/C Active Object tasks.
+                Can not specify no-affinity.
+
+            config QPC_PINNED_TO_CORE_0
+                bool "Core 0 (PRO CPU)"
+            config QPC_PINNED_TO_CORE_1
+                bool "Core 1 (APP CPU)"
+                depends on !FREERTOS_UNICORE
+        endchoice
+
+        config QPC_QSPY_ENABLE
+            bool "Enable QSpy"
+            default n
+            help
+                Enables/disables the integration of Q-SPY debugging into the QActive framework.
+              
+    endmenu
+
+    menu "QP/C Object sizes"
+        visible if QP_ENABLED
+        choice QPC_EVENT_SIZE_CHOICE
+            prompt "Size of QP/C Event (1, 2 or 4)"
+            help
+                The size (in bytes) of the event-size representation in the QF.
+
+            config QPC_EVENT_SIZE_2
+                bool "2U (uint16_t) (default)"
+            config QPC_EVENT_SIZE_1
+                bool "1U (uint8_t)"
+            config QPC_EVENT_SIZE_4
+                bool "4U (uint32_t)"
+        endchoice
+
+        config QPC_EVENT_SIZE
+            int
+            default 1 if QPC_EVENT_SIZE_1
+            default 2 if QPC_EVENT_SIZE_2
+            default 4 if QPC_EVENT_SIZE_4
+            default 2
+
+        choice QPC_EQUEUE_CTR_SIZE_CHOICE
+            prompt "Size of QP/C EQueue counters (1, 2 or 4)"
+            help
+                The size (in bytes) of the ring-buffer counters used in the native QF event queue implementation.
+
+            config QPC_EQUEUE_CTR_SIZE_1
+                bool "1U (uint8_t) (default)"
+            config QPC_EQUEUE_CTR_SIZE_2
+                bool "2U (uint16_t)"
+            config QPC_EQUEUE_CTR_SIZE_4
+                bool "4U (uint32_t)"
+        endchoice
+
+        config QPC_EQUEUE_CTR_SIZE
+            int
+            default 1 if QPC_EQUEUE_CTR_SIZE_1
+            default 2 if QPC_EQUEUE_CTR_SIZE_2
+            default 4 if QPC_EQUEUE_CTR_SIZE_4
+            default 2
+
+        choice QPC_MPOOL_SIZ_SIZE_CHOICE
+            prompt "Size of QP/C MPool (1, 2 or 4)"
+            help
+                The size (in bytes) of the block-size representation in the native QF event pool.
+
+            config QPC_MPOOL_SIZ_SIZE_2
+                bool "2U (uint16_t) (default)"
+            config QPC_MPOOL_SIZ_SIZE_1
+                bool "1U (uint8_t)"
+            config QPC_MPOOL_SIZ_SIZE_4
+                bool "4U (uint32_t)"
+        endchoice
+
+        config QPC_MPOOL_SIZ_SIZE
+            int
+            default 1 if QPC_MPOOL_SIZ_SIZE_1
+            default 2 if QPC_MPOOL_SIZ_SIZE_2
+            default 4 if QPC_MPOOL_SIZ_SIZE_4
+            default 2
+
+        choice QPC_MPOOL_CTR_SIZE_CHOICE
+            prompt "Size of QP/C MPool counters (1, 2 or 4)"
+            help
+                The size (in bytes) of the block-counter representation in the native QF event pool.
+
+            config QPC_MPOOL_CTR_SIZE_2
+                bool "2U (uint16_t) (default)"
+            config QPC_MPOOL_CTR_SIZE_1
+                bool "1U (uint8_t)"
+            config QPC_MPOOL_CTR_SIZE_4
+                bool "4U (uint32_t)"
+        endchoice
+
+        config QPC_MPOOL_CTR_SIZE
+            int
+            default 1 if QPC_MPOOL_CTR_SIZE_1
+            default 2 if QPC_MPOOL_CTR_SIZE_2
+            default 4 if QPC_MPOOL_CTR_SIZE_4
+            default 2
+
+        choice QPC_TIMEEVT_CTR_SIZE_CHOICE
+            prompt "Size of QP/C TimeEvt (1, 2 or 4)"
+            help
+                Type of the Time Event counter, which determines the dynamic
+                range of the time delays measured in clock ticks.
+
+            config QPC_TIMEEVT_CTR_SIZE_2
+                bool "2U (uint16_t) (default)"
+            config QPC_TIMEEVT_CTR_SIZE_1
+                bool "1U (uint8_t)"
+            config QPC_TIMEEVT_CTR_SIZE_4
+                bool "4U (uint32_t)"
+        endchoice
+
+        config QPC_TIMEEVT_CTR_SIZE
+            int
+            default 1 if QPC_TIMEEVT_CTR_SIZE_1
+            default 2 if QPC_TIMEEVT_CTR_SIZE_2
+            default 4 if QPC_TIMEEVT_CTR_SIZE_4
+            default 2
+    endmenu
+
+    menu "Event Memory Pool"
+        visible if QP_ENABLED
+        config QPC_SMALL_POOL_SIZE
+          int "Small Memory Pool Size"
+          range 16 512
+          default 32
+          help
+            Max number of events in a small memory pool
+        config QPC_MEDIUM_POOL_SIZE
+          int "Medium Memory Pool Size"
+          range 16 512
+          default 32
+          help
+            Max number of events in a medium memory pool
+        config QPC_MEDIUM_POOL_ENTRY_SIZE
+          int "Medium Memory Pool Entry Size"
+          default 16
+        config QPC_LARGE_POOL_SIZE
+          int "Large Memory Pool Size"
+          range 16 512
+          default 32
+          help
+            Max number of events in a large memory pool
+        config QPC_LARGE_POOL_ENTRY_SIZE
+          int "Large Memory Pool Entry Size"
+          default 32
+  
+      endmenu #"Event Memory Pool"
+  
+endmenu

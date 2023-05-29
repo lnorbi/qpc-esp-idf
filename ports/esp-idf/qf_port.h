@@ -38,7 +38,28 @@
 #define QF_THREAD_TYPE        StaticTask_t
 
 /* The maximum number of active objects in the application, see NOTE1 */
-#define QF_MAX_ACTIVE         configMAX_PRIORITIES
+#ifdef( CONFIG_QPC_MAX_ACTIVE )
+    #define QF_MAX_ACTIVE       CONFIG_QPC_MAX_ACTIVE
+#else
+    #define QF_MAX_ACTIVE       configMAX_PRIORITIES
+#endif
+
+/* Allow adjustment of event sizes via KConfig */
+#if defined( CONFIG_QPC_EVENT_SIZE )
+    #define QF_EVENT_SIZ_SIZE   CONFIG_QPC_EVENT_SIZE
+#endif
+#if defined( CONFIG_QPC_EQUEUE_CTR_SIZE )
+    #define QF_EQUEUE_CTR_SIZE  CONFIG_QPC_EQUEUE_CTR_SIZE
+#endif
+#if defined( CONFIG_QPC_MPOOL_SIZ_SIZE )
+    #define QF_MPOOL_SIZ_SIZE   CONFIG_QPC_MPOOL_SIZ_SIZE
+#endif
+#if defined( CONFIG_QPC_MPOOL_CTR_SIZE )
+    #define QF_MPOOL_CTR_SIZE   CONFIG_QPC_MPOOL_CTR_SIZE
+#endif
+#if defined( CONFIG_QPC_TIMEEVT_CTR_SIZE )
+    #define QF_TIMEEVT_CTR_SIZE CONFIG_QPC_TIMEEVT_CTR_SIZE
+#endif
 
 /* QF interrupt disabling for FreeRTOS-ESP32 (task level), see NOTE2 */
 #define QF_INT_DISABLE()      portENTER_CRITICAL(&QF_esp32mux)
